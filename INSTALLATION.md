@@ -1,0 +1,413 @@
+# Installation Guide
+
+This guide walks you through completing the dotfiles setup with GNU Stow.
+
+## Current Status
+
+✅ **Completed**:
+- Dotfiles repository created at `~/dotfiles`
+- All configs copied and organized in stow-compatible structure
+- Git repository initialized with 2 commits
+- Comprehensive .gitignore for security
+- README.md with full documentation
+- bootstrap.sh for automated installation
+- Makefile for easy management
+
+⏳ **Remaining Steps**:
+1. Install GNU Stow
+2. Test stow deployment (optional but recommended)
+3. Deploy dotfiles with stow
+4. Push to GitHub
+
+---
+
+## Step 1: Install GNU Stow
+
+```bash
+sudo apt update && sudo apt install -y stow
+```
+
+Verify installation:
+```bash
+stow --version
+```
+
+Expected output: `stow (GNU Stow) version 2.3.1`
+
+---
+
+## Step 2: Test Deployment (Dry Run)
+
+**IMPORTANT**: This step shows what stow will do WITHOUT making changes.
+
+```bash
+cd ~/dotfiles
+make test
+```
+
+Or manually:
+```bash
+cd ~/dotfiles
+stow -n -v bash git ghostty oh-my-posh yazi micro htop
+```
+
+**What to look for**:
+- `LINK: .bashrc => dotfiles/bash/.bashrc` ✓ Good
+- `WARNING: existing target is ...` ⚠️ Conflict (see below)
+
+### Handling Conflicts
+
+If you see conflicts (existing files), you have two options:
+
+**Option A: Backup existing files** (Recommended)
+```bash
+# Run the bootstrap script (handles backups automatically)
+./bootstrap.sh
+```
+
+**Option B: Manual backup**
+```bash
+mkdir -p ~/dotfiles-backup-$(date +%Y%m%d)
+mv ~/.bashrc ~/dotfiles-backup-$(date +%Y%m%d)/
+mv ~/.bash_profile ~/dotfiles-backup-$(date +%Y%m%d)/
+mv ~/.gitconfig ~/dotfiles-backup-$(date +%Y%m%d)/
+# ... backup other conflicting files
+```
+
+---
+
+## Step 3: Deploy Dotfiles
+
+### Using the Bootstrap Script (Easiest)
+
+```bash
+cd ~/dotfiles
+./bootstrap.sh
+```
+
+The script will:
+- Check for GNU Stow
+- Detect conflicts
+- Offer to backup existing files
+- Install all packages
+- Verify installation
+- Offer to reload shell
+
+### Using Make (Recommended After Bootstrap)
+
+```bash
+cd ~/dotfiles
+make install
+```
+
+### Manual Stow (Advanced)
+
+Install all packages:
+```bash
+cd ~/dotfiles
+stow bash git ghostty oh-my-posh yazi micro htop
+```
+
+Or install selectively:
+```bash
+stow bash    # Just bash config
+stow git     # Just git config
+```
+
+---
+
+## Step 4: Verify Installation
+
+Check that symlinks were created:
+
+```bash
+ls -la ~ | grep '\->'
+```
+
+You should see something like:
+```
+.bashrc -> dotfiles/bash/.bashrc
+.bash_profile -> dotfiles/bash/.bash_profile
+.gitconfig -> dotfiles/git/.gitconfig
+```
+
+Verify config directories:
+```bash
+ls -la ~/.config | grep '\->'
+```
+
+Expected:
+```
+ghostty -> ../dotfiles/ghostty/.config/ghostty
+oh-my-posh -> ../dotfiles/oh-my-posh/.config/oh-my-posh
+yazi -> ../dotfiles/yazi/.config/yazi
+...
+```
+
+---
+
+## Step 5: Reload Shell
+
+```bash
+source ~/.bashrc
+```
+
+Or restart your terminal.
+
+---
+
+## Step 6: Push to GitHub
+
+### Create GitHub Repository
+
+**Option A: Using GitHub CLI (gh)**
+```bash
+cd ~/dotfiles
+
+# Create private repo
+gh repo create dotfiles --private --source=. --remote=origin
+
+# Push
+git push -u origin main
+```
+
+**Option B: Using GitHub Web Interface**
+
+1. Go to https://github.com/new
+2. Repository name: `dotfiles`
+3. Description: "Personal dotfiles managed with GNU Stow"
+4. **Private** (recommended for first version)
+5. Do NOT initialize with README (we already have one)
+6. Click "Create repository"
+
+Then:
+```bash
+cd ~/dotfiles
+git remote add origin https://github.com/YOUR_USERNAME/dotfiles.git
+git push -u origin main
+```
+
+### Verify Push
+
+```bash
+git remote -v
+git log --oneline
+```
+
+---
+
+## Daily Usage
+
+### Editing Configs
+
+Since configs are **symlinked**, edit them anywhere:
+
+```bash
+# Edit in home directory
+vim ~/.bashrc
+
+# Or edit in repo
+vim ~/dotfiles/bash/.bashrc
+
+# Changes are the same file!
+```
+
+### Committing Changes
+
+```bash
+cd ~/dotfiles
+
+# Check what changed
+git status
+
+# Commit
+git add .
+git commit -m "feat(bash): add new alias"
+git push
+```
+
+Or use Make shortcuts:
+```bash
+cd ~/dotfiles
+make commit   # Interactive commit
+make push     # Push to GitHub
+make sync     # Pull + push
+```
+
+### Adding New Configs
+
+Example: Add neovim config
+
+```bash
+cd ~/dotfiles
+
+# Create package directory
+mkdir -p nvim/.config/nvim
+
+# Copy existing config
+cp -r ~/.config/nvim/* nvim/.config/nvim/
+
+# Stow it
+stow nvim
+
+# Commit
+git add nvim/
+git commit -m "feat(nvim): add neovim configuration"
+git push
+```
+
+### Deploying to New Machine
+
+```bash
+# Clone repo
+git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
+
+# Run bootstrap
+cd ~/dotfiles
+./bootstrap.sh
+
+# Or use make
+make install
+```
+
+---
+
+## Makefile Commands
+
+```bash
+make help       # Show all commands
+make install    # Install all dotfiles
+make uninstall  # Remove all symlinks
+make update     # Git pull + restow
+make test       # Dry run (shows what would happen)
+make list       # List available packages
+make status     # Git status
+make commit     # Quick commit
+make push       # Push to GitHub
+make sync       # Pull + push
+```
+
+---
+
+## Troubleshooting
+
+### "Permission denied" when installing stow
+```bash
+sudo apt install stow
+```
+
+### Stow reports "existing target" conflicts
+**Solution 1**: Use bootstrap script
+```bash
+./bootstrap.sh  # Offers to backup automatically
+```
+
+**Solution 2**: Manually backup and retry
+```bash
+mv ~/.bashrc ~/.bashrc.backup
+stow bash
+```
+
+**Solution 3**: Adopt existing files (merges into repo)
+```bash
+stow --adopt bash
+git diff  # Review what changed
+```
+
+### Symlinks are broken after moving dotfiles repo
+Stow uses absolute paths. If you move the repo, unstow and restow:
+```bash
+cd ~/dotfiles  # In new location
+stow -D bash   # Unstow
+stow bash      # Restow with new paths
+```
+
+### Want to remove everything and start over
+```bash
+cd ~/dotfiles
+make uninstall  # Remove all symlinks
+rm -rf ~/dotfiles  # Delete repo (careful!)
+```
+
+---
+
+## Security Checklist
+
+Before pushing to GitHub:
+
+- [ ] Review `.gitignore` - secrets excluded?
+- [ ] Check for passwords: `grep -r "password" .`
+- [ ] Check for API keys: `grep -r "api_key" .`
+- [ ] Check for tokens: `grep -r "token" .`
+- [ ] No SSH private keys: `find . -name "id_rsa" -o -name "id_ed25519"`
+- [ ] Machine-specific files in `.bash/local` (git-ignored)
+
+---
+
+## What's Git-Ignored (Safe from Commits)
+
+The `.gitignore` automatically excludes:
+
+- `*.local` - Machine-specific configs
+- `.bash/local` - Your local bash settings
+- `*_secret`, `*_private` - Sensitive files
+- `.env`, `.env.*` - Environment files
+- SSH private keys
+- API tokens and credentials
+- Backup files (`*.backup-*`)
+- Cache and temporary files
+
+You can freely create files matching these patterns - they won't be committed.
+
+---
+
+## Next Steps
+
+After completing installation:
+
+1. **Test the setup**:
+   ```bash
+   source ~/.bashrc
+   # Check if oh-my-posh prompt loads
+   # Check if tools work (yazi, micro, etc.)
+   ```
+
+2. **Customize for this machine**:
+   ```bash
+   # Add machine-specific settings (git-ignored)
+   vim ~/.bash/local
+   ```
+
+3. **Review and clean up**:
+   ```bash
+   # Remove old backup if everything works
+   rm -rf ~/dotfiles-backup-20251019_134818
+   ```
+
+4. **Set up GitHub repo** (see Step 6 above)
+
+5. **Optional: Install additional tools**:
+   ```bash
+   sudo apt install -y bat fd-find ripgrep fzf eza
+   ```
+
+6. **Consider future enhancements**:
+   - Add pre-commit hooks for secret scanning
+   - Set up GitHub Actions for testing
+   - Add more tool configs (nvim, tmux, etc.)
+   - Create machine-specific branches if needed
+
+---
+
+## Resources
+
+- **GNU Stow Manual**: https://www.gnu.org/software/stow/manual/
+- **Your README**: `~/dotfiles/README.md`
+- **Makefile Help**: `make help`
+- **Bootstrap Script**: `./bootstrap.sh --help`
+
+---
+
+**You're almost done!** Just install stow, test, deploy, and push to GitHub. Your dotfiles will then be under version control and ready to deploy to any new machine with a single command.
+
+Happy dotfile-ing! 🚀
