@@ -1,0 +1,10 @@
+# Yazi Theme Configuration
+# Yazi v0.4+ uses "dark" and "light" instead of "use"
+# The flavor name should NOT include the .yazi extension
+
+[flavor]
+dark = "catppuccin-mocha"
+
+# Other themes to try:
+# dark = "dracula"
+# dark = "monokai-vibrant"

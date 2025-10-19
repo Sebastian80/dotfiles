@@ -1,0 +1,50 @@
+# Yazi Configuration
+# Rich preview plugin for formatted markdown, JSON, CSV, etc.
+
+# ========================================
+# Manager Settings
+# ========================================
+[mgr]
+ratio = [1, 3, 5]          # Pane ratio [parent, current, preview] - gives more space to preview
+show_hidden = true         # Show hidden files by default
+scrolloff = 5              # Keep 5 lines of context above/below cursor
+sort_by = "alphabetical"   # Sort files alphabetically
+sort_reverse = false       # Normal sort order (A-Z)
+show_symlink = true        # Show symlink targets
+linemode = "mtime"         # Display modification time (options: none, size, mtime, permissions, owner)
+
+# ========================================
+# Preview Settings
+# ========================================
+[preview]
+tab_size = 2               # Tab width in preview pane
+max_width = 2000           # Maximum preview width in pixels (allows full-width previews)
+max_height = 2000          # Maximum preview height in pixels (allows tall previews)
+image_quality = 75         # Image preview quality (0-100)
+
+# ========================================
+# Performance Settings
+# ========================================
+[tasks]
+micro_workers = 10         # Number of concurrent micro tasks
+macro_workers = 10         # Number of concurrent macro tasks
+bizarre_retry = 3          # Retry count for failed tasks
+
+# ========================================
+# Plugin Configuration
+# ========================================
+[plugin]
+prepend_previewers = [
+    # mdcat for fully rendered markdown (piper + mdcat)
+    { name = "*.md", run = 'piper -- mdcat --local "$1"' },
+
+    # Rich preview for other text and data formats
+    { name = "*.json", run = "rich-preview" },
+    { name = "*.csv", run = "rich-preview" },
+    { name = "*.rst", run = "rich-preview" },
+    { name = "*.ipynb", run = "rich-preview" },
+    { name = "*.xml", run = "rich-preview" },
+    { name = "*.yaml", run = "rich-preview" },
+    { name = "*.yml", run = "rich-preview" },
+    { name = "*.toml", run = "rich-preview" }
+]

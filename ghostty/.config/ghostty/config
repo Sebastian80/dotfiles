@@ -1,0 +1,181 @@
+# ========================================
+# Ghostty Configuration for Oh My Posh
+# ========================================
+# Optimized for bash + Oh My Posh setup
+# Reload config: Ctrl+Shift+R (or Ctrl+Shift+P > "Reload Config")
+# Docs: https://ghostty.org/docs/config
+
+# ========================================
+# Theme & Colors
+# ========================================
+# Auto-switch between Catppuccin Frappe (dark) and Latte (light)
+theme = dark:Catppuccin Frappe,light:Catppuccin Latte
+
+# Alternative popular themes to try:
+# theme = TokyoNight
+# theme = Dracula
+# theme = GitHub Dark Default
+# theme = Nord
+# theme = Catppuccin Mocha
+
+# Auto-switch between dark/light (optional):
+# theme = dark:Monokai Pro,light:Monokai Pro Light
+
+# ========================================
+# Font Configuration
+# ========================================
+# JetBrains Mono is built-in and has excellent Nerd Font support
+# Perfect for Oh My Posh icons and powerline symbols
+font-family = "JetBrains Mono"
+font-size = 13
+font-thicken = true
+
+# Enable font ligatures for better code readability
+# Each font-feature must be on its own line
+font-feature = +calt
+font-feature = +liga
+
+# Alternative fonts (if installed):
+# font-family = "Fira Code"
+# font-family = "CascadiaCode Nerd Font"
+# font-family = "Hack Nerd Font"
+
+# ========================================
+# Window Appearance
+# ========================================
+# Add padding for a cleaner look
+window-padding-x = 10
+window-padding-y = 10
+
+# Transparency disabled - titlebar was too transparent and showing windows behind
+# background-opacity = 0.92
+# background-blur = true
+
+# Window decoration - using default (not set like ttys3 config)
+# window-decoration = client
+
+# Window theme (titlebar color) - only works when gtk-adwaita is enabled (default)
+# Disabled due to GTK parser errors
+# window-theme = ghostty
+# Custom titlebar colors (Catppuccin Frappe)
+# window-titlebar-background = #232634
+# window-titlebar-foreground = #c6d0f5
+
+# Window size (optional - comment out to use default)
+# window-height = 35
+# window-width = 120
+
+# Save window state between sessions
+# Disabled to prevent restoring smaller window size that causes prompt layout issues
+window-save-state = never
+
+# ========================================
+# GTK Tab & Header Styling
+# ========================================
+# Custom CSS for compact tab styling (based on ttys3/my-ghostty-config)
+# Added via PR: https://github.com/ghostty-org/ghostty/pull/4200
+gtk-custom-css = tab-style.css
+
+# Compact tabs (not wide GNOME-style tabs)
+gtk-wide-tabs = false
+
+# Tab position: top or bottom (left/right not supported in this GTK version)
+gtk-tabs-location = top
+
+# Tab bar visibility: always, auto, or never
+window-show-tab-bar = auto
+
+# Toolbar style: flat (no shadow) vs raised (with shadow)
+gtk-toolbar-style = flat
+
+# Optional: Disable titlebar to reduce height (uncomment to enable)
+# This makes titlebar not too fat
+# gtk-titlebar = false
+
+# Optional: Disable all libadwaita features for even slimmer UI (uncomment to enable)
+# WARNING: This will disable window-theme and other adwaita-related features
+# gtk-adwaita = false
+
+# ========================================
+# Cursor
+# ========================================
+cursor-style = bar
+cursor-style-blink = true
+cursor-color = #ffffff
+cursor-opacity = 0.9
+
+# ========================================
+# Shell Integration
+# ========================================
+# Shell integration DISABLED - confirmed to conflict with oh-my-posh
+# Even with our fixes, Ghostty's shell integration breaks:
+# - Multiline prompt on resize (collapses to ">")
+# - Title bar (shows "~" instead of folder name)
+# We use simple-integration.bash instead for needed features
+shell-integration = none
+
+# ========================================
+# Behavior
+# ========================================
+# Don't confirm close when at a prompt
+confirm-close-surface = false
+
+# Better scrollback
+scrollback-limit = 10000
+
+# ========================================
+# Performance
+# ========================================
+# GPU acceleration is always enabled in Ghostty
+
+# New tabs/splits inherit current directory (also handled by OSC 7)
+working-directory = inherit
+
+# Enable clickable URLs
+link-url = true
+
+# ========================================
+# Additional Customizations
+# ========================================
+# Uncomment and customize as needed:
+
+# Custom window title
+# title = "Terminal"
+
+# Mouse behavior
+mouse-hide-while-typing = true
+
+# Increase trackpad scroll speed (default: precision:1,discrete:3)
+# precision = trackpad scrolling, discrete = mouse wheel scrolling
+mouse-scroll-multiplier = precision:5,discrete:3
+
+# Clipboard & Selection
+# Don't auto-copy selection to clipboard (use Ctrl+Shift+C instead)
+copy-on-select = false
+
+clipboard-read = allow
+clipboard-write = allow
+clipboard-trim-trailing-spaces = true
+
+# ========================================
+# Custom Keybindings
+# ========================================
+# Reload config (Ctrl+Shift+R)
+keybind = ctrl+shift+r=reload_config
+
+# Command palette (Ghostty 1.2+) - popup with actions, keybindings, search
+keybind = ctrl+shift+p=toggle_command_palette
+
+# ========================================
+# Bell / Sound Configuration
+# ========================================
+# Enable audio bell + visual indicators
+# Options: audio, title, attention, border, system
+bell-features = audio,title,attention
+
+# Path to bell sound file (relative to this config or absolute)
+# Uncomment and customize after placing your preferred sound file
+# bell-audio = ~/.config/ghostty/bell.ogg
+
+# Volume (0.0 to 1.0, default is 0.5)
+bell-audio-volume = 0.3

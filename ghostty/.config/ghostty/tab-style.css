@@ -1,0 +1,41 @@
+headerbar {
+  min-height: 24px;
+  padding: 0;
+  margin: 0;
+}
+
+/* Tabbar background - the area around tabs */
+tabbar tabbox {
+  margin: 0;
+  padding: 4px;
+  min-height: 10px;
+  background-color: #232634;
+  font-family: monospace;
+}
+
+/* Individual tabs - rounded corners */
+tabbar tabbox tab {
+  margin: 2px;
+  padding: 4px 12px;
+  color: #838ba7;
+  background-color: #414559;
+  border-radius: 8px;
+  border: none;
+}
+
+/* Active/selected tab - rounded with lighter background */
+tabbar tabbox tab:selected {
+  background-color: #51576d;
+  color: #c6d0f5;
+  font-weight: bold;
+}
+
+/* Hovered tab */
+tabbar tabbox tab:hover {
+  background-color: #51576d;
+  color: #ffffff;
+}
+
+tabbar tabbox tab label {
+  font-size: 13px;
+}

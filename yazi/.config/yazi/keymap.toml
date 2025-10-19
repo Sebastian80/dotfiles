@@ -1,0 +1,49 @@
+# Yazi Keybindings
+# ========================================
+# Manager Keybindings
+# ========================================
+
+# Maximize/restore preview pane (press M to toggle)
+[[mgr.prepend_keymap]]
+on = "M"
+run = "plugin toggle-pane max-preview"
+desc = "Maximize or restore preview pane"
+
+# Full-width preview - hide parent pane for more preview space (press W to toggle)
+[[mgr.prepend_keymap]]
+on = "W"
+run = "plugin toggle-pane min-parent"
+desc = "Hide/show parent directory for wider preview"
+
+# Alternative: Hide file list for maximum preview (press P to toggle)
+[[mgr.prepend_keymap]]
+on = "P"
+run = "plugin toggle-pane min-current"
+desc = "Hide/show file list for maximum preview width"
+
+# Preview scrolling - faster alternatives to Shift+J/K
+[[mgr.prepend_keymap]]
+on = "<C-d>"
+run = "seek 50"
+desc = "Scroll preview down (half page)"
+
+[[mgr.prepend_keymap]]
+on = "<C-u>"
+run = "seek -50"
+desc = "Scroll preview up (half page)"
+
+[[mgr.prepend_keymap]]
+on = "<C-f>"
+run = "seek 100"
+desc = "Scroll preview down (full page)"
+
+[[mgr.prepend_keymap]]
+on = "<C-b>"
+run = "seek -100"
+desc = "Scroll preview up (full page)"
+
+# Optional: Hide/show preview pane (uncomment to enable Ctrl+p)
+# [[mgr.prepend_keymap]]
+# on = "<C-p>"
+# run = "plugin toggle-pane min-preview"
+# desc = "Hide or show preview pane"

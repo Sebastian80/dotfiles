@@ -1,0 +1,29 @@
+[[plugin.deps]]
+use = "AnirudhG07/rich-preview"
+rev = "843c3fa"
+hash = "b4040931f0d2f9670ddb4923e55cd881"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:toggle-pane"
+rev = "9a52857"
+hash = "8a7c58225816a163a6e8730c0adafbc8"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:piper"
+rev = "9a52857"
+hash = "a20327710c3a8d37ee0972128dcb6a31"
+
+[[flavor.deps]]
+use = "sanjinso/monokai-vibrant"
+rev = "8b68223"
+hash = "f4458ebaf8961d714eba05fe5ba40166"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-mocha"
+rev = "2d73b79"
+hash = "d4c41d713b325710a9dd5ae86c3f8a5f"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:dracula"
+rev = "2d73b79"
+hash = "fc6944561718351d70cffde75839211f"

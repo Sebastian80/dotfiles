@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# ~/.bash/path
+# PATH modifications for all shells
+# Loaded by: .bash_profile and .bashrc
+
+# Add ~/.local/bin to PATH (if not already present)
+case ":${PATH}:" in
+    *:"$HOME/.local/bin":*)
+        ;;
+    *)
+        # Prepending path in case a system-installed binary needs to be overridden
+        export PATH="$HOME/.local/bin:$PATH"
+        ;;
+esac
+
+# Rust/Cargo environment - adds ~/.cargo/bin to PATH
+if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
+
+# fnm (Fast Node Manager)
+FNM_PATH="$HOME/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+    export PATH="$FNM_PATH:$PATH"
+    # Initialize fnm if available
+    command -v fnm &>/dev/null && eval "$(fnm env 2>/dev/null)"
+fi
+
+# fzf - fuzzy finder
+if [ -d "$HOME/.fzf/bin" ]; then
+    export PATH="$HOME/.fzf/bin:$PATH"
+fi
+
+# Go language support (if Go is installed)
+if [ -d "$HOME/go" ]; then
+    export GOPATH="$HOME/go"
+    export PATH="$GOPATH/bin:$PATH"
+fi
+
+# Local bin directory (alternative location)
+if [ -d "$HOME/bin" ]; then
+    export PATH="$HOME/bin:$PATH"
+fi

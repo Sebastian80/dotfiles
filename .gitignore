@@ -1,0 +1,189 @@
+# Dotfiles .gitignore - Senior+++ Pattern
+# Based on security best practices and common patterns
+
+# ============================================================================
+# SECRETS - NEVER COMMIT THESE
+# ============================================================================
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+*.local
+*_local
+*_secret
+*_private
+
+# SSH Keys
+.ssh/id_*
+.ssh/*.pem
+.ssh/*.key
+!.ssh/config
+!.ssh/*.pub
+
+# GPG Keys
+.gnupg/
+*.gpg
+*.asc
+
+# Cloud Provider Credentials
+.aws/credentials
+.aws/config
+.azure/
+.gcloud/
+
+# API Keys and Tokens
+*token*
+*secret*
+*credential*
+
+# Password Databases
+*.kdbx
+*.kdb
+
+# ============================================================================
+# MACHINE-SPECIFIC FILES
+# ============================================================================
+
+# Local overrides (use .bashrc.local, .zshrc.local pattern)
+bash/.bash/local
+**/local.sh
+**/local.zsh
+**/local.bash
+
+# Machine-specific configs
+*.local.toml
+*.local.yaml
+*.local.yml
+
+# ============================================================================
+# TEMPORARY & CACHE FILES
+# ============================================================================
+
+# Vim/Neovim temporary files
+*.swp
+*.swo
+*~
+*.bak
+.*.swp
+
+# Editor directories
+.vscode/
+.idea/
+*.code-workspace
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Cache directories
+__pycache__/
+*.pyc
+.cache/
+node_modules/
+
+# ============================================================================
+# VERSION CONTROL
+# ============================================================================
+
+# Git
+.git/
+*.orig
+
+# ============================================================================
+# BUILD ARTIFACTS
+# ============================================================================
+
+# Compiled files
+*.o
+*.so
+*.dylib
+*.dll
+
+# Binary executables
+*.exe
+
+# ============================================================================
+# PERSONAL DATA
+# ============================================================================
+
+# Browser data (if accidentally included)
+**/Cache/
+**/Cookies
+**/Cookies-journal
+**/History
+**/Sessions/
+
+# Email
+*.mbox
+
+# ============================================================================
+# APPLICATION-SPECIFIC
+# ============================================================================
+
+# Micro editor
+micro/.config/micro/buffers/
+micro/.config/micro/backups/
+
+# Oh-my-posh cache
+oh-my-posh/.config/oh-my-posh/cache/
+
+# Yazi state
+yazi/.config/yazi/state.toml
+
+# Ghostty
+ghostty/.config/ghostty/*.backup-*
+
+# Git
+git/.config/git/credentials
+
+# ============================================================================
+# BACKUPS
+# ============================================================================
+
+# Backup files
+*.backup
+*.old
+*-backup-*
+backup/
+backups/
+
+# ============================================================================
+# TESTING & DEVELOPMENT
+# ============================================================================
+
+# Test files
+test/
+tests/tmp/
+*.test
+
+# Development
+dev/
+tmp/
+temp/
+
+# ============================================================================
+# EXCEPTIONS - Files we DO want to commit
+# ============================================================================
+
+# SSH config is safe (no keys)
+!.ssh/config
+
+# Public keys are safe
+!.ssh/*.pub
+!*.pub
+
+# Example/template files
+!*.example
+!*.template
+!*-template
+
+# Documentation
+!README.md
+!LICENSE
+!INSTALL.md

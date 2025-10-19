@@ -1,0 +1,49 @@
+# Popular Ghostty Themes (Correct Names)
+# =========================================
+# Use these exact names in your config file
+# Edit: ~/.config/ghostty/config
+
+# DARK THEMES
+# -----------
+Catppuccin Mocha              # Soft pastels, easy on eyes (CURRENT)
+TokyoNight                    # Modern blues/purples
+TokyoNight Storm              # Variant with more contrast
+Monokai Pro                   # Professional, high contrast
+Dracula                       # Popular purple dark theme
+GitHub Dark Default           # GitHub's default dark
+Nord                          # Cool Nordic palette
+Atom One Dark                 # Atom editor theme
+Ayu                           # Minimalist dark
+Gruvbox Dark                  # Retro warm colors
+
+# LIGHT THEMES
+# ------------
+Catppuccin Latte              # Soft light pastels (CURRENT)
+Ayu Light                     # Clean, minimal white
+GitHub Light Default          # GitHub's default light
+One Half Light                # Balanced and bright
+Monokai Pro Light             # Light version of Monokai
+TokyoNight Day                # Light version of TokyoNight
+Atom One Light                # Light Atom theme
+Gruvbox Light                 # Retro warm light theme
+
+# USAGE EXAMPLES
+# --------------
+
+# Single theme (always dark):
+theme = TokyoNight
+
+# Single theme (always light):
+theme = Catppuccin Latte
+
+# Auto-switch based on system theme (CURRENT SETUP):
+theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+
+# Other auto-switch combinations:
+theme = dark:TokyoNight,light:TokyoNight Day
+theme = dark:Dracula,light:Ayu Light
+theme = dark:Nord,light:GitHub Light Default
+theme = dark:Monokai Pro,light:Monokai Pro Light
+
+# NOTE: Theme names are case-sensitive and may contain spaces!
+# List all themes: ghostty +list-themes
