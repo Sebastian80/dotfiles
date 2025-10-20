@@ -17,6 +17,9 @@ brew "gh"           # GitHub CLI
 
 # Utilities
 brew "jq"           # JSON processor
+brew "glow"         # Markdown viewer
+brew "htop"         # Interactive process viewer
+brew "micro"        # Modern terminal text editor
 
 # Development Version Managers
 brew "fnm"          # Fast Node.js version manager
