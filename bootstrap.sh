@@ -57,11 +57,36 @@ if ! command -v stow &> /dev/null; then
 fi
 info "GNU Stow found: $(stow --version | head -n1)"
 
+# Check for Homebrew
+if ! command -v brew &> /dev/null; then
+    warn "Homebrew is not installed."
+    echo "Homebrew is required to install modern CLI tools (bat, eza, fzf, etc.)"
+    read -p "Would you like to install Homebrew now? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        info "Installing Homebrew (this may take a few minutes)..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        # Add Homebrew to PATH for this session
+        if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+            info "Homebrew installed successfully"
+        else
+            error "Homebrew installation may have failed. Please check the output above."
+        fi
+    else
+        warn "Skipping Homebrew installation. You can install it later:"
+        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    fi
+else
+    info "Homebrew found: $(brew --version | head -n1)"
+fi
+
 echo ""
 step "Checking for conflicts..."
 
 # List of packages to install
-PACKAGES=(bash git ghostty oh-my-posh yazi micro htop)
+PACKAGES=(bash git ghostty oh-my-posh yazi micro htop btop)
 
 # Check for conflicts
 CONFLICTS=0
@@ -202,8 +227,10 @@ echo "Next steps:"
 echo "  1. Reload your shell: source ~/.bashrc"
 echo "  2. Review the configuration files"
 echo "  3. Add machine-specific settings to ~/.bash/local"
-echo "  4. (Optional) Install recommended tools:"
-echo "     sudo apt install -y bat fd-find ripgrep fzf eza"
+echo "  4. (Optional) Install recommended system packages:"
+echo "     sudo apt install -y nala"
+echo "  5. Install Homebrew packages:"
+echo "     brew bundle install --file=~/dotfiles/Brewfile"
 echo ""
 info "For more information, see README.md"
 echo ""
