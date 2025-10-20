@@ -3,6 +3,11 @@
 # PATH modifications for all shells
 # Loaded by: .bash_profile and .bashrc
 
+# Homebrew (must be first to prioritize brew packages)
+if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
 # Add ~/.local/bin to PATH (if not already present)
 case ":${PATH}:" in
     *:"$HOME/.local/bin":*)
@@ -13,10 +18,8 @@ case ":${PATH}:" in
         ;;
 esac
 
-# Rust/Cargo environment - adds ~/.cargo/bin to PATH
-if [ -f "$HOME/.cargo/env" ]; then
-    source "$HOME/.cargo/env"
-fi
+# Rust/Cargo (DEPRECATED - removed in favor of Homebrew)
+# Keeping comment for reference - tools now installed via brew
 
 # fnm (Fast Node Manager)
 FNM_PATH="$HOME/.local/share/fnm"
@@ -26,10 +29,8 @@ if [ -d "$FNM_PATH" ]; then
     command -v fnm &>/dev/null && eval "$(fnm env 2>/dev/null)"
 fi
 
-# fzf - fuzzy finder
-if [ -d "$HOME/.fzf/bin" ]; then
-    export PATH="$HOME/.fzf/bin:$PATH"
-fi
+# fzf (DEPRECATED - now installed via Homebrew)
+# fzf shell integration loaded in .bash/tools
 
 # Go language support (if Go is installed)
 if [ -d "$HOME/go" ]; then

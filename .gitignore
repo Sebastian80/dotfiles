@@ -133,8 +133,9 @@ micro/.config/micro/backups/
 # Oh-my-posh cache
 oh-my-posh/.config/oh-my-posh/cache/
 
-# Yazi state
+# Yazi state and backups
 yazi/.config/yazi/state.toml
+yazi/.config/yazi/*.toml-*
 
 # Ghostty
 ghostty/.config/ghostty/*.backup-*

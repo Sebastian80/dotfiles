@@ -32,4 +32,3 @@ fi
 # Added by Toolbox App
 export PATH="$PATH:/home/sebastian/.local/share/JetBrains/Toolbox/scripts"
 
-. "$HOME/.cargo/env"
