@@ -51,6 +51,13 @@ bash/.bash/local
 **/local.zsh
 **/local.bash
 
+# Fonts (downloaded via install-fonts.sh, not stored in git)
+*.ttf
+*.otf
+*.woff
+*.woff2
+fonts/
+
 # Machine-specific configs
 *.local.toml
 *.local.yaml
