@@ -22,5 +22,8 @@ brew "jq"           # JSON processor
 brew "fnm"          # Fast Node.js version manager
 brew "uv"           # Fast Python package manager
 
+# Prompt & Shell
+brew "oh-my-posh"   # Prompt theme engine
+
 # Build Tools (optional, for compiling from source if needed)
 # brew "gcc"
