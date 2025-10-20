@@ -1,0 +1,43 @@
+/* Ghostty Tab Styling - Active Tab with Green Indicator */
+
+/* Tab container */
+tabbox {
+    background-color: #303446;
+    background-image: none;
+}
+
+/* INACTIVE TABS - muted */
+tab {
+    background-color: #414559;
+    background-image: none;
+    color: #c6d0f5;
+    border: none;
+    border-left: 4px solid transparent;
+}
+
+/* ACTIVE TAB - Green left bar + subtle glow */
+tab:checked {
+    background-color: #363a4f;
+    background-image: none;
+    color: #ffffff;
+    border-left: 4px solid #a6e3a1;
+    box-shadow: 0 0 4px rgba(166, 227, 161, 0.3);
+    font-weight: bold;
+}
+
+/* Hovered tab */
+tab:hover {
+    background-color: #51576d;
+    background-image: none;
+    color: #ffffff;
+}
+
+/* Tab close button */
+tab button {
+    background: transparent;
+    color: #a5adce;
+}
+
+tab button:hover {
+    color: #e78284;
+}

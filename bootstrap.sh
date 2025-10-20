@@ -86,7 +86,7 @@ echo ""
 step "Checking for conflicts..."
 
 # List of packages to install
-PACKAGES=(bash git ghostty oh-my-posh yazi micro htop btop)
+PACKAGES=(bash git gtk ghostty oh-my-posh yazi micro htop btop)
 
 # Check for conflicts
 CONFLICTS=0
