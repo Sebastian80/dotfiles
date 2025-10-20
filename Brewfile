@@ -13,6 +13,8 @@ brew "zoxide"       # Smarter cd command
 
 # Git Tools
 brew "git-delta"    # Better git diff viewer
+brew "difftastic"   # Structural diff tool (alternative to delta)
+brew "lazygit"      # Terminal UI for git commands
 brew "gh"           # GitHub CLI
 
 # Utilities
@@ -21,6 +23,7 @@ brew "glow"         # Markdown viewer
 brew "btop"         # Resource monitor with beautiful TUI
 brew "htop"         # Interactive process viewer
 brew "micro"        # Modern terminal text editor
+brew "lazydocker"   # Terminal UI for docker commands
 
 # Development Version Managers
 brew "fnm"          # Fast Node.js version manager
