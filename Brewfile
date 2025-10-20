@@ -18,7 +18,7 @@ brew "gh"           # GitHub CLI
 # Utilities
 brew "jq"           # JSON processor
 brew "glow"         # Markdown viewer
-brew "htop"         # Interactive process viewer
+brew "btop"         # Resource monitor with beautiful TUI
 brew "micro"        # Modern terminal text editor
 
 # Development Version Managers
