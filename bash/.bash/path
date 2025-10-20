@@ -21,13 +21,14 @@ esac
 # Rust/Cargo (DEPRECATED - removed in favor of Homebrew)
 # Keeping comment for reference - tools now installed via brew
 
-# fnm (Fast Node Manager)
-FNM_PATH="$HOME/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-    export PATH="$FNM_PATH:$PATH"
-    # Initialize fnm if available
-    command -v fnm &>/dev/null && eval "$(fnm env 2>/dev/null)"
+# fnm (Fast Node Manager) - installed via Homebrew
+# Initialize fnm for automatic Node.js version switching
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env 2>/dev/null)"
 fi
+
+# uv (Python package manager) - installed via Homebrew
+# No initialization needed, works automatically
 
 # fzf (DEPRECATED - now installed via Homebrew)
 # fzf shell integration loaded in .bash/tools

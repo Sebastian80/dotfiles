@@ -18,5 +18,9 @@ brew "gh"           # GitHub CLI
 # Utilities
 brew "jq"           # JSON processor
 
+# Development Version Managers
+brew "fnm"          # Fast Node.js version manager
+brew "uv"           # Fast Python package manager
+
 # Build Tools (optional, for compiling from source if needed)
 # brew "gcc"
