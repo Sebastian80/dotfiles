@@ -286,3 +286,22 @@ weather() {
     local location="${1:-}"
     curl -s "wttr.in/${location}?format=3"
 }
+
+# ============================================
+# Tool Wrapper Functions
+# ============================================
+
+# eza wrapper to fix stdin regression bug (v0.23.0+)
+# Issue: https://github.com/eza-community/eza/issues/1568
+# When stdin is available (pipes, command substitution), eza reads it and may
+# produce no output if stdin is empty. This wrapper forces explicit path when
+# stdin is not a TTY or when no arguments are provided.
+eza() {
+    # If stdin is a TTY or arguments were provided, use eza normally
+    if [[ -t 0 ]] || [[ $# -gt 0 ]]; then
+        command eza "$@"
+    else
+        # Non-TTY stdin with no args: force current directory
+        command eza . "$@"
+    fi
+}

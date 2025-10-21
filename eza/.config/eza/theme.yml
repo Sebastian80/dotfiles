@@ -1,0 +1,226 @@
+# ========================================
+# Catppuccin Frappé Theme for eza
+# ========================================
+# A professional eza color scheme using the Catppuccin Frappé palette
+# Matches Ghostty's Catppuccin Frappé theme for visual consistency
+#
+# Catppuccin Frappé: "A less vibrant alternative using subdued colors for a muted aesthetic"
+# Palette: https://catppuccin.com/palette
+#
+# Location: ~/.config/eza/theme.yml (or $EZA_CONFIG_DIR/theme.yml)
+# Reload: Open a new terminal or run: source ~/.bashrc
+# Test: ls -la or ll
+#
+# Color Reference (Catppuccin Frappé):
+#   Base colors: #303446 (base), #292c3c (mantle), #232634 (crust)
+#   Text colors: #c6d0f5 (text), #b5bfe2 (subtext1), #a5adce (subtext0)
+#   Accent colors: #8caaee (blue), #a6d189 (green), #e78284 (red), #e5c890 (yellow)
+#                  #ca9ee6 (mauve), #81c8be (teal), #99d1db (sky), #f4b8e4 (pink)
+# ========================================
+
+# Enable colored output
+colourful: true
+
+# ========================================
+# File Kinds - Different types of filesystem objects
+# ========================================
+filekinds:
+  normal: {foreground: "#c6d0f5"}                      # Regular files (text)
+  directory: {foreground: "#8caaee", is_bold: true}    # Directories (blue, bold for visibility)
+  symlink: {foreground: "#99d1db"}                     # Symbolic links (sky)
+  pipe: {foreground: "#737994"}                        # Named pipes (overlay0)
+  block_device: {foreground: "#ea999c"}                # Block devices (maroon)
+  char_device: {foreground: "#ea999c"}                 # Character devices (maroon)
+  socket: {foreground: "#626880"}                      # Unix sockets (surface2)
+  special: {foreground: "#ca9ee6"}                     # Special files (mauve)
+  executable: {foreground: "#a6d189", is_bold: true}   # Executable files (green, bold)
+  mount_point: {foreground: "#85c1dc"}                 # Mount points (sapphire)
+
+# ========================================
+# Permissions - File permission display (rwxrwxrwx)
+# ========================================
+# Design philosophy:
+#   - User permissions: Bright/prominent (you have direct control)
+#   - Group permissions: Medium brightness (shared control)
+#   - Other permissions: Dimmed (everyone else)
+#   - Write perms: Yellow/orange (caution - can modify)
+#   - Execute perms: Green (active/runnable)
+#   - Read perms: Default/white (passive)
+# ========================================
+perms:
+  # User permissions (most important - you own the file)
+  user_read: {foreground: "#c6d0f5", is_bold: true}           # r-- (text, bold)
+  user_write: {foreground: "#e5c890", is_bold: true}          # -w- (yellow, bold - caution)
+  user_execute_file: {foreground: "#a6d189", is_bold: true}   # --x executable (green, bold)
+  user_execute_other: {foreground: "#a6d189", is_bold: true}  # --x other (green, bold)
+
+  # Group permissions (moderate importance - shared access)
+  group_read: {foreground: "#b5bfe2"}                         # r-- (subtext1)
+  group_write: {foreground: "#e5c890"}                        # -w- (yellow - caution)
+  group_execute: {foreground: "#a6d189"}                      # --x (green)
+
+  # Other permissions (low prominence - world readable/writable)
+  other_read: {foreground: "#a5adce", is_dimmed: true}        # r-- (subtext0, dimmed)
+  other_write: {foreground: "#ef9f76", is_dimmed: true}       # -w- (peach, dimmed - warning)
+  other_execute: {foreground: "#81c8be", is_dimmed: true}     # --x (teal, dimmed)
+
+  # Special permissions (setuid, setgid, sticky bit)
+  special_user_file: {foreground: "#f4b8e4", is_bold: true}   # Setuid/setgid (pink, bold - security)
+  special_other: {foreground: "#ca9ee6"}                      # Sticky bit (mauve)
+  attribute: {foreground: "#a5adce"}                          # Extended attributes (subtext0)
+
+# ========================================
+# Size - File size display
+# ========================================
+# Gradient: Small files (dim) → Large files (bright/colored)
+# ========================================
+size:
+  major: {foreground: "#a5adce"}                       # Major device number
+  minor: {foreground: "#81c8be"}                       # Minor device number
+
+  # File size numbers
+  number_byte: {foreground: "#949cbb", is_dimmed: true}  # 0-999 B (overlay2, dimmed - tiny)
+  number_kilo: {foreground: "#b5bfe2"}                   # 1-999 KB (subtext1 - small)
+  number_mega: {foreground: "#8caaee"}                   # 1-999 MB (blue - medium)
+  number_giga: {foreground: "#ca9ee6", is_bold: true}    # 1-999 GB (mauve, bold - large)
+  number_huge: {foreground: "#e78284", is_bold: true}    # 1+ TB (red, bold - very large!)
+
+  # File size units (dimmed to emphasize the number)
+  unit_byte: {foreground: "#838ba7", is_dimmed: true}    # B (overlay1, dimmed)
+  unit_kilo: {foreground: "#949cbb", is_dimmed: true}    # KB (overlay2, dimmed)
+  unit_mega: {foreground: "#a5adce", is_dimmed: true}    # MB (subtext0, dimmed)
+  unit_giga: {foreground: "#b5bfe2", is_dimmed: true}    # GB (subtext1, dimmed)
+  unit_huge: {foreground: "#c6d0f5", is_dimmed: true}    # TB (text, dimmed)
+
+# ========================================
+# Users & Groups - Ownership display
+# ========================================
+users:
+  user_you: {foreground: "#c6d0f5", is_bold: true}     # Your username (text, bold - it's you!)
+  user_root: {foreground: "#e78284", is_bold: true}    # Root user (red, bold - danger)
+  user_other: {foreground: "#ca9ee6"}                  # Other users (mauve)
+  group_yours: {foreground: "#b5bfe2"}                 # Your group (subtext1)
+  group_other: {foreground: "#838ba7"}                 # Other groups (overlay1)
+  group_root: {foreground: "#e78284"}                  # Root group (red)
+
+# ========================================
+# Links - Hard link count
+# ========================================
+links:
+  normal: {foreground: "#99d1db"}                      # Single link (sky)
+  multi_link_file: {foreground: "#85c1dc", is_bold: true}  # Multiple hard links (sapphire, bold)
+
+# ========================================
+# Git - Version control status
+# ========================================
+# Standard git colors: new (green), modified (yellow), deleted (red)
+# ========================================
+git:
+  new: {foreground: "#a6d189", is_bold: true}          # Untracked/new files (green, bold)
+  modified: {foreground: "#e5c890", is_bold: true}     # Modified files (yellow, bold)
+  deleted: {foreground: "#e78284"}                     # Deleted files (red)
+  renamed: {foreground: "#81c8be"}                     # Renamed files (teal)
+  typechange: {foreground: "#f4b8e4"}                  # Type changed (pink)
+  ignored: {foreground: "#737994", is_dimmed: true}    # Ignored files (overlay0, dimmed)
+  conflicted: {foreground: "#ea999c", is_bold: true}   # Merge conflicts (maroon, bold - urgent)
+
+# ========================================
+# Git Repository - Branch and status
+# ========================================
+git_repo:
+  branch_main: {foreground: "#c6d0f5", is_bold: true}  # main/master branch (text, bold)
+  branch_other: {foreground: "#ca9ee6"}                # Other branches (mauve)
+  git_clean: {foreground: "#a6d189"}                   # Clean working tree (green)
+  git_dirty: {foreground: "#e78284"}                   # Dirty working tree (red)
+
+# ========================================
+# Security Context - SELinux labels
+# ========================================
+security_context:
+  colon: {foreground: "#737994"}                       # Separator (overlay0)
+  user: {foreground: "#b5bfe2"}                        # SELinux user (subtext1)
+  role: {foreground: "#ca9ee6"}                        # SELinux role (mauve)
+  typ: {foreground: "#626880"}                         # SELinux type (surface2)
+  range: {foreground: "#ca9ee6"}                       # SELinux range (mauve)
+
+# ========================================
+# File Types - Semantic file categories
+# ========================================
+# Based on file extensions and content type
+# ========================================
+file_type:
+  image: {foreground: "#e5c890"}                       # Images (png, jpg, gif) - yellow
+  video: {foreground: "#ea999c"}                       # Videos (mp4, mkv) - maroon
+  music: {foreground: "#a6d189"}                       # Music (mp3, flac) - green
+  lossless: {foreground: "#81c8be"}                    # Lossless audio (flac, wav) - teal
+  crypto: {foreground: "#ef9f76"}                      # Encrypted/keys (asc, gpg) - peach
+  document: {foreground: "#c6d0f5"}                    # Documents (pdf, doc) - text
+  compressed: {foreground: "#ca9ee6", is_bold: true}   # Archives (zip, tar) - mauve, bold
+  temp: {foreground: "#737994", is_dimmed: true}       # Temporary (tmp, swp) - overlay0, dimmed
+  compiled: {foreground: "#85c1dc"}                    # Compiled (o, pyc) - sapphire
+  build: {foreground: "#838ba7", is_underline: true}   # Build files (Makefile, CMake) - overlay1, underline
+  source: {foreground: "#8caaee"}                      # Source code (js, py, rs) - blue
+
+# ========================================
+# Miscellaneous Elements
+# ========================================
+punctuation: {foreground: "#737994"}                   # Punctuation characters (overlay0)
+date: {foreground: "#e5c890"}                          # Timestamp (yellow)
+inode: {foreground: "#a5adce", is_dimmed: true}        # Inode number (subtext0, dimmed)
+blocks: {foreground: "#949cbb", is_dimmed: true}       # Block count (overlay2, dimmed)
+header: {foreground: "#c6d0f5", is_bold: true}         # Column headers (text, bold)
+octal: {foreground: "#81c8be"}                         # Octal permissions (teal)
+flags: {foreground: "#ca9ee6"}                         # File flags (mauve)
+control_char: {foreground: "#f4b8e4"}                  # Control characters (pink)
+
+# ========================================
+# Symlink Display
+# ========================================
+symlink_path: {foreground: "#99d1db", is_italic: true}         # Symlink target (sky, italic)
+broken_symlink: {foreground: "#e78284", is_bold: true}         # Broken symlink (red, bold)
+broken_path_overlay: {foreground: "#626880", is_underline: true}  # Broken path (surface2, underline)
+
+# ========================================
+# Icon Customization (Optional)
+# ========================================
+# Uncomment and customize icons for specific files/extensions
+# Note: Requires a Nerd Font for icon glyphs to render properly
+# ========================================
+# filenames:
+#   .gitignore: {icon: {glyph: ""}}
+#   .gitattributes: {icon: {glyph: ""}}
+#   Dockerfile: {icon: {glyph: "🐳"}}
+#   docker-compose.yml: {icon: {glyph: "🐳"}}
+#   Makefile: {icon: {glyph: ""}}
+#   README.md: {icon: {glyph: "📖"}}
+#   package.json: {icon: {glyph: ""}}
+#   Cargo.toml: {icon: {glyph: "🦀"}}
+#   .env: {icon: {glyph: ""}}
+
+# extensions:
+#   rs: {filename: {foreground: "#ea999c"}, icon: {glyph: "🦀"}}
+#   py: {filename: {foreground: "#e5c890"}, icon: {glyph: ""}}
+#   js: {filename: {foreground: "#e5c890"}, icon: {glyph: ""}}
+#   ts: {filename: {foreground: "#8caaee"}, icon: {glyph: ""}}
+#   go: {filename: {foreground: "#85c1dc"}, icon: {glyph: ""}}
+#   md: {filename: {foreground: "#c6d0f5"}, icon: {glyph: ""}}
+
+# ========================================
+# Notes & Best Practices
+# ========================================
+# 1. Color Consistency: This theme matches Catppuccin Frappé used in Ghostty
+# 2. Visual Hierarchy: Bold for important items, dimmed for less important
+# 3. Permission Philosophy: Brighter = more control, dimmer = less control
+# 4. Git Colors: Industry standard (green=new, yellow=mod, red=del)
+# 5. File Sizes: Color gradient from small (dim) to large (bright/colored)
+# 6. Security: Red/pink for security-relevant items (root, setuid, etc.)
+# 7. Testing: Run 'll' in a git repo with various file types to test
+# 8. Customization: Modify colors by editing hex codes above
+# 9. Reset Styles: Use 'prefix_with_reset: true' if styles bleed between items
+# 10. Validation: Check YAML syntax - errors can break multiple properties
+#
+# For more info:
+#   - man eza_colors-explanation
+#   - https://github.com/eza-community/eza
+#   - https://catppuccin.com/palette
+# ========================================

@@ -35,10 +35,23 @@ bizarre_retry = 3          # Retry count for failed tasks
 # ========================================
 [plugin]
 prepend_previewers = [
-    # mdcat for fully rendered markdown (piper + mdcat)
-    { name = "*.md", run = 'piper -- mdcat --local "$1"' },
+    # ========================================
+    # Markdown - Use rich-preview plugin (compatible with yazi 25.5.31)
+    # ========================================
+    # rich-cli 1.8.0 provides markdown preview with:
+    # - Automatic format detection
+    # - Syntax highlighting and pretty-printing
+    # - Rounded panels with guides
+    # Note: piper plugin requires yazi 25.9.15+, so using rich-preview directly
+    { name = "*.md", run = "rich-preview" },
 
-    # Rich preview for other text and data formats
+    # ========================================
+    # Data Formats - Use rich-preview plugin
+    # ========================================
+    # rich-cli 1.8.0 handles structured data formats with:
+    # - Automatic format detection
+    # - Syntax highlighting and pretty-printing
+    # - Rounded panels and guides
     { name = "*.json", run = "rich-preview" },
     { name = "*.csv", run = "rich-preview" },
     { name = "*.rst", run = "rich-preview" },

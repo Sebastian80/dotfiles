@@ -1,0 +1,37 @@
+# ========================================
+# fzf Main Configuration
+# ========================================
+# This file is loaded via FZF_DEFAULT_OPTS_FILE
+# Edit and reload: source ~/.config/fzf/fzf.bash (or exec bash)
+#
+# Since fzf 0.47.0 (March 2024), fzf supports reading options from a file
+# Since fzf 0.55.0 (December 2024), comments are supported in config files
+#
+# Documentation: https://github.com/junegunn/fzf
+
+# ========================================
+# Universal UI Settings
+# ========================================
+# These apply to ALL fzf invocations (files, history, processes, etc.)
+
+# Layout and borders
+--layout=reverse
+--border
+
+# Keybindings for preview scrolling
+--bind=ctrl-u:preview-page-up
+--bind=ctrl-d:preview-page-down
+
+# ========================================
+# Color Scheme
+# ========================================
+# Uncomment to customize colors (Catppuccin Frappe example):
+# --color=bg+:#414559,bg:#303446,spinner:#f2d5cf,hl:#e78284
+# --color=fg:#c6d0f5,header:#e78284,info:#ca9ee6,pointer:#f2d5cf
+# --color=marker:#f2d5cf,fg+:#c6d0f5,prompt:#ca9ee6,hl+:#e78284
+
+# ========================================
+# Performance
+# ========================================
+# --history=$HOME/.fzf_history
+# --history-size=10000

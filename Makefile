@@ -22,20 +22,20 @@ help: ## Show this help message
 
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
-	@stow -v bash git ghostty oh-my-posh yazi micro htop
+	@stow -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
 	@echo "$(GREEN)✓ Installation complete$(NC)"
 	@echo "Run 'source ~/.bashrc' to reload shell"
 
 uninstall: ## Uninstall all dotfiles (remove symlinks)
 	@echo "$(YELLOW)Removing all dotfiles symlinks...$(NC)"
-	@stow -D -v bash git ghostty oh-my-posh yazi micro htop
+	@stow -D -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
 	@echo "$(GREEN)✓ Uninstallation complete$(NC)"
 
 update: ## Update dotfiles (restow after git pull)
 	@echo "$(GREEN)Updating dotfiles from git...$(NC)"
 	@git pull --rebase
 	@echo "$(GREEN)Restowing packages...$(NC)"
-	@stow -R -v bash git ghostty oh-my-posh yazi micro htop
+	@stow -R -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
 	@echo "$(GREEN)✓ Update complete$(NC)"
 
 link: install ## Alias for install
@@ -48,7 +48,7 @@ list: ## List all stow packages
 
 test: ## Test stow (dry run, shows what would be created)
 	@echo "$(YELLOW)Dry run - showing what would be created:$(NC)"
-	@stow -n -v bash git ghostty oh-my-posh yazi micro htop
+	@stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
 
 clean: ## Clean up broken symlinks in home directory
 	@echo "$(YELLOW)Finding broken symlinks in home directory...$(NC)"
@@ -61,6 +61,9 @@ clean: ## Clean up broken symlinks in home directory
 # Individual package targets
 bash: ## Install bash configuration only
 	@stow -v bash
+
+bin: ## Install user scripts only
+	@stow -v bin
 
 git: ## Install git configuration only
 	@stow -v git
@@ -79,6 +82,12 @@ micro: ## Install micro configuration only
 
 htop: ## Install htop configuration only
 	@stow -v htop
+
+btop: ## Install btop configuration only
+	@stow -v btop
+
+gtk: ## Install GTK theme configuration only
+	@stow -v gtk
 
 # Git shortcuts
 status: ## Show git status

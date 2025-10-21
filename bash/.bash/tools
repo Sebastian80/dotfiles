@@ -7,12 +7,9 @@
 # fzf - Fuzzy Finder
 # ============================================
 if command -v fzf &>/dev/null; then
-    # Load fzf key bindings (Ctrl+R for history, Ctrl+T for files, Alt+C for directories)
-    if [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
-        source /usr/share/doc/fzf/examples/key-bindings.bash
-    fi
-
-    # Load fzf bash integration if available
+    # Load fzf bash integration (key bindings and completion)
+    # This sources ~/.fzf.bash which runs: eval "$(fzf --bash)"
+    # Provides Ctrl+R (history), Ctrl+T (files), Alt+C (directories)
     [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
     # fzf helper functions

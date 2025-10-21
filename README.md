@@ -7,8 +7,8 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 - **Modular Bash Configuration**: Split into 8 focused files (path, exports, prompt, aliases, functions, tools, completion, local)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: ghostty, oh-my-posh, yazi, micro, bat, eza, fzf, ripgrep
-- **Catppuccin Theme**: Consistent theming across applications
+- **Modern Tooling**: 21 modern CLI tools via Homebrew (see Tools section)
+- **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure
 
@@ -19,12 +19,26 @@ dotfiles/
 │   ├── .bash_profile
 │   ├── .profile
 │   └── .bash/      # Modular configs
+├── bin/            # User utilities (stowed to ~/bin)
+│   └── bin/
+│       ├── dotfiles-update
+│       ├── dotfiles-backup
+│       ├── docker-clean
+│       └── switch-theme
 ├── git/            # Git configuration
+├── gtk/            # GTK theme configuration
 ├── ghostty/        # Ghostty terminal
 ├── oh-my-posh/     # Prompt engine
+├── eza/            # Modern ls with Catppuccin Frappé theme
 ├── yazi/           # File manager
 ├── micro/          # Text editor
 ├── htop/           # System monitor
+├── btop/           # Modern system monitor
+├── scripts/        # Installation & maintenance scripts
+│   ├── setup/      # bootstrap.sh, install-*.sh
+│   ├── maintenance/# verify-installation.sh
+│   └── utils/      # Helper scripts
+├── Brewfile        # Homebrew package manifest
 └── README.md       # This file
 ```
 
@@ -33,17 +47,40 @@ dotfiles/
 - **Operating System**: Ubuntu/Debian Linux
 - **GNU Stow**: `sudo apt install stow`
 - **Git**: `sudo apt install git`
+- **Homebrew**: See [Installation](#installation) section for setup
 
 ## Installation
 
-### Fresh Installation
+### Automated Installation (Recommended)
 
 ```bash
 # Clone repository
 git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
 
-# Install GNU Stow
-sudo apt update && sudo apt install -y stow
+# Run bootstrap script (installs stow, Homebrew, and deploys dotfiles)
+cd ~/dotfiles
+./scripts/setup/bootstrap.sh
+
+# The script will:
+# - Check and install GNU Stow if needed
+# - Optionally install Homebrew
+# - Check for conflicts and offer backup/adopt options
+# - Install all dotfiles packages (including ~/bin utilities)
+# - Verify symlinks
+```
+
+### Manual Installation
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+
+# Install prerequisites
+sudo apt update && sudo apt install -y git stow
+
+# Install Homebrew (for modern CLI tools)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Backup existing configs (important!)
 mkdir -p ~/dotfiles-backup-$(date +%Y%m%d)
@@ -51,12 +88,18 @@ cp ~/.bashrc ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 cp ~/.bash_profile ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
-# Deploy all packages
+# Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow */
+stow bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+
+# Install Homebrew packages
+brew bundle install --file=~/dotfiles/Brewfile
 
 # Reload shell
 source ~/.bashrc
+
+# Now you have access to user utilities:
+# - dotfiles-update, dotfiles-backup, docker-clean, switch-theme
 ```
 
 ### Selective Installation
@@ -75,8 +118,14 @@ stow git
 # Install terminal configs
 stow ghostty oh-my-posh
 
-# Install all tools
-stow yazi micro htop
+# Install file managers and editors
+stow yazi micro
+
+# Install system monitors
+stow htop btop
+
+# Install GTK theming
+stow gtk
 ```
 
 ## Management
@@ -195,26 +244,64 @@ Use the `.local` suffix pattern for sensitive configs:
 .bashrc.local
 ```
 
+### Comprehensive Security Guide
+
+See **[SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md)** for detailed guidelines on:
+- SSH key management (Ed25519 best practices)
+- Development secrets with `pass` (GPG-based password manager)
+- API token storage (GitHub, GitLab, Jira, etc.)
+- Separating company vs personal credentials
+- Backup and recovery procedures
+
 ## Tools Included
 
-### Terminal
-- **ghostty**: Modern GPU-accelerated terminal
-- **oh-my-posh**: Cross-platform prompt engine
-- **Catppuccin Frappe**: Color theme
+All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list).
 
-### Shell Tools
-- **bat**: cat with syntax highlighting
-- **eza**: Modern ls replacement
-- **fzf**: Fuzzy finder
-- **ripgrep**: Fast text search
-- **yazi**: Terminal file manager
+**📦 For complete package inventory:** See **[PACKAGES.md](PACKAGES.md)** for detailed list of all 139+ packages organized by installation method (Homebrew, APT, Snap, Flatpak, shell scripts, etc.).
+
+**🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
+
+### Terminal
+- **ghostty** - Modern GPU-accelerated terminal (via apt)
+- **oh-my-posh** - Cross-platform prompt engine with custom themes
+
+### Modern CLI Tools (Rust-based)
+- **bat** - `cat` with syntax highlighting and Git integration
+- **eza** - Modern `ls` replacement with icons and Git status
+- **fd** - Fast and user-friendly `find` replacement
+- **ripgrep** (rg) - Extremely fast `grep` alternative
+- **fzf** - Fuzzy finder for files, history, and commands
+- **yazi** - Terminal file manager with preview support
+- **zoxide** - Smarter `cd` command that learns your habits
+
+### Git Tools
+- **git-delta** - Better `git diff` viewer with syntax highlighting
+- **difftastic** - Structural diff tool that understands syntax
+- **lazygit** - Terminal UI for git commands
+- **gh** - GitHub CLI for working with issues, PRs, repos
 
 ### Editors
-- **micro**: Modern terminal text editor
-- **vim**: Classic editor (with configs)
+- **micro** - Modern, intuitive terminal text editor (mouse support!)
 
-### System
-- **htop**: Interactive process viewer
+### System Monitoring
+- **htop** - Interactive process viewer
+- **btop** - Beautiful resource monitor with modern TUI
+
+### Utilities
+- **jq** - Command-line JSON processor
+- **glow** - Render markdown in the terminal
+- **lazydocker** - Terminal UI for Docker management
+
+### Development Tools
+- **fnm** - Fast Node.js version manager
+- **uv** - Fast Python package installer and resolver
+- **Docker Engine** - Container platform (via apt)
+
+### Optional Tools (Bash integration included)
+The bash configuration includes integration code for these tools if you install them:
+- **direnv** - Directory-specific environment variables
+- **asdf** - Multi-language version manager
+- **chafa** - Terminal image viewer
 
 ## Deployment to New Machine
 
@@ -226,15 +313,21 @@ sudo apt install -y git stow
 # 2. Clone dotfiles
 git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
 
-# 3. Review what will be linked
+# 3. Run automated setup (recommended)
 cd ~/dotfiles
-stow --no -v */  # Dry run
+./bootstrap.sh
 
-# 4. Deploy
-stow */
+# OR Manual deployment:
 
-# 5. Install tools (optional)
-sudo apt install -y bat fd-find ripgrep fzf
+# 3. Review what will be linked (dry run)
+cd ~/dotfiles
+stow -n -v bash git gtk ghostty oh-my-posh yazi micro htop btop
+
+# 4. Deploy packages
+stow bash git gtk ghostty oh-my-posh yazi micro htop btop
+
+# 5. Install Homebrew and tools
+brew bundle install --file=~/dotfiles/Brewfile
 
 # 6. Reload shell
 exec bash

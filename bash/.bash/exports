@@ -39,11 +39,11 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 # bat (cat replacement) - check for both 'bat' and 'batcat'
 if command -v bat &>/dev/null; then
-    export BAT_THEME="Catppuccin-frappe"
+    export BAT_THEME="Catppuccin Frappe"
     export BAT_STYLE="numbers,changes,header"
     export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 elif command -v batcat &>/dev/null; then
-    export BAT_THEME="Catppuccin-frappe"
+    export BAT_THEME="Catppuccin Frappe"
     export BAT_STYLE="numbers,changes,header"
     export MANPAGER="sh -c 'col -bx | batcat -l man -p'"
 fi
@@ -52,26 +52,11 @@ fi
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
 # fzf (fuzzy finder) configuration
+# All fzf settings moved to ~/.config/fzf/ for easier experimentation
+# Main config: ~/.config/fzf/config (FZF_DEFAULT_OPTS_FILE)
+# Shell integration: ~/.config/fzf/fzf.bash (sourced below)
 if command -v fzf &>/dev/null; then
-    # Use bat for preview if available
-    if command -v bat &>/dev/null; then
-        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'bat --style=numbers --color=always {}' --bind ctrl-u:preview-page-up,ctrl-d:preview-page-down"
-    elif command -v batcat &>/dev/null; then
-        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'batcat --style=numbers --color=always {}' --bind ctrl-u:preview-page-up,ctrl-d:preview-page-down"
-    else
-        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
-    fi
-
-    # Use fd for file searching if available
-    if command -v fd &>/dev/null; then
-        export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-        export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-    elif command -v fdfind &>/dev/null; then
-        export FZF_DEFAULT_COMMAND='fdfind --type f --hidden --follow --exclude .git'
-        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-        export FZF_ALT_C_COMMAND='fdfind --type d --hidden --follow --exclude .git'
-    fi
+    [ -f "$HOME/.config/fzf/fzf.bash" ] && source "$HOME/.config/fzf/fzf.bash"
 fi
 
 # eza (modern ls) configuration

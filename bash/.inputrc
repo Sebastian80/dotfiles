@@ -1,0 +1,86 @@
+# ~/.inputrc
+# Readline configuration for bash
+# Loaded automatically when bash starts
+
+# ========================================
+# CSI Sequence Handling (Ghostty Compatibility)
+# ========================================
+# Problem: Ghostty uses fixterms (CSI u keyboard protocol) by default
+# Issue: Bash/readline doesn't support CSI u sequences
+# Result: Ctrl+ combinations show literal escape sequences (e.g., "109;5u")
+#
+# Solution: Use readline's skip-csi-sequence function to consume these sequences
+# This prevents them from appearing as literal text in the terminal
+#
+# References:
+# - Ghostty Discussion #3151: https://github.com/ghostty-org/ghostty/discussions/3151
+# - Ghostty Discussion #5071: https://github.com/ghostty-org/ghostty/discussions/5071
+# - GNU Readline Manual: https://tiswww.case.edu/php/chet/readline/readline.html
+
+# Bind ESC [ to skip-csi-sequence
+# This consumes CSI u sequences like ^[[109;5u (Ctrl+M)
+# Without this, pressing Ctrl+M would display "109;5u" as literal text
+"\e[": skip-csi-sequence
+
+# Additional CSI sequence starters (for compatibility with other escape sequences)
+"\e]": skip-csi-sequence
+"\e\\": skip-csi-sequence
+
+# ========================================
+# Basic Readline Configuration
+# ========================================
+
+# Use vi or emacs editing mode (emacs is default)
+set editing-mode emacs
+
+# Show all completions immediately without bell
+set show-all-if-ambiguous on
+set show-all-if-unmodified on
+
+# Ignore case when completing
+set completion-ignore-case on
+
+# Treat hyphens and underscores as equivalent when completing
+set completion-map-case on
+
+# Append slash to completed directory names
+set mark-directories on
+set mark-symlinked-directories on
+
+# Don't bell on completion errors
+set bell-style none
+
+# Show extra file information when completing (like ls -F)
+set visible-stats on
+
+# Use colors for completion (like ls --color)
+set colored-stats on
+set colored-completion-prefix on
+
+# Single tab shows all matches immediately
+set show-all-if-ambiguous on
+
+# Enable 8-bit input (for UTF-8)
+set input-meta on
+set output-meta on
+set convert-meta off
+
+# ========================================
+# History Navigation
+# ========================================
+
+# Arrow keys search history based on what's already typed
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# ========================================
+# Additional Keybindings
+# ========================================
+
+# Ctrl+Left/Right for word navigation
+"\e[1;5C": forward-word   # Ctrl+Right
+"\e[1;5D": backward-word  # Ctrl+Left
+
+# Alt+Left/Right for word navigation (alternative)
+"\e[1;3C": forward-word   # Alt+Right
+"\e[1;3D": backward-word  # Alt+Left

@@ -179,3 +179,93 @@ bell-features = audio,title,attention
 
 # Volume (0.0 to 1.0, default is 0.5)
 bell-audio-volume = 0.3
+
+# ========================================
+# Keyboard Protocol Compatibility Fix
+# ========================================
+# Problem: Ghostty uses fixterms (CSI u sequences) by default
+# Issue: fzf 0.66.0 does not support CSI u / Kitty keyboard protocol
+# Result: Some key combinations show literal escape sequences (e.g., "109;5u")
+#
+# Solution: Override fixterms for common Ctrl combinations to use legacy encoding
+# Trade-off: These keys will no longer be distinguishable from their equivalents
+#   (e.g., Ctrl+I = Tab, Ctrl+M = Enter again)
+#
+# References:
+# - fzf Issue #1980: https://github.com/junegunn/fzf/issues/1980
+# - fzf Issue #3208: https://github.com/junegunn/fzf/issues/3208
+# - Ghostty Discussion #5071: https://github.com/ghostty-org/ghostty/discussions/5071
+# - fixterms spec: http://www.leonerd.org.uk/hacks/fixterms/
+#
+# Format: keybind = <trigger>=text:<hex_escape>
+
+# Ctrl+[ → ESC (0x1B) instead of CSI 91;5u
+keybind = ctrl+left_bracket=text:\x1b
+
+# Ctrl+I → TAB (0x09) instead of CSI 105;5u
+keybind = ctrl+i=text:\x09
+
+# Ctrl+M → ENTER (0x0D) instead of CSI 109;5u
+keybind = ctrl+m=text:\x0d
+
+# Ctrl+J → LINEFEED (0x0A) instead of CSI 106;5u
+keybind = ctrl+j=text:\x0a
+
+# Ctrl+H → BACKSPACE (0x08) instead of CSI 104;5u
+keybind = ctrl+h=text:\x08
+
+# Additional common Ctrl combinations (expanded fix for bash compatibility)
+# Many of these are printable ASCII control characters that bash expects
+# Comments moved above keybinds to prevent them being included in the action
+
+# Ctrl+A: SOH - Beginning of line
+keybind = ctrl+a=text:\x01
+# Ctrl+B: STX - Backward char
+keybind = ctrl+b=text:\x02
+# Ctrl+C: ETX - Interrupt (SIGINT)
+keybind = ctrl+c=text:\x03
+# Ctrl+D: EOT - Delete char / EOF
+keybind = ctrl+d=text:\x04
+# Ctrl+E: ENQ - End of line
+keybind = ctrl+e=text:\x05
+# Ctrl+F: ACK - Forward char
+keybind = ctrl+f=text:\x06
+# Ctrl+G: BEL - Bell / abort
+keybind = ctrl+g=text:\x07
+# Ctrl+H already defined above (backspace)
+# Ctrl+I already defined above (tab)
+# Ctrl+J already defined above (linefeed)
+# Ctrl+K: VT - Kill line
+keybind = ctrl+k=text:\x0b
+# Ctrl+L: FF - Clear screen
+keybind = ctrl+l=text:\x0c
+# Ctrl+M already defined above (return)
+# Ctrl+N: SO - Next history
+keybind = ctrl+n=text:\x0e
+# Ctrl+O: SI - Operate-and-get-next
+keybind = ctrl+o=text:\x0f
+# Ctrl+P: DLE - Previous history
+keybind = ctrl+p=text:\x10
+# Ctrl+Q: DC1 - Resume (XON)
+keybind = ctrl+q=text:\x11
+# Ctrl+R: DC2 - Reverse search
+keybind = ctrl+r=text:\x12
+# Ctrl+S: DC3 - Suspend (XOFF)
+keybind = ctrl+s=text:\x13
+# Ctrl+T: DC4 - Transpose chars
+keybind = ctrl+t=text:\x14
+# Ctrl+U: NAK - Kill line backward
+keybind = ctrl+u=text:\x15
+# Ctrl+V: SYN - Literal next
+keybind = ctrl+v=text:\x16
+# Ctrl+W: ETB - Kill word backward
+keybind = ctrl+w=text:\x17
+# Ctrl+X: CAN - Prefix key
+keybind = ctrl+x=text:\x18
+# Ctrl+Y: EM - Yank
+keybind = ctrl+y=text:\x19
+# Ctrl+Z: SUB - Suspend (SIGTSTP)
+keybind = ctrl+z=text:\x1a
+
+# Note: You can add more overrides as you discover problematic key combinations
+# Format: keybind = ctrl+<key>=text:\x<hex_code>

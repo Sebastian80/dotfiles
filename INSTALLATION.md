@@ -7,17 +7,17 @@ This guide walks you through completing the dotfiles setup with GNU Stow.
 ✅ **Completed**:
 - Dotfiles repository created at `~/dotfiles`
 - All configs copied and organized in stow-compatible structure
-- Git repository initialized with 2 commits
+- Git repository initialized
 - Comprehensive .gitignore for security
 - README.md with full documentation
 - bootstrap.sh for automated installation
 - Makefile for easy management
+- GNU Stow installed (`stow 2.3.1`)
+- Homebrew installed with all modern CLI tools
+- All dotfiles deployed and symlinked
+- Docker Engine installed
 
-⏳ **Remaining Steps**:
-1. Install GNU Stow
-2. Test stow deployment (optional but recommended)
-3. Deploy dotfiles with stow
-4. Push to GitHub
+This guide serves as reference documentation for the installation process and troubleshooting.
 
 ---
 
@@ -48,7 +48,7 @@ make test
 Or manually:
 ```bash
 cd ~/dotfiles
-stow -n -v bash git ghostty oh-my-posh yazi micro htop
+stow -n -v bash git gtk ghostty oh-my-posh yazi micro htop btop
 ```
 
 **What to look for**:
@@ -105,7 +105,7 @@ make install
 Install all packages:
 ```bash
 cd ~/dotfiles
-stow bash git ghostty oh-my-posh yazi micro htop
+stow bash git gtk ghostty oh-my-posh yazi micro htop btop
 ```
 
 Or install selectively:
@@ -386,9 +386,10 @@ After completing installation:
 
 4. **Set up GitHub repo** (see Step 6 above)
 
-5. **Optional: Install additional tools**:
+5. **Install modern CLI tools via Homebrew**:
    ```bash
-   sudo apt install -y bat fd-find ripgrep fzf eza
+   cd ~/dotfiles
+   brew bundle install --file=~/dotfiles/Brewfile
    ```
 
 6. **Consider future enhancements**:

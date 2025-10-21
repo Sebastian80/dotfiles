@@ -4,6 +4,18 @@
 # Loaded by: .bash_profile and .bashrc
 
 # ============================================
+# Homebrew Bash Completion (v2)
+# ============================================
+# Load Homebrew-installed completions for tools like eza, bat, fd, rg, etc.
+# This must be loaded BEFORE standard bash completion to ensure proper integration
+if type brew &>/dev/null; then
+    HOMEBREW_PREFIX="$(brew --prefix)"
+    if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+        source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
+    fi
+fi
+
+# ============================================
 # Standard Bash Completion
 # ============================================
 
