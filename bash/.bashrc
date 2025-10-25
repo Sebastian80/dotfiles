@@ -55,6 +55,13 @@ done
 # Load keybindings
 [ -r ~/.bash/keybindings.bash ] && [ -f ~/.bash/keybindings.bash ] && source ~/.bash/keybindings.bash
 
+# Load bash-completion framework (provides _get_comp_words_by_ref and other completion utilities)
+# Requires progcomp and extglob shell options
+if [ -f /home/linuxbrew/.linuxbrew/share/bash-completion/bash_completion ]; then
+    shopt -s progcomp extglob
+    source /home/linuxbrew/.linuxbrew/share/bash-completion/bash_completion
+fi
+
 # Load completion (legacy + new modular)
 [ -r ~/.bash/completion.old ] && [ -f ~/.bash/completion.old ] && source ~/.bash/completion.old
 for file in ~/.bash/completions/*.bash; do
