@@ -9,13 +9,30 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
+# Unicode symbols (work without Nerd Fonts)
+CHECK="✓"
+CROSS="✗"
+ARROW="→"
+STAR="★"
+WARN="⚠"
+ROCKET="🚀"
+PACKAGE="📦"
+GEAR="⚙️"
+SPARKLE="✨"
+CLOCK="⏳"
+
 # Functions
-info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-error() { echo -e "${RED}[ERROR]${NC} $1"; }
-step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+info() { echo -e "${GREEN}${CHECK}${NC} $1"; }
+warn() { echo -e "${YELLOW}${WARN}${NC}  $1"; }
+error() { echo -e "${RED}${CROSS}${NC} $1"; }
+step() { echo -e "${BLUE}${ARROW}${NC} ${BOLD}$1${NC}"; }
+success() { echo -e "${GREEN}${SPARKLE} $1${NC}"; }
+working() { echo -e "${CYAN}${GEAR}${NC}  $1"; }
 
 # Check if running from dotfiles directory
 if [[ ! -f "$(pwd)/bootstrap.sh" ]]; then
@@ -26,7 +43,14 @@ fi
 
 DOTFILES_DIR="$(pwd)"
 
-step "Starting dotfiles installation..."
+# Display banner
+echo ""
+echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║${NC}  ${BOLD}${MAGENTA}Sebastian's Dotfiles Bootstrap${NC}                        ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  ${ROCKET} Modern CLI tools & configs with GNU Stow         ${CYAN}║${NC}"
+echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
+echo ""
+step "Starting installation..."
 echo ""
 
 # Check prerequisites
@@ -82,11 +106,40 @@ else
     info "Homebrew found: $(brew --version | head -n1)"
 fi
 
+# Install Homebrew packages
+if command -v brew &> /dev/null; then
+    echo ""
+    step "Homebrew Packages Installation"
+    echo ""
+    echo -e "${PACKAGE} ${BOLD}The Brewfile contains 27 packages:${NC}"
+    echo -e "  ${CYAN}→${NC} Modern CLI tools (bat, eza, fzf, ripgrep, yazi)"
+    echo -e "  ${CYAN}→${NC} Development tools (gh, glab, composer, fnm, uv)"
+    echo -e "  ${CYAN}→${NC} Prompt engine (oh-my-posh)"
+    echo -e "  ${CYAN}→${NC} Password manager (bitwarden-cli)"
+    echo ""
+    echo -e "${CLOCK} ${YELLOW}Installation time: 5-10 minutes${NC}"
+    echo ""
+    read -p "Install Homebrew packages now? (recommended) (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        step "Installing Homebrew packages from Brewfile..."
+        if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
+            info "✓ Homebrew packages installed successfully"
+        else
+            warn "Some packages may have failed to install. Check output above."
+        fi
+    else
+        warn "Skipping Homebrew package installation."
+        echo "You can install them later with:"
+        echo "  brew bundle install --file=~/dotfiles/Brewfile"
+    fi
+fi
+
 echo ""
 step "Checking for conflicts..."
 
-# List of packages to install
-PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop)
+# List of packages to install (all 15 user-facing packages)
+PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
 
 # Check for conflicts
 CONFLICTS=0
@@ -218,25 +271,71 @@ if [[ ! -f "$HOME/.bash/local" ]]; then
     echo "# This file is git-ignored" >> "$HOME/.bash/local"
 fi
 
+# Install system configuration
 echo ""
-step "Installation complete!"
+step "System Configuration"
 echo ""
-info "Your dotfiles have been installed successfully."
+info "System configuration adds Homebrew paths to sudo's secure_path."
+echo "This allows Homebrew tools (bat, eza, etc.) to work with sudo commands."
 echo ""
-echo "Next steps:"
-echo "  1. Reload your shell: source ~/.bashrc"
-echo "  2. Review the configuration files"
-echo "  3. Add machine-specific settings to ~/.bash/local"
-echo "  4. (Optional) Install recommended system packages:"
-echo "     sudo apt install -y nala"
-echo "  5. Install Homebrew packages:"
-echo "     brew bundle install --file=~/dotfiles/Brewfile"
-echo "  6. Install Nerd Fonts (required for oh-my-posh icons):"
-echo "     ~/dotfiles/install-fonts.sh"
-echo "  7. (Optional) Install Docker Engine:"
-echo "     ~/dotfiles/install-docker.sh"
+warn "This requires sudo privileges (you'll be prompted for password)."
 echo ""
-info "For more information, see README.md"
+read -p "Install system configuration now? (recommended) (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    step "Installing system configuration..."
+    if make -C "$DOTFILES_DIR" install-system; then
+        info "✓ System configuration installed successfully"
+    else
+        error "Failed to install system configuration"
+        echo "You can install it later with:"
+        echo "  cd ~/dotfiles && make install-system"
+    fi
+else
+    warn "Skipping system configuration."
+    echo "You can install it later with:"
+    echo "  cd ~/dotfiles && make install-system"
+fi
+
+echo ""
+echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}                              ${GREEN}║${NC}"
+echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
+echo ""
+echo -e "${BOLD}${CYAN}What was installed:${NC}"
+echo -e "  ${CHECK} GNU Stow and dotfiles packages (16 configs)"
+if command -v brew &> /dev/null && brew list bat &> /dev/null; then
+    echo -e "  ${CHECK} Homebrew packages (27 modern CLI tools)"
+fi
+if [[ -f /etc/sudoers.d/homebrew-path ]]; then
+    echo -e "  ${CHECK} System configuration (Homebrew sudo PATH)"
+fi
+echo ""
+echo -e "${BOLD}${BLUE}Next Steps:${NC}"
+echo -e "  ${CYAN}1.${NC} Reload your shell: ${MAGENTA}source ~/.bashrc${NC}"
+echo -e "  ${CYAN}2.${NC} Review the configuration files"
+echo -e "  ${CYAN}3.${NC} Add machine-specific settings to ${MAGENTA}~/.bash/local${NC}"
+echo ""
+echo -e "${BOLD}${YELLOW}Optional Installations:${NC}"
+if ! command -v brew &> /dev/null || ! brew list bat &> /dev/null; then
+    echo -e "  ${PACKAGE} Install Homebrew packages:"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}brew bundle install --file=~/dotfiles/Brewfile${NC}"
+fi
+if [[ ! -f /etc/sudoers.d/homebrew-path ]]; then
+    echo -e "  ${GEAR} Install system configuration:"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}cd ~/dotfiles && make install-system${NC}"
+fi
+echo -e "  ${STAR} Install Nerd Fonts (for oh-my-posh icons):"
+echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-fonts.sh${NC}"
+echo -e "  🐳 Install Docker Engine:"
+echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-docker.sh${NC}"
+echo -e "  🔐 Configure authentication (Bitwarden):"
+echo -e "    ${CYAN}→${NC} See ${MAGENTA}INSTALLATION.md${NC} Step 7 or ${MAGENTA}SECRET_MANAGEMENT.md${NC}"
+echo ""
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${SPARKLE} For more information, see ${MAGENTA}README.md${NC}"
+echo -e "${ROCKET} Happy dotfile-ing!"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
 # Ask if user wants to reload shell

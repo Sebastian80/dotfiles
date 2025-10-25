@@ -1,0 +1,15 @@
+# Stow ignore file for bash package
+# Files and directories listed here will not be symlinked by Stow
+# Pattern format: Perl regular expressions
+
+# Documentation files (not dotfiles)
+\.md$
+
+# Backup files
+\.old$
+\.backup$
+~$
+
+# Version control
+^\.git$
+^\.gitignore$

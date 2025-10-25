@@ -16,6 +16,10 @@ brew "git-delta"    # Better git diff viewer
 brew "difftastic"   # Structural diff tool (alternative to delta)
 brew "lazygit"      # Terminal UI for git commands
 brew "gh"           # GitHub CLI
+brew "glab"         # GitLab CLI
+
+# Password Manager
+brew "bitwarden-cli"  # Bitwarden CLI for password management
 
 # Utilities
 brew "jq"           # JSON processor
@@ -29,6 +33,7 @@ brew "xclip"        # X11 clipboard utility (required for clipboard ops in termi
 # Development Version Managers
 brew "fnm"          # Fast Node.js version manager
 brew "uv"           # Fast Python package manager
+brew "composer"     # PHP dependency manager
 
 # Prompt & Shell
 brew "oh-my-posh"   # Prompt theme engine

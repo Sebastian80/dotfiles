@@ -22,20 +22,23 @@ help: ## Show this help message
 
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
-	@stow -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+	@stow -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 	@echo "$(GREEN)✓ Installation complete$(NC)"
-	@echo "Run 'source ~/.bashrc' to reload shell"
+	@echo ""
+	@echo "$(YELLOW)Manual step required:$(NC)"
+	@echo "  Install system config: make install-system"
+	@echo "  Then reload shell: source ~/.bashrc"
 
 uninstall: ## Uninstall all dotfiles (remove symlinks)
 	@echo "$(YELLOW)Removing all dotfiles symlinks...$(NC)"
-	@stow -D -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+	@stow -D -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 	@echo "$(GREEN)✓ Uninstallation complete$(NC)"
 
 update: ## Update dotfiles (restow after git pull)
 	@echo "$(GREEN)Updating dotfiles from git...$(NC)"
 	@git pull --rebase
 	@echo "$(GREEN)Restowing packages...$(NC)"
-	@stow -R -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+	@stow -R -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 	@echo "$(GREEN)✓ Update complete$(NC)"
 
 link: install ## Alias for install
@@ -48,7 +51,7 @@ list: ## List all stow packages
 
 test: ## Test stow (dry run, shows what would be created)
 	@echo "$(YELLOW)Dry run - showing what would be created:$(NC)"
-	@stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+	@stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 clean: ## Clean up broken symlinks in home directory
 	@echo "$(YELLOW)Finding broken symlinks in home directory...$(NC)"
@@ -105,3 +108,40 @@ pull: ## Pull from remote
 
 sync: ## Sync with remote (pull + push)
 	@git pull --rebase && git push
+
+# System configuration (requires sudo)
+install-system: ## Install system-level configurations (requires sudo)
+	@echo "$(GREEN)Installing system configurations...$(NC)"
+	@echo "$(YELLOW)This requires sudo privileges$(NC)"
+	@sudo install -m 0440 system/.config/sudoers.d/homebrew-path /etc/sudoers.d/homebrew-path
+	@sudo visudo -c
+	@echo "$(GREEN)✓ System configuration installed$(NC)"
+	@echo "Homebrew tools now work with sudo"
+
+.PHONY: verify-auth
+verify-auth:  ## Verify authentication setup
+	@echo "$(CYAN)=== Authentication Verification ===$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Checking Bitwarden CLI...$(NC)"
+	@command -v bw >/dev/null && echo "$(GREEN)✓$(NC) bw CLI installed" || echo "$(RED)✗$(NC) bw CLI not found"
+	@echo ""
+	@echo "$(YELLOW)Checking Bitwarden session...$(NC)"
+	@test -n "$$BW_SESSION" && echo "$(GREEN)✓$(NC) BW_SESSION active" || echo "$(RED)✗$(NC) BW_SESSION not set (run: bw unlock)"
+	@echo ""
+	@echo "$(YELLOW)Checking development tokens...$(NC)"
+	@test -n "$$GITHUB_TOKEN" && echo "$(GREEN)✓$(NC) GITHUB_TOKEN loaded" || echo "$(RED)✗$(NC) GITHUB_TOKEN not set"
+	@test -n "$$GITLAB_TOKEN" && echo "$(GREEN)✓$(NC) GITLAB_TOKEN loaded" || echo "$(RED)✗$(NC) GITLAB_TOKEN not set"
+	@test -n "$$COMPOSER_AUTH" && echo "$(GREEN)✓$(NC) COMPOSER_AUTH loaded" || echo "$(RED)✗$(NC) COMPOSER_AUTH not set"
+	@echo ""
+	@echo "$(YELLOW)Checking SSH agent...$(NC)"
+	@test -S "$$HOME/.bitwarden-ssh-agent.sock" && echo "$(GREEN)✓$(NC) Bitwarden SSH agent socket found" || echo "$(RED)✗$(NC) SSH agent socket not found"
+	@test -n "$$SSH_AUTH_SOCK" && echo "$(GREEN)✓$(NC) SSH_AUTH_SOCK set" || echo "$(RED)✗$(NC) SSH_AUTH_SOCK not set"
+	@echo ""
+	@echo "$(YELLOW)Checking gh CLI configuration...$(NC)"
+	@test -f "$$HOME/.config/gh/config.yml" && echo "$(GREEN)✓$(NC) gh config exists" || echo "$(RED)✗$(NC) gh config not found"
+	@command -v gh >/dev/null && gh config get git_protocol 2>/dev/null | grep -q ssh && echo "$(GREEN)✓$(NC) gh using SSH protocol" || echo "$(YELLOW)⚠$(NC) gh not configured for SSH"
+	@echo ""
+	@echo "$(YELLOW)Checking glab CLI configuration...$(NC)"
+	@test -f "$$HOME/.config/glab-cli/config.yml" && echo "$(GREEN)✓$(NC) glab config exists" || echo "$(RED)✗$(NC) glab config not found"
+	@grep -q "host: git.netresearch.de" "$$HOME/.config/glab-cli/config.yml" 2>/dev/null && echo "$(GREEN)✓$(NC) glab configured for git.netresearch.de" || echo "$(YELLOW)⚠$(NC) glab not configured for self-hosted GitLab"
+	@echo ""

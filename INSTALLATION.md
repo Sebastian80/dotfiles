@@ -16,6 +16,7 @@ This guide walks you through completing the dotfiles setup with GNU Stow.
 - Homebrew installed with all modern CLI tools
 - All dotfiles deployed and symlinked
 - Docker Engine installed
+- System-level configurations (sudoers for Homebrew PATH)
 
 This guide serves as reference documentation for the installation process and troubleshooting.
 
@@ -48,7 +49,7 @@ make test
 Or manually:
 ```bash
 cd ~/dotfiles
-stow -n -v bash git gtk ghostty oh-my-posh yazi micro htop btop
+stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
 ```
 
 **What to look for**:
@@ -146,7 +147,28 @@ yazi -> ../dotfiles/yazi/.config/yazi
 
 ---
 
-## Step 5: Reload Shell
+## Step 5: Install System Configurations
+
+Some configurations require root access and cannot be symlinked with stow.
+
+```bash
+cd ~/dotfiles
+make install-system
+```
+
+This installs:
+- **Sudoers configuration**: Adds Homebrew paths to sudo's secure_path, allowing Homebrew tools (bat, eza, fd, rg, etc.) to work with sudo commands
+
+**What happens:**
+1. Copies `system/.config/sudoers.d/homebrew-path` to `/etc/sudoers.d/`
+2. Sets correct permissions (0440)
+3. Validates configuration with `visudo -c`
+
+**Security note:** This is safe and standard practice for Homebrew-based systems. It only affects PATH, not authentication.
+
+---
+
+## Step 6: Reload Shell
 
 ```bash
 source ~/.bashrc
@@ -156,7 +178,126 @@ Or restart your terminal.
 
 ---
 
-## Step 6: Push to GitHub
+## Step 7: Configure Authentication (Optional but Recommended)
+
+This step sets up Bitwarden for unified authentication across GitHub, GitLab, and Composer.
+
+### Install Bitwarden Desktop
+
+**Important:** Use the `.deb` package (not Flatpak) for proper SSH agent integration.
+
+```bash
+# Download from https://bitwarden.com/download/
+wget https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb -O Bitwarden.deb
+sudo dpkg -i Bitwarden.deb
+```
+
+### Enable SSH Agent
+
+1. Open Bitwarden desktop app
+2. Go to **Settings → Options**
+3. Enable "**Enable SSH Agent**" ✓
+4. (Optional) Enable "**Unlock with biometrics**" ✓ (for fingerprint unlock)
+
+### Unlock Bitwarden CLI
+
+```bash
+# Unlock vault (loads session + development tokens)
+bw unlock
+
+# You should see:
+# ✅ Bitwarden unlocked successfully!
+# 📦 Session stored in tmpfs (auto-cleared on logout)
+# 🔑 GITHUB_TOKEN loaded
+# 🔑 GITLAB_TOKEN loaded
+# 📦 COMPOSER_AUTH loaded (GitHub + GitLab)
+# ✅ Development secrets loaded and saved to tmpfs
+```
+
+### Verify Tokens Loaded
+
+```bash
+# Check environment variables
+echo $GITHUB_TOKEN
+echo $GITLAB_TOKEN
+echo $COMPOSER_AUTH | jq
+
+# Verify SSH agent
+ls -la ~/.bitwarden-ssh-agent.sock
+ssh-add -l
+```
+
+### Configure CLI Tools
+
+#### GitHub CLI (gh)
+
+The gh CLI is pre-configured to use SSH protocol:
+
+```bash
+# Verify configuration
+gh config get git_protocol
+# Should output: ssh
+
+# Check authentication
+gh auth status
+# Should show: ✓ Logged in to github.com (GITHUB_TOKEN)
+```
+
+#### GitLab CLI (glab)
+
+The glab CLI is pre-configured for self-hosted GitLab (git.netresearch.de):
+
+```bash
+# Check configuration
+cat ~/.config/glab-cli/config.yml | grep host
+# Should show: host: git.netresearch.de
+
+# Check authentication
+glab auth status
+# Should show: ✓ Logged in to git.netresearch.de (GITLAB_TOKEN)
+```
+
+**Note:** Both `gh` and `glab` use environment variables (GITHUB_TOKEN, GITLAB_TOKEN) which are auto-loaded from Bitwarden when you run `bw unlock`.
+
+### Test Authentication
+
+```bash
+# Test GitHub SSH
+ssh -T git@github.com
+# Expected: Hi <username>! You've successfully authenticated
+
+# Test GitLab SSH
+ssh -T git@git.netresearch.de
+# Expected: Welcome to GitLab, @<username>!
+
+# Test gh CLI
+gh api user | jq -r .login
+
+# Test glab CLI
+glab api user | jq -r .username
+
+# Test Composer
+composer diagnose | grep github
+# Expected: github.com oauth access: OK
+```
+
+### Daily Workflow
+
+After initial setup, you only need to unlock once per session:
+
+```bash
+# Morning: Unlock once (fingerprint or master password)
+bw unlock
+
+# All terminals now have access to tokens
+# Work normally with gh, glab, composer, git
+```
+
+**For complete authentication setup and troubleshooting:** See [SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md)
+
+---
+
+## Step 8: Push to GitHub
 
 ### Create GitHub Repository
 

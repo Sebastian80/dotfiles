@@ -82,7 +82,7 @@ fi
 # 3. Check Stow Packages
 section "Stow Packages"
 
-PACKAGES=(bash git gtk ghostty oh-my-posh yazi micro htop btop)
+PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
 
 for package in "${PACKAGES[@]}"; do
     if [[ -d "$package" ]]; then
@@ -141,6 +141,18 @@ verify_symlink ~/.config/git "$DOTFILES_DIR/git/.config/git"
 verify_symlink ~/.config/gtk-3.0/bookmarks "$DOTFILES_DIR/gtk/.config/gtk-3.0/bookmarks"
 verify_symlink ~/.config/gtk-4.0/gtk.css "$DOTFILES_DIR/gtk/.config/gtk-4.0/gtk.css"
 
+# Tool-specific config symlinks
+verify_symlink ~/.config/eza "$DOTFILES_DIR/eza/.config/eza"
+verify_symlink ~/.config/glow "$DOTFILES_DIR/glow/.config/glow"
+verify_symlink ~/.config/lazygit "$DOTFILES_DIR/lazygit/.config/lazygit"
+verify_symlink ~/.config/lazydocker "$DOTFILES_DIR/lazydocker/.config/lazydocker"
+
+# User utilities (bin/)
+verify_symlink ~/bin/dotfiles-update "$DOTFILES_DIR/bin/bin/dotfiles-update"
+verify_symlink ~/bin/dotfiles-backup "$DOTFILES_DIR/bin/bin/dotfiles-backup"
+verify_symlink ~/bin/docker-clean "$DOTFILES_DIR/bin/bin/docker-clean"
+verify_symlink ~/bin/switch-theme "$DOTFILES_DIR/bin/bin/switch-theme"
+
 # 5. Check for Broken Symlinks
 section "Broken Symlinks Check"
 
@@ -191,8 +203,12 @@ check_tool micro "micro (text editor)"
 check_tool htop "htop (process viewer)"
 check_tool btop "btop (resource monitor)"
 check_tool gh "gh (GitHub CLI)"
+check_tool glab "glab (GitLab CLI)"
 check_tool lazygit "lazygit (git UI)"
+check_tool lazydocker "lazydocker (Docker UI)"
 check_tool docker "docker (containers)"
+check_tool bw "bw (Bitwarden CLI)"
+check_tool composer "composer (PHP dependency manager)"
 
 # 8. Check Shell Configuration
 section "Shell Configuration"
@@ -208,6 +224,13 @@ if echo "$PATH" | grep -q "linuxbrew"; then
     success "Homebrew is in PATH"
 else
     warn "Homebrew is NOT in PATH"
+fi
+
+# Check if ~/bin is in PATH
+if echo "$PATH" | grep -q "$HOME/bin"; then
+    success "~/bin is in PATH (user utilities available)"
+else
+    warn "~/bin is NOT in PATH"
 fi
 
 # 9. Security Check
@@ -253,8 +276,62 @@ check_doc "README.md"
 check_doc "INSTALLATION.md"
 check_doc "Brewfile"
 check_doc "Makefile"
-check_doc "bootstrap.sh"
 check_doc "SECRET_MANAGEMENT.md"
+check_doc "SCRIPTS.md"
+
+# 11. Authentication & System Configuration
+section "Authentication & System Configuration"
+
+# Check Bitwarden session
+if command -v bw &> /dev/null; then
+    if [[ -n "$BW_SESSION" ]]; then
+        success "Bitwarden session active"
+    else
+        warn "Bitwarden session not active (run: bw unlock)"
+    fi
+
+    # Check development tokens
+    if [[ -n "$GITHUB_TOKEN" ]]; then
+        success "GITHUB_TOKEN loaded"
+    else
+        warn "GITHUB_TOKEN not set"
+    fi
+
+    if [[ -n "$GITLAB_TOKEN" ]]; then
+        success "GITLAB_TOKEN loaded"
+    else
+        warn "GITLAB_TOKEN not set"
+    fi
+
+    if [[ -n "$COMPOSER_AUTH" ]]; then
+        success "COMPOSER_AUTH configured"
+    else
+        warn "COMPOSER_AUTH not set"
+    fi
+
+    # Check SSH agent
+    if [[ -S "$HOME/.bitwarden-ssh-agent.sock" ]]; then
+        success "Bitwarden SSH agent socket found"
+    else
+        warn "Bitwarden SSH agent not running"
+    fi
+else
+    warn "Bitwarden CLI not installed (optional)"
+fi
+
+# Check system configuration (sudoers for Homebrew)
+if [[ -f /etc/sudoers.d/homebrew-path ]]; then
+    success "System sudoers configuration installed"
+    # Check permissions
+    PERMS=$(stat -c '%a' /etc/sudoers.d/homebrew-path 2>/dev/null)
+    if [[ "$PERMS" == "440" ]]; then
+        success "Sudoers permissions correct (440)"
+    else
+        error "Sudoers permissions incorrect: $PERMS (should be 440)"
+    fi
+else
+    warn "System sudoers configuration not installed (run: make install-system)"
+fi
 
 # Summary
 echo ""

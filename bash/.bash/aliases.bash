@@ -10,9 +10,6 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias ~='cd ~'
-# Disabled: causes issues with shell snapshots
-# alias -- -='cd -'
-# Note: Use 'cd -' directly to go to previous directory
 
 # ============================================
 # Modern Tool Replacements (with fallbacks)

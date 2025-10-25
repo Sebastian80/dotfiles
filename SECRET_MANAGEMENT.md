@@ -1,792 +1,1171 @@
-# Secret Management Strategy - 2025 Best Practices
+# Secret Management with Bitwarden - 2025
 
-**Last Updated:** 2025-10-20
-**Research Validated:** ✅ Current industry standards
+**Last Updated:** 2025-10-24
+**System:** Integrated Bitwarden (Desktop + Browser + CLI + SSH Agent)
 
 ---
 
 ## Table of Contents
 
-1. [Critical Principles](#critical-principles)
-2. [Architecture Overview](#architecture-overview)
-3. [SSH Key Management](#ssh-key-management)
-4. [Development Secrets (Pass + GPG)](#development-secrets-pass--gpg)
-5. [Company vs Personal Boundaries](#company-vs-personal-boundaries)
-6. [Implementation Guide](#implementation-guide)
-7. [Backup & Recovery](#backup--recovery)
-8. [References & Resources](#references--resources)
-
----
-
-## Critical Principles
-
-### 🔴 The Golden Rule: Separate Company and Personal Secrets
-
-```
-┌─────────────────────────────────────────────┐
-│ NEVER MIX COMPANY AND PERSONAL SECRETS     │
-├─────────────────────────────────────────────┤
-│ Company Bitwarden → Work secrets ONLY      │
-│ Personal solution → YOUR personal secrets  │
-└─────────────────────────────────────────────┘
-```
-
-**Why This Matters:**
-- **Job Changes:** Leave company → lose access → lose personal tokens
-- **Privacy:** Personal side projects shouldn't be in company vault
-- **Legal:** Company may claim ownership of secrets in their systems
-- **Policy Changes:** Company can change access policies at any time
-- **Audit Logs:** Company can see when you access what
+1. [Architecture Overview](#architecture-overview)
+2. [Components](#components)
+3. [Biometric Unlock Setup](#biometric-unlock-setup)
+4. [CLI Integration](#cli-integration)
+5. [SSH Key Management](#ssh-key-management)
+6. [Session Management](#session-management)
+7. [Token Loading](#token-loading)
+8. [Best Practices](#best-practices)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Architecture Overview
 
+This system uses **Bitwarden** as a unified secret management solution with four integrated components:
+
 ```
-┌───────────────────────────────────────────────────────────┐
-│ SECRET MANAGEMENT ARCHITECTURE                            │
-├───────────────────────────────────────────────────────────┤
-│                                                           │
-│ SSH Keys → ~/.ssh/ (encrypted with passphrases)          │
-│   │                                                       │
-│   ├─ Backup: GPG-encrypted tarballs                      │
-│   ├─ Storage: Local filesystem only                      │
-│   └─ Managed: Separate from password managers            │
-│                                                           │
-│ Development Secrets → Pass + GPG + Git                   │
-│   │                                                       │
-│   ├─ GitHub/GitLab tokens                                │
-│   ├─ Composer auth.json                                  │
-│   ├─ API keys (Jira, Confluence, etc.)                   │
-│   ├─ Database credentials                                │
-│   ├─ SSH key passphrases                                 │
-│   └─ Any scriptable/automatable secrets                  │
-│                                                           │
-│ Personal Accounts → 1Password Personal (optional)        │
-│   │                                                       │
-│   ├─ Banking, shopping, subscriptions                    │
-│   ├─ Personal email accounts                             │
-│   ├─ Social media credentials                            │
-│   └─ General web logins                                  │
-│                                                           │
-│ Work Secrets → Company Bitwarden                         │
-│   │                                                       │
-│   ├─ Company-issued credentials                          │
-│   ├─ Shared team secrets                                 │
-│   ├─ Work service accounts                               │
-│   └─ Company-specific tokens                             │
-│                                                           │
-└───────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ BITWARDEN INTEGRATED ARCHITECTURE                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────────┐                                      │
+│  │ Desktop App      │  ← Biometric unlock (fingerprint)    │
+│  │ (Bitwarden.deb)  │  ← Master vault                      │
+│  └────────┬─────────┘  ← Polkit + fprintd integration     │
+│           │                                                 │
+│           ├──→ Native Messaging ──→ Browser Extension      │
+│           │                                                 │
+│           ├──→ SSH Agent Socket ──→ SSH Client             │
+│           │    (~/.bitwarden-ssh-agent.sock)               │
+│           │                                                 │
+│           └──→ Unlock Signal ────→ CLI (bw command)        │
+│                                                             │
+│  ┌──────────────────┐                                      │
+│  │ Enhanced CLI     │  ← Custom bash wrapper               │
+│  │ (bw function)    │  ← Session in tmpfs                  │
+│  └────────┬─────────┘  ← Shortcuts (u/l/g/c)              │
+│           │                                                 │
+│           ├──→ BW_SESSION ────→ /run/user/$UID/bw-session │
+│           ├──→ GITHUB_TOKEN ──→ /run/user/$UID/bw-github  │
+│           ├──→ GITLAB_TOKEN ──→ /run/user/$UID/bw-gitlab  │
+│           └──→ COMPOSER_AUTH ─→ /run/user/$UID/bw-compose │
+│                                                             │
+│  All tokens in tmpfs (RAM-only, cleared on logout)         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Benefits
+
+✅ **Single Unlock**: Fingerprint unlock for desktop app unlocks everything
+✅ **Browser Integration**: Native messaging for browser extension
+✅ **SSH Management**: Bitwarden SSH agent manages all SSH keys
+✅ **CLI Automation**: Enhanced `bw` command with session management
+✅ **Secure Storage**: Tokens in tmpfs (RAM-only, auto-cleared)
+✅ **Cross-Terminal**: Session shared across all terminal windows
+
+---
+
+## Components
+
+### 1. Bitwarden Desktop App
+
+**Package:** `bitwarden.deb` (from official website, NOT Flatpak/Snap)
+**Location:** Installed system-wide via dpkg
+**Unlock:** Fingerprint (fprintd + polkit integration)
+
+**Features:**
+- Master vault storage
+- Biometric unlock (fingerprint reader)
+- Native messaging for browser extension
+- SSH agent socket
+- Background process (remains unlocked)
+
+**Installation:**
+```bash
+# Download from https://bitwarden.com/download/
+wget https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb
+sudo dpkg -i Bitwarden-*.deb
+```
+
+### 2. Browser Extension
+
+**Browser:** Google Chrome (.deb package, NOT Flatpak)
+**Extension:** Bitwarden Browser Extension
+**Communication:** Native messaging → Desktop app
+
+**Why .deb Chrome?**
+- Flatpak Chrome blocks native messaging (sandboxing)
+- .deb version allows IPC with desktop app
+- Enables biometric unlock in browser
+
+**Setup:**
+1. Install Chrome .deb: `sudo dpkg -i google-chrome-stable_current_amd64.deb`
+2. Install Bitwarden extension from Chrome Web Store
+3. Enable "Unlock with biometrics" in extension settings
+4. Use fingerprint to unlock instead of master password
+
+### 3. Bitwarden CLI
+
+**Package:** `bitwarden-cli` (Homebrew)
+**Command:** `bw` (enhanced with custom wrapper)
+**Config:** `~/.bash/functions/bitwarden.bash`
+
+**Installation:**
+```bash
+brew install bitwarden-cli
+```
+
+**Enhanced Features** (via bash wrapper):
+- `bw unlock` or `bw u` - Unlock and save session to tmpfs
+- `bw lock` - Lock and clear all tokens
+- `bw get` or `bw g` - Get password from item
+- `bw copy` or `bw c` - Copy password to clipboard
+- Auto-loads tokens on unlock (GITHUB_TOKEN, etc.)
+
+### 4. Bitwarden SSH Agent
+
+**Socket:** `~/.bitwarden-ssh-agent.sock`
+**Config:** `~/.bash/exports/bitwarden.bash`
+
+**Features:**
+- Manages all SSH keys stored in Bitwarden vault
+- No need for ssh-agent or keychain
+- Keys decrypted on demand with biometric unlock
+- Integrated with SSH client via SSH_AUTH_SOCK
+
+**Configuration:**
+```bash
+# Automatically configured in exports/bitwarden.bash
+export SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
 ```
 
 ---
 
-## SSH Key Management
+## Biometric Unlock Setup
 
-### Current Best Practices (2025)
+### Prerequisites
 
-**Algorithm:** Ed25519 (modern, secure, fast)
-**Encryption:** AES-256 with strong passphrase
-**Rotation:** Every 2 years, embed year in filename
+1. **Fingerprint Reader**: Hardware fingerprint scanner
+2. **fprintd**: Fingerprint authentication daemon
+3. **Chrome .deb**: NOT Flatpak (blocks native messaging)
+4. **Bitwarden Desktop**: .deb package
 
-### Generating Keys
-
-```bash
-# Generate Ed25519 key with current year in name
-ssh-keygen -t ed25519 \
-  -C "sebastian@$(hostname)-$(date +%Y)" \
-  -f ~/.ssh/id_ed25519_github_2025
-
-# Repeat for each service/machine
-ssh-keygen -t ed25519 -C "sebastian@$(hostname)-2025" -f ~/.ssh/id_ed25519_gitlab_2025
-ssh-keygen -t ed25519 -C "sebastian@$(hostname)-2025" -f ~/.ssh/id_ed25519_work_2025
-```
-
-### SSH Directory Structure
-
-```
-~/.ssh/
-├── config                           # SSH client config (safe to version)
-├── id_ed25519_github_2025          # Private key (NEVER share)
-├── id_ed25519_github_2025.pub      # Public key (safe to share)
-├── id_ed25519_gitlab_2025          # Private key
-├── id_ed25519_gitlab_2025.pub      # Public key
-├── id_ed25519_work_2025            # Private key
-├── id_ed25519_work_2025.pub        # Public key
-└── authorized_keys                  # Incoming SSH (optional)
-```
-
-### SSH Config Example
-
-```ssh
-# ~/.ssh/config
-
-# GitHub Personal
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_github_2025
-    IdentitiesOnly yes
-
-# GitLab Personal
-Host gitlab.com
-    HostName gitlab.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_gitlab_2025
-    IdentitiesOnly yes
-
-# Work GitLab
-Host gitlab.company.com
-    HostName gitlab.company.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_work_2025
-    IdentitiesOnly yes
-
-# Default settings for all hosts
-Host *
-    AddKeysToAgent yes
-    UseKeychain yes
-    ServerAliveInterval 60
-    ServerAliveCountMax 3
-```
-
-### Key Management Best Practices
-
-✅ **DO:**
-- Use different key per service (GitHub, GitLab, work servers)
-- Use different key per machine (laptop, desktop, VM)
-- Rotate every 2 years (embed year in filename)
-- Use strong passphrase on each private key (16+ characters)
-- Use ssh-agent for convenience (automatically loads keys)
-- Keep GPG-encrypted backups
-- Store SSH config in dotfiles/stow
-
-❌ **DO NOT:**
-- Store private keys in password managers (Bitwarden, 1Password, etc.)
-- Store private keys in Git (even encrypted repos)
-- Use same key for personal and work
-- Use RSA keys (Ed25519 is superior)
-- Share private keys via email, Slack, cloud storage
-- Leave private keys unencrypted (no passphrase)
-
-### Backup Strategy
+### Step 1: Install fprintd
 
 ```bash
-# Create encrypted backup of entire .ssh directory
-tar -czf - ~/.ssh | gpg -c --cipher-algo AES256 > ~/backups/ssh_backup_$(date +%Y%m%d).tar.gz.gpg
-
-# Store backup on:
-# - External encrypted USB drive
-# - Personal encrypted cloud storage (NOT company cloud)
-# - Secure local backup system
+sudo apt update
+sudo apt install fprintd libpam-fprintd
 ```
 
-### Recovery Process
+### Step 2: Enroll Fingerprints
 
 ```bash
-# Decrypt and restore
-gpg -d ~/backups/ssh_backup_20251020.tar.gz.gpg | tar -xzf - -C ~/
+# Enroll your fingerprints
+fprintd-enroll
 
-# Set correct permissions
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_*
-chmod 644 ~/.ssh/*.pub
-chmod 644 ~/.ssh/config
+# Verify enrollment
+fprintd-list $USER
 ```
+
+### Step 3: Configure PAM for Polkit
+
+Polkit uses PAM for authentication. Add fingerprint support:
+
+```bash
+# Check current PAM config
+cat /etc/pam.d/polkit-1
+
+# Should include (automatically added by libpam-fprintd):
+# auth sufficient pam_fprintd.so
+# auth required pam_unix.so
+```
+
+### Step 4: Test Biometric Unlock
+
+1. Open Bitwarden desktop app
+2. Lock the vault
+3. Click unlock
+4. Touch fingerprint reader (instead of typing master password)
+5. Vault should unlock with fingerprint
+
+### Step 5: Configure Browser Extension
+
+1. Install Bitwarden extension in Chrome
+2. Go to Settings → Options
+3. Enable "Unlock with biometrics"
+4. Test: Lock extension, unlock with fingerprint
+
+### Troubleshooting Biometric Unlock
+
+**Desktop app doesn't show fingerprint option:**
+```bash
+# Verify fprintd is running
+systemctl status fprintd
+
+# Check enrolled fingerprints
+fprintd-list $USER
+
+# Test polkit with fingerprint
+pkexec echo "test"  # Should prompt for fingerprint
+```
+
+**Browser extension shows "biometrics unavailable":**
+- Check Chrome is .deb package (not Flatpak)
+- Verify native messaging: `ls ~/.config/google-chrome/NativeMessagingHosts/`
+- Restart Chrome completely
+- Check desktop app is running
 
 ---
 
-## Development Secrets (Pass + GPG)
+## CLI Integration
 
-### Why Pass?
+### Enhanced bw Command
 
-**Pass** (the Standard Unix Password Manager) is the recommended tool for development secrets:
+Custom bash wrapper in `~/.bash/functions/bitwarden.bash` enhances the official `bw` CLI.
 
-✅ **Advantages:**
-- **Simple & Transparent:** GPG-encrypted files in Git - you see exactly what's happening
-- **Local Control:** No cloud dependencies, you control everything
-- **Git Integration:** Built-in version control and sync
-- **Unix Philosophy:** Composable with shell scripts and tools
-- **Team-Ready:** Multi-GPG-key support for shared secrets
-- **Open Source:** Auditable, no vendor lock-in
-- **Free:** No subscription costs
-
-📊 **Comparison with Alternatives:**
-
-| Feature | Pass | Bitwarden CLI | 1Password CLI |
-|---------|------|---------------|---------------|
-| Biometric unlock | ❌ | ❌ (session tokens) | ✅ Touch ID |
-| Git integration | ✅ Built-in | ❌ | ❌ |
-| Team sharing | ✅ Multi-GPG | ✅ Enterprise | ✅ Enterprise |
-| Script-friendly | ✅ Simple | ⚠️ Complex | ✅ Good |
-| Speed | ✅ Fast | ❌ Slow (server calls) | ✅ Fast |
-| Cost | Free | $10/user/mo | $8/user/mo |
-| Open Source | ✅ | ✅ | ❌ |
-
-### Installation
+### File: `~/.bash/functions/bitwarden.bash` (relevant excerpt)
 
 ```bash
-# Install pass
-brew install pass
-
-# Install pass extensions (optional)
-brew install pass-otp  # For TOTP/2FA codes
-```
-
-### Setup
-
-```bash
-# 1. Create GPG key (if you don't have one)
-gpg --full-generate-key
-# Choose: (1) RSA and RSA, 4096 bits, no expiration
-# Use strong passphrase!
-
-# 2. Get your GPG key ID
-gpg --list-secret-keys --keyid-format=long
-# Look for: sec   rsa4096/YOUR_KEY_ID
-
-# 3. Initialize pass
-pass init YOUR_KEY_ID
-
-# 4. Enable Git integration
-pass git init
-
-# 5. Add remote (private Git repo - GitHub/GitLab)
-pass git remote add origin git@github.com:yourusername/password-store.git
-
-# 6. Initial push
-pass git push -u origin main
-```
-
-### Directory Structure
-
-```
-~/.password-store/
-├── .git/                        # Git repository
-├── .gpg-id                      # GPG key ID used for encryption
-│
-├── dev/
-│   ├── github/
-│   │   ├── personal-token.gpg
-│   │   └── work-token.gpg
-│   ├── gitlab/
-│   │   └── token.gpg
-│   ├── jira/
-│   │   └── api-key.gpg
-│   ├── confluence/
-│   │   └── api-token.gpg
-│   └── composer/
-│       └── auth.json.gpg
-│
-├── ssh/
-│   ├── github-passphrase.gpg
-│   ├── gitlab-passphrase.gpg
-│   └── work-passphrase.gpg
-│
-├── databases/
-│   ├── postgres-local.gpg
-│   └── mysql-dev.gpg
-│
-└── personal/
-    ├── email-accounts.gpg
-    └── backup-codes.gpg
+# Enhanced bw function that overrides official CLI
+bw() {
+    local cmd="${1:-list}"
+    case "$cmd" in
+        unlock|u)
+            # Unlock and save session to tmpfs
+            declare -g BW_SESSION=$(command bw unlock --raw)
+            if [[ -n "$BW_SESSION" ]]; then
+                export BW_SESSION
+                local BW_SESSION_FILE="/run/user/$(id -u)/bw-session"
+                echo "$BW_SESSION" > "$BW_SESSION_FILE"
+                chmod 600 "$BW_SESSION_FILE"
+                echo "✓ Bitwarden unlocked (session available until logout)"
+                load_bw_secrets  # Auto-load dev tokens
+            fi
+            ;;
+        lock)
+            command bw lock
+            unset BW_SESSION GITHUB_TOKEN GITLAB_TOKEN COMPOSER_AUTH
+            rm -f "/run/user/$(id -u)"/bw-*
+            echo "✓ Bitwarden locked (session and tokens cleared)"
+            ;;
+        get|g)
+            command bw get item "$2" 2>/dev/null | grep -o '"password":"[^"]*"' | cut -d'"' -f4
+            ;;
+        copy|c)
+            local password=$(bw get "$2")
+            echo -n "$password" | xclip -selection clipboard
+            echo "✓ Password copied to clipboard"
+            ;;
+        *)
+            command bw "$@"  # Pass-through to original CLI
+            ;;
+    esac
+}
 ```
 
 ### Usage Examples
 
 ```bash
-# Store a secret (interactive prompt)
-pass insert dev/github/token
+# Unlock vault (stores session in tmpfs, loads dev tokens)
+bw unlock
+# or shortcut:
+bw u
 
-# Store multiline secret (like auth.json)
-pass insert -m dev/composer/auth
-# Paste content, then Ctrl+D
+# Get password from item
+bw get "GitHub"
+# or shortcut:
+bw g "GitHub"
 
-# Retrieve secret
-pass show dev/github/token
+# Copy password to clipboard
+bw copy "GitHub"
+# or shortcut:
+bw c "GitHub"
 
-# Copy to clipboard (auto-clears after 45s)
-pass -c dev/github/token
+# Lock vault (clears session and all tokens)
+bw lock
 
-# Generate random password
-pass generate dev/newservice/password 32
-
-# Edit existing secret
-pass edit dev/github/token
-
-# Remove secret
-pass rm dev/oldservice/token
-
-# Search for secrets
-pass grep "github"
-
-# Show directory tree
-pass
-
-# Git operations
-pass git status
-pass git log
-pass git push
-pass git pull
+# Original CLI commands still work
+bw list items
+bw create item
+bw edit item <id>
 ```
 
-### Integration with Shell Scripts
+### Session Persistence
 
-#### In ~/.bash/tools or ~/.bash/functions
+**Session stored in:** `/run/user/$UID/bw-session`
+**Characteristics:**
+- tmpfs (RAM-only storage)
+- Automatically cleared on logout/reboot
+- Shared across all terminal windows
+- Secure (mode 600, only readable by you)
 
+**Auto-loading on new shells:**
 ```bash
-# Function to load secrets into environment
-load_dev_secrets() {
-    export GITHUB_TOKEN=$(pass show dev/github/token)
-    export GITLAB_TOKEN=$(pass show dev/gitlab/token)
-    export JIRA_API_KEY=$(pass show dev/jira/api-key)
-    export COMPOSER_AUTH=$(pass show dev/composer/auth)
-    echo "✓ Development secrets loaded"
-}
-
-# Function to unload secrets
-unload_dev_secrets() {
-    unset GITHUB_TOKEN
-    unset GITLAB_TOKEN
-    unset JIRA_API_KEY
-    unset COMPOSER_AUTH
-    echo "✓ Development secrets unloaded"
-}
-
-# Quick access aliases
-alias pass-github='pass -c dev/github/token'
-alias pass-gitlab='pass -c dev/gitlab/token'
-alias pass-composer='pass show dev/composer/auth'
-```
-
-#### Usage in Projects
-
-```bash
-# In your project scripts
-#!/bin/bash
-
-# Load GitHub token from pass
-GITHUB_TOKEN=$(pass show dev/github/token)
-
-# Use in API calls
-curl -H "Authorization: token $GITHUB_TOKEN" \
-  https://api.github.com/user/repos
-```
-
-#### Composer Integration
-
-```bash
-# Store Composer auth
-pass insert -m dev/composer/auth
-# Paste your auth.json content
-
-# Load for composer commands
-export COMPOSER_AUTH=$(pass show dev/composer/auth)
-composer install
-```
-
-### Team Sharing (Advanced)
-
-```bash
-# Initialize with multiple GPG keys for team
-pass init 0x1234ABCD 0x5678EFGH
-
-# Different folders can have different keys
-cd ~/.password-store/personal
-pass init 0x1234ABCD  # Only your key
-
-cd ~/.password-store/team
-pass init 0x1234ABCD 0x5678EFGH  # You + teammate
-```
-
-### Backup & Sync
-
-```bash
-# Push changes to remote
-pass git push
-
-# Pull changes from another machine
-pass git pull
-
-# Full backup (including GPG keys)
-gpg --export-secret-keys YOUR_KEY_ID > ~/backups/gpg-secret.key
-gpg --export YOUR_KEY_ID > ~/backups/gpg-public.key
-tar -czf ~/backups/password-store.tar.gz ~/.password-store/
-```
-
----
-
-## Company vs Personal Boundaries
-
-### Use Company Bitwarden For:
-
-✅ **Work-Related Only:**
-- Company-issued credentials (email, SSO, etc.)
-- Shared team secrets (deploy keys, service accounts)
-- Company service accounts (AWS, Azure, etc.)
-- Work-related API tokens that belong to company
-- Credentials for company-owned infrastructure
-
-### Use Personal Solution (Pass/1Password) For:
-
-✅ **Your Personal/Development:**
-- Personal GitHub/GitLab accounts and tokens
-- Personal project API keys
-- Development tool credentials
-- Personal email accounts
-- Side project secrets
-- SSH key passphrases for personal keys
-- Personal learning platform accounts
-
-### Gray Areas - Default to Personal:
-
-When in doubt, ask: "If I leave this company tomorrow, do I need this secret?"
-- If YES → Personal solution
-- If NO → Company Bitwarden
-
-**Examples:**
-- GitHub personal account token for side projects → **Personal**
-- GitHub token for company repos → **Company**
-- Personal domain registrar → **Personal**
-- Company domain registrar → **Company**
-
----
-
-## Implementation Guide
-
-### Phase 1: Set Up Pass (Week 1)
-
-```bash
-# 1. Install
-brew install pass
-
-# 2. Create/verify GPG key
-gpg --list-secret-keys
-
-# If no key exists:
-gpg --full-generate-key
-
-# 3. Initialize pass
-pass init $(gpg --list-secret-keys --keyid-format=long | grep sec | awk '{print $2}' | cut -d'/' -f2)
-
-# 4. Create directory structure
-pass insert -m dev/README << 'EOF'
-Development secrets directory
-Store API tokens, keys, and credentials here
-EOF
-
-# 5. Set up Git
-pass git init
-pass git remote add origin git@github.com:yourusername/password-store-private.git
-pass git push -u origin main
-```
-
-### Phase 2: Migrate Secrets (Week 1-2)
-
-```bash
-# Migrate from old machine or recreate
-pass insert dev/github/token          # GitHub personal access token
-pass insert dev/gitlab/token          # GitLab personal access token
-pass insert dev/jira/api-key         # Jira API key
-pass insert -m dev/composer/auth     # Composer auth.json
-
-# Store SSH passphrases (optional, but useful)
-pass insert ssh/github-passphrase
-pass insert ssh/gitlab-passphrase
-```
-
-### Phase 3: Generate SSH Keys (Week 2)
-
-```bash
-# GitHub
-ssh-keygen -t ed25519 -C "sebastian@$(hostname)-2025" -f ~/.ssh/id_ed25519_github_2025
-
-# GitLab
-ssh-keygen -t ed25519 -C "sebastian@$(hostname)-2025" -f ~/.ssh/id_ed25519_gitlab_2025
-
-# Work
-ssh-keygen -t ed25519 -C "sebastian@$(hostname)-2025" -f ~/.ssh/id_ed25519_work_2025
-
-# Add public keys to services
-cat ~/.ssh/id_ed25519_github_2025.pub  # Copy to GitHub settings
-cat ~/.ssh/id_ed25519_gitlab_2025.pub  # Copy to GitLab settings
-```
-
-### Phase 4: SSH Config Stow Package (Week 2)
-
-```bash
-# Create SSH stow package structure
-mkdir -p ~/dotfiles/ssh/.ssh
-
-# Create config file
-cat > ~/dotfiles/ssh/.ssh/config << 'EOF'
-# GitHub Personal
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_github_2025
-    IdentitiesOnly yes
-
-# GitLab Personal
-Host gitlab.com
-    HostName gitlab.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_gitlab_2025
-    IdentitiesOnly yes
-
-# Default settings
-Host *
-    AddKeysToAgent yes
-    ServerAliveInterval 60
-    ServerAliveCountMax 3
-EOF
-
-# Stow the SSH config (NOT the keys!)
-cd ~/dotfiles
-stow ssh
-
-# Verify
-ls -la ~/.ssh/config  # Should be symlink to dotfiles
-```
-
-### Phase 5: Shell Integration (Week 2)
-
-Add to `~/dotfiles/bash/.bash/tools`:
-
-```bash
-# Pass integration functions
-if command -v pass &> /dev/null; then
-    # Load development secrets
-    load_dev_secrets() {
-        export GITHUB_TOKEN=$(pass show dev/github/token 2>/dev/null)
-        export GITLAB_TOKEN=$(pass show dev/gitlab/token 2>/dev/null)
-        export JIRA_API_KEY=$(pass show dev/jira/api-key 2>/dev/null)
-        export COMPOSER_AUTH=$(pass show dev/composer/auth 2>/dev/null)
-        echo "✓ Development secrets loaded into environment"
-    }
-
-    # Unload secrets from environment
-    unload_dev_secrets() {
-        unset GITHUB_TOKEN GITLAB_TOKEN JIRA_API_KEY COMPOSER_AUTH
-        echo "✓ Development secrets cleared from environment"
-    }
-
-    # Quick clipboard access
-    alias pass-gh='pass -c dev/github/token'
-    alias pass-gl='pass -c dev/gitlab/token'
-    alias pass-jira='pass -c dev/jira/api-key'
-
-    # Show pass tree
-    alias pass-tree='pass'
+# In functions/bitwarden.bash
+if command -v bw &>/dev/null; then
+    _BW_RUNDIR="/run/user/${UID:-$(id -u)}"
+    [[ -f "$_BW_RUNDIR/bw-session" ]] && export BW_SESSION=$(command cat "$_BW_RUNDIR/bw-session")
 fi
 ```
 
-### Phase 6: Create Backup Scripts (Week 3)
+Result: Open new terminal → BW_SESSION automatically loaded → CLI works immediately
 
-Create `~/dotfiles/backup-secrets.sh`:
+---
+
+## SSH Key Management
+
+### Bitwarden SSH Agent
+
+**How it works:**
+1. Store SSH private keys in Bitwarden vault (as "SSH Key" item type)
+2. Bitwarden desktop app creates SSH agent socket
+3. SSH client uses Bitwarden as SSH agent
+4. Keys decrypted on-demand with biometric unlock
+
+### Setup
+
+**1. Enable SSH Agent in Bitwarden Desktop:**
+- Open Bitwarden desktop app
+- Settings → Options
+- Enable "Enable SSH Agent"
+- Note socket path: `~/.bitwarden-ssh-agent.sock`
+
+**2. Configure SSH Client:**
+
+File: `~/.bash/exports/bitwarden.bash`
+```bash
+# Configure SSH to use Bitwarden SSH agent
+if [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
+    export SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
+fi
+```
+
+**3. Add SSH Keys to Bitwarden:**
+- Item Type: "SSH Key"
+- Private Key: Paste your private key (including passphrase if any)
+- Bitwarden will manage decryption
+
+**4. Test:**
+```bash
+# List keys managed by Bitwarden SSH agent
+ssh-add -l
+
+# Use SSH normally
+ssh git@github.com
+# Bitwarden decrypts key on-demand with fingerprint
+```
+
+### Advantages
+
+✅ **No separate ssh-agent needed**
+✅ **Keys encrypted in Bitwarden vault**
+✅ **Biometric unlock for key access**
+✅ **Works across all applications**
+✅ **No keys on filesystem** (optional - can delete local copies)
+
+### SSH Key Best Practices
+
+**Key Generation:**
+```bash
+# Generate Ed25519 key
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+# Store in Bitwarden:
+# 1. Copy private key content: cat ~/.ssh/id_ed25519
+# 2. Create "SSH Key" item in Bitwarden
+# 3. Paste private key
+# 4. (Optional) Delete local copy after testing
+```
+
+**Multiple Keys:**
+- Store each key as separate "SSH Key" item in Bitwarden
+- Name them clearly: "GitHub SSH", "GitLab SSH", "Work Server SSH"
+- Bitwarden SSH agent automatically provides correct key
+
+---
+
+## Session Management
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────┐
+│ tmpfs (/run/user/$UID) - RAM-only storage           │
+├──────────────────────────────────────────────────────┤
+│  bw-session       ← Bitwarden CLI session token     │
+│  bw-github-token  ← GitHub personal access token    │
+│  bw-gitlab-token  ← GitLab access token             │
+│  bw-composer-token ← Composer auth.json             │
+└──────────────────────────────────────────────────────┘
+         ↓ Cleared automatically on logout/reboot
+```
+
+### Session Workflow
+
+1. **Unlock:** `bw unlock`
+   - Prompts for master password
+   - Generates session token
+   - Saves to `/run/user/$UID/bw-session` (mode 600)
+   - Calls `load_bw_secrets` to populate environment tokens
+   - Tokens saved to tmpfs
+
+2. **New Terminal:**
+   - Shell starts, loads `~/.bash/functions/bitwarden.bash`
+   - Checks for `/run/user/$UID/bw-session`
+   - Auto-loads BW_SESSION
+   - Auto-loads GITHUB_TOKEN, GITLAB_TOKEN, etc.
+   - CLI works immediately, no re-unlock needed
+
+3. **Lock:** `bw lock`
+   - Locks Bitwarden vault
+   - Unsets environment variables
+   - Deletes all `/run/user/$UID/bw-*` files
+   - Session and tokens cleared from memory
+
+4. **Logout/Reboot:**
+   - tmpfs automatically cleared
+   - All session data removed from RAM
+   - No traces left on disk
+
+### Security Properties
+
+✅ **RAM-only**: Never written to disk
+✅ **Auto-clear**: Removed on logout/reboot
+✅ **Secure permissions**: Mode 600 (only your user)
+✅ **Shared safely**: All your terminals, nobody else's
+✅ **No persistence**: Session doesn't survive reboot
+
+---
+
+## Token Loading
+
+### Auto-loading Development Tokens
+
+When you run `bw unlock`, the enhanced CLI automatically calls `load_bw_secrets` to populate development tokens.
+
+### Function: `load_bw_secrets` (in `~/.bash/functions/bitwarden.bash`)
 
 ```bash
-#!/bin/bash
-# Backup script for secrets
+load_bw_secrets() {
+    local quiet=false
+    if [[ "$1" == "--quiet" ]]; then
+        quiet=true
+    fi
 
-BACKUP_DIR="$HOME/backups/secrets"
-DATE=$(date +%Y%m%d_%H%M%S)
+    # Check if bw is available and unlocked
+    if ! command -v bw &>/dev/null; then
+        [[ "$quiet" == false ]] && echo "⚠ Bitwarden CLI not installed"
+        return 1
+    fi
 
-mkdir -p "$BACKUP_DIR"
+    # GitHub token (from custom field "token" in "Github" item)
+    local github_token=$(bw get item db6b3004-7194-4175-b4ff-b37f00ea56ad 2>/dev/null | jq -r '.fields[] | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
+    if [[ -n "$github_token" && "$github_token" != "null" ]]; then
+        export GITHUB_TOKEN="$github_token"
+        echo "$GITHUB_TOKEN" > "/run/user/$(id -u)/bw-github-token"
+        chmod 600 "/run/user/$(id -u)/bw-github-token"
+        [[ "$quiet" == false ]] && echo "✓ GITHUB_TOKEN loaded"
+    fi
 
-echo "Creating encrypted backups..."
+    # GitLab token (similar pattern)
+    # COMPOSER_AUTH (similar pattern)
 
-# Backup SSH directory (encrypted)
-echo "→ Backing up SSH keys..."
-tar -czf - ~/.ssh | gpg -c --cipher-algo AES256 > "$BACKUP_DIR/ssh_$DATE.tar.gz.gpg"
+    [[ "$quiet" == false ]] && echo "✓ Development secrets loaded"
+}
+```
 
-# Backup GPG keys
-echo "→ Backing up GPG keys..."
-gpg --export-secret-keys --armor > "$BACKUP_DIR/gpg_secret_$DATE.asc"
-gpg --export --armor > "$BACKUP_DIR/gpg_public_$DATE.asc"
+### Supported Tokens
 
-# Backup password store (already encrypted)
-echo "→ Backing up password store..."
-tar -czf "$BACKUP_DIR/password_store_$DATE.tar.gz" ~/.password-store/
+| Token | Env Variable | Bitwarden Item ID | Purpose |
+|-------|--------------|-------------------|---------|
+| GitHub | `GITHUB_TOKEN` | `db6b3004-7194-4175-b4ff-b37f00ea56ad` | GitHub API access |
+| GitLab | `GITLAB_TOKEN` | `8cff5d6b-ba18-484b-add5-b37f00f82acc` | GitLab API access |
+| Composer | `COMPOSER_AUTH` | Search by name "Composer" | PHP package auth |
 
-echo ""
-echo "✓ Backups created in $BACKUP_DIR"
-echo ""
-echo "IMPORTANT: Store these backups on:"
-echo "  - External encrypted USB drive"
-echo "  - Personal encrypted cloud storage"
-echo "  - Secure off-site location"
-echo ""
-echo "DO NOT store on company systems!"
+### Usage
+
+**Automatic (on unlock):**
+```bash
+bw unlock
+# Output:
+# ✓ Bitwarden unlocked (session available until logout)
+# ✓ GITHUB_TOKEN loaded
+# ✓ GITLAB_TOKEN loaded
+# ✓ COMPOSER_AUTH loaded
+# ✓ Development secrets loaded
+```
+
+**Manual (reload tokens):**
+```bash
+load_bw_secrets
+```
+
+**Silent mode:**
+```bash
+load_bw_secrets --quiet
+```
+
+### Adding New Tokens
+
+1. **Store in Bitwarden:**
+   - Create item in Bitwarden vault
+   - Add custom field named "token" or "Token"
+   - Get item ID: `bw list items | jq -r '.[] | select(.name=="YourItem") | .id'`
+
+2. **Add to `load_bw_secrets` function:**
+```bash
+# Your new token
+local your_token=$(bw get item ITEM_ID 2>/dev/null | jq -r '.fields[] | select(.name == "token") | .value' 2>/dev/null)
+if [[ -n "$your_token" && "$your_token" != "null" ]]; then
+    export YOUR_TOKEN="$your_token"
+    echo "$YOUR_TOKEN" > "/run/user/$(id -u)/bw-your-token"
+    chmod 600 "/run/user/$(id -u)/bw-your-token"
+    [[ "$quiet" == false ]] && echo "✓ YOUR_TOKEN loaded"
+fi
+```
+
+3. **Add to unlock and unload:**
+```bash
+# In bw() function, lock case:
+unset BW_SESSION GITHUB_TOKEN GITLAB_TOKEN COMPOSER_AUTH YOUR_TOKEN
 ```
 
 ---
 
-## Backup & Recovery
+## GitHub CLI (gh) Configuration
 
-### What to Backup
+### Current Setup
 
-1. **SSH Keys** (encrypted)
-2. **GPG Keys** (public and private)
-3. **Password Store** (~/.password-store/)
-4. **SSH Config** (already in dotfiles/stow)
+The GitHub CLI is configured to use **SSH protocol** for all Git operations.
 
-### Backup Schedule
+**Configuration file:** `~/.config/gh/config.yml`
 
-- **Monthly:** Full backup to external drive
-- **After key generation:** Immediate backup
-- **Before key rotation:** Backup old keys before deletion
-
-### Backup Storage Locations
-
-✅ **Safe:**
-- Encrypted external USB drive (stored off-site)
-- Personal encrypted cloud storage (Mega, Tresorit, etc.)
-- Personal NAS with encryption
-- Secure personal backup service
-
-❌ **Unsafe:**
-- Company cloud storage (Dropbox, OneDrive, etc.)
-- Unencrypted USB drives
-- Company-managed systems
-- Email attachments
-
-### Recovery Procedure
-
-#### Scenario 1: New Machine Setup
-
-```bash
-# 1. Install essentials
-sudo apt update && sudo apt install gnupg pass git
-
-# 2. Restore GPG keys
-gpg --import ~/backups/gpg_public_20251020.asc
-gpg --import ~/backups/gpg_secret_20251020.asc
-
-# 3. Trust your key
-gpg --edit-key YOUR_KEY_ID
-# Type: trust, then 5 (ultimate), then quit
-
-# 4. Clone password store
-git clone git@github.com:yourusername/password-store-private.git ~/.password-store
-
-# 5. Restore SSH keys (if needed)
-gpg -d ~/backups/ssh_20251020.tar.gz.gpg | tar -xzf - -C ~/
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_*
+```yaml
+git_protocol: ssh  # Uses SSH for git operations (not HTTPS)
 ```
 
-#### Scenario 2: Key Compromise
+### Why SSH Protocol?
+
+- **No token needed for git operations** - SSH keys handled by Bitwarden SSH Agent
+- **More secure** than HTTPS with token authentication
+- **Consistent** with SSH-based workflows
+- **Best practice** recommended by GitHub
+
+### Authentication Methods
+
+| Operation | Authentication Method | Token/Key Used |
+|-----------|----------------------|----------------|
+| Git clone/push/pull | SSH | Bitwarden SSH Agent (SER_SSH ED25519 key) |
+| API calls (`gh pr`, `gh issue`, etc.) | HTTPS + OAuth/Token | GITHUB_TOKEN (from Bitwarden) |
+
+### Using gh CLI
 
 ```bash
-# 1. Generate new keys immediately
-ssh-keygen -t ed25519 -C "sebastian@$(hostname)-2025" -f ~/.ssh/id_ed25519_github_2025_NEW
+# Git operations use SSH automatically
+gh repo clone username/repo
+# Internally uses: git clone git@github.com:username/repo.git
 
-# 2. Update services (GitHub, GitLab, etc.)
-# Add new public key, remove old key
+# API operations use GITHUB_TOKEN
+gh pr list
+gh issue create
+gh api user
 
-# 3. Revoke old GPG key (if compromised)
-gpg --gen-revoke YOUR_OLD_KEY_ID > revocation_cert.asc
-gpg --import revocation_cert.asc
-gpg --send-keys YOUR_OLD_KEY_ID
-
-# 4. Create new GPG key and re-encrypt password store
-pass init NEW_GPG_KEY_ID
+# Check authentication status
+gh auth status
+# Output:
+#   ✓ Logged in to github.com account Sebastian80 (GITHUB_TOKEN)
+#   - Git operations protocol: ssh
 ```
 
----
+### Configuration Commands
 
-## References & Resources
-
-### Official Documentation
-- **Pass:** https://www.passwordstore.org/
-- **SSH Best Practices:** https://www.brandonchecketts.com/archives/ssh-ed25519-key-best-practices-for-2025
-- **GPG Documentation:** https://gnupg.org/documentation/
-
-### Tools
-- **pass** - Unix password manager
-- **pass-otp** - TOTP/2FA extension for pass
-- **qtpass** - GUI for pass (optional)
-- **browserpass** - Browser extension for pass
-- **Android Password Store** - Mobile app for pass
-
-### Key Algorithms (2025)
-- **SSH:** Ed25519 (modern, secure, fast)
-- **GPG:** RSA 4096 or Ed25519
-- **Avoid:** DSA, RSA < 2048, ECDSA (government concerns)
-
-### Security Principles
-1. **Defense in Depth:** Multiple layers of security
-2. **Least Privilege:** Minimal necessary access
-3. **Zero Trust:** Verify everything, trust nothing
-4. **Key Rotation:** Regular key updates (2-year cycle)
-5. **Separation of Concerns:** Personal vs work secrets
-
-### Key Rotation Schedule
-| Key Type | Rotation Interval | Next Rotation |
-|----------|------------------|---------------|
-| SSH Keys | 2 years | 2027 |
-| GPG Keys | 3-5 years | 2028-2030 |
-| API Tokens | 6-12 months | As needed |
-| Passwords | 3-6 months | As needed |
-
----
-
-## Quick Reference Commands
-
-### Pass Commands
 ```bash
-pass                          # Show all passwords
-pass show dev/github/token    # Display secret
-pass -c dev/github/token      # Copy to clipboard
-pass insert dev/new/secret    # Add new secret
-pass generate service/pw 32   # Generate password
-pass edit dev/github/token    # Edit secret
-pass rm dev/old/secret        # Remove secret
-pass git push                 # Sync to remote
-pass git pull                 # Sync from remote
-pass grep "github"            # Search secrets
+# View current protocol
+gh config get git_protocol
+# Output: ssh
+
+# Change to SSH (already set in dotfiles)
+gh config set git_protocol ssh
+
+# Change to HTTPS (not recommended)
+gh config set git_protocol https
 ```
 
-### SSH Commands
+### How GITHUB_TOKEN is Used
+
+The `GITHUB_TOKEN` environment variable is used for:
+1. **gh CLI API operations** - All `gh` commands that call GitHub API
+2. **Composer** - Accessing private GitHub packages
+3. **CI/CD** - Can be passed to GitHub Actions
+
+**Not used for:**
+- Git clone/push operations (uses SSH keys instead)
+
+### Troubleshooting
+
+**Problem:** gh says "Not logged in"
+
 ```bash
-ssh-keygen -t ed25519 -C "comment" -f ~/.ssh/keyname
-ssh-add ~/.ssh/keyname        # Add key to agent
-ssh-add -l                    # List loaded keys
-ssh-copy-id -i key.pub user@host
+# Check if GITHUB_TOKEN is loaded
+echo $GITHUB_TOKEN
+
+# If empty, unlock Bitwarden
+bw unlock
+
+# Verify authentication
+gh auth status
 ```
 
-### GPG Commands
+**Problem:** gh uses HTTPS instead of SSH for cloning
+
 ```bash
-gpg --list-keys               # List public keys
-gpg --list-secret-keys        # List private keys
-gpg --export -a KEY_ID        # Export public key
-gpg --export-secret-key -a    # Export private key
-gpg --import keyfile          # Import key
-gpg -c file                   # Encrypt file
-gpg -d file.gpg               # Decrypt file
+# Check protocol
+gh config get git_protocol
+
+# Set to SSH
+gh config set git_protocol ssh
+```
+
+**Problem:** SSH key authentication fails
+
+```bash
+# Check SSH agent
+echo $SSH_AUTH_SOCK
+# Should show: /home/sebastian/.bitwarden-ssh-agent.sock
+
+# List loaded keys
+ssh-add -l
+# Should show SER_SSH key
+
+# Test GitHub SSH
+ssh -T git@github.com
+# Should show: Hi Sebastian80! You've successfully authenticated
 ```
 
 ---
 
-## Action Items
+## GitLab CLI (glab) Configuration
 
-- [ ] Install pass and create GPG key
-- [ ] Initialize password store with Git
-- [ ] Migrate development secrets to pass
-- [ ] Generate Ed25519 SSH keys for each service
-- [ ] Create SSH config in dotfiles/stow
-- [ ] Add shell integration functions
-- [ ] Create backup script
-- [ ] Perform initial encrypted backup
-- [ ] Store backup in secure location
-- [ ] Document recovery process
-- [ ] Test recovery on test VM/container
-- [ ] Set calendar reminder for key rotation (2027)
+### Current Setup
+
+The GitLab CLI is configured for **self-hosted GitLab** instance at **git.netresearch.de**.
+
+**Configuration file:** `~/.config/glab-cli/config.yml`
+
+```yaml
+git_protocol: ssh  # Uses SSH for git operations
+host: git.netresearch.de  # Self-hosted GitLab instance
+
+hosts:
+    git.netresearch.de:
+        api_protocol: https
+        api_host: git.netresearch.de
+        token:  # Uses GITLAB_TOKEN environment variable
+```
+
+### Self-Hosted GitLab Setup
+
+Your configuration uses a **self-hosted GitLab** instance, not gitlab.com:
+
+- **GitLab URL:** https://git.netresearch.de
+- **SSH URL:** git@git.netresearch.de:group/project.git
+- **API Endpoint:** https://git.netresearch.de/api/v4/
+
+### Authentication Methods
+
+| Operation | Authentication Method | Token/Key Used |
+|-----------|----------------------|----------------|
+| Git clone/push/pull | SSH | Bitwarden SSH Agent |
+| API calls (`glab mr`, `glab issue`, etc.) | HTTPS + Token | GITLAB_TOKEN (from Bitwarden) |
+
+### How It Works
+
+1. **Git Operations:** Use SSH protocol
+   - SSH key managed by Bitwarden SSH Agent
+   - Format: `git@git.netresearch.de:group/project.git`
+
+2. **API Operations:** Use GITLAB_TOKEN environment variable
+   - Auto-loaded from Bitwarden when running `bw unlock`
+   - Stored in tmpfs: `/run/user/$UID/bw-gitlab-token`
+   - Bitwarden item ID: `8cff5d6b-ba18-484b-add5-b37f00f82acc`
+
+3. **GITLAB_HOST:** Automatically set when GITLAB_TOKEN is loaded
+   - `export GITLAB_HOST="git.netresearch.de"`
+   - Tells other tools (like Composer) to use self-hosted instance
+
+### Using glab CLI
+
+```bash
+# Ensure Bitwarden is unlocked (loads GITLAB_TOKEN)
+bw unlock
+
+# Verify token and host are set
+echo $GITLAB_TOKEN
+echo $GITLAB_HOST
+# Should show: git.netresearch.de
+
+# Use glab normally
+glab mr list
+glab issue create
+glab repo clone group/project
+glab api user
+
+# Check authentication status
+glab auth status
+# Output:
+#   ✓ Logged in to git.netresearch.de as sebastian.ertner (GITLAB_TOKEN)
+#   ✓ Git operations for git.netresearch.de configured to use ssh protocol
+```
+
+### Configuration Commands
+
+```bash
+# View current host
+glab config get host
+# Output: git.netresearch.de
+
+# View git protocol
+cat ~/.config/glab-cli/config.yml | grep git_protocol
+# Output: git_protocol: ssh
+
+# Set host (already configured in dotfiles)
+glab config set --global host git.netresearch.de
+```
+
+### How GITLAB_TOKEN is Used
+
+The `GITLAB_TOKEN` environment variable is used for:
+1. **glab CLI API operations** - All `glab` commands that call GitLab API
+2. **Composer** - Accessing private GitLab packages from git.netresearch.de
+3. **CI/CD** - Can be passed to GitLab CI pipelines
+
+**Not used for:**
+- Git clone/push operations (uses SSH keys instead)
+
+### GitLab.com vs Self-Hosted
+
+Your setup is configured for **self-hosted GitLab**:
+
+| Aspect | GitLab.com (public) | git.netresearch.de (self-hosted) |
+|--------|---------------------|----------------------------------|
+| Host | gitlab.com | git.netresearch.de |
+| SSH URL | git@gitlab.com:user/repo.git | git@git.netresearch.de:group/project.git |
+| API Endpoint | https://gitlab.com/api/v4/ | https://git.netresearch.de/api/v4/ |
+| Token Domain | gitlab.com | git.netresearch.de |
+| COMPOSER_AUTH | `"gitlab-token":{"gitlab.com":"token"}` | `"gitlab-token":{"git.netresearch.de":"token"}` |
+
+**Your dotfiles automatically configure this** via:
+- `GITLAB_HOST` environment variable
+- glab config file pointing to git.netresearch.de
+- COMPOSER_AUTH using git.netresearch.de (not gitlab.com)
+
+### Troubleshooting
+
+**Problem:** glab says "No GitLab token found"
+
+```bash
+# Check if GITLAB_TOKEN is loaded
+echo $GITLAB_TOKEN
+
+# If empty, unlock Bitwarden
+bw unlock
+
+# Manually load if needed
+load_bw_secrets
+
+# Verify
+glab auth status
+```
+
+**Problem:** glab connects to gitlab.com instead of git.netresearch.de
+
+```bash
+# Check GITLAB_HOST
+echo $GITLAB_HOST
+# Should show: git.netresearch.de
+
+# Check glab config
+cat ~/.config/glab-cli/config.yml | grep host
+# Should show: host: git.netresearch.de
+
+# Fix if wrong
+glab config set --global host git.netresearch.de
+```
+
+**Problem:** 401 Unauthorized
+
+```bash
+# Check token validity at https://git.netresearch.de/-/user_settings/personal_access_tokens
+# Ensure token has these scopes:
+# - api (for glab CLI)
+# - read_repository
+# - write_repository
+
+# Regenerate token if expired, update in Bitwarden
+# Then reload:
+bw lock && bw unlock
+```
+
+**Problem:** SSH authentication fails
+
+```bash
+# Check SSH agent
+echo $SSH_AUTH_SOCK
+
+# Test GitLab SSH
+ssh -T git@git.netresearch.de
+# Should show: Welcome to GitLab, @sebastian.ertner!
+```
 
 ---
 
-**Document Version:** 1.0
+## Composer Authentication
+
+### How COMPOSER_AUTH Works
+
+Composer reads the `COMPOSER_AUTH` environment variable to authenticate with package repositories.
+
+**Format:**
+```json
+{
+  "github-oauth": {
+    "github.com": "ghp_..."
+  },
+  "gitlab-token": {
+    "git.netresearch.de": "glpat-..."
+  }
+}
+```
+
+**Note:** This configuration uses **git.netresearch.de** (self-hosted GitLab), not gitlab.com.
+
+### Generated by Bitwarden
+
+The `COMPOSER_AUTH` is **automatically generated** from GitHub and GitLab tokens when you run `bw unlock`:
+
+**Source:** `~/dotfiles/bash/.bash/functions/bitwarden.bash` (lines 126-151)
+
+```bash
+# Build COMPOSER_AUTH JSON from tokens
+composer_auth='{'
+# Add GitHub OAuth
+composer_auth+='"github-oauth":{"github.com":"'$github_token'"}'
+# Add GitLab token for self-hosted instance
+composer_auth+=',"gitlab-token":{"git.netresearch.de":"'$gitlab_token'"}'
+composer_auth+='}'
+
+export COMPOSER_AUTH="$composer_auth"
+```
+
+### Using Composer
+
+```bash
+# Ensure Bitwarden is unlocked (loads COMPOSER_AUTH)
+bw unlock
+
+# Verify COMPOSER_AUTH is set
+echo $COMPOSER_AUTH | jq
+
+# Use Composer normally - authentication is automatic
+composer install
+composer require vendor/package
+
+# Composer will authenticate to:
+# - github.com for public/private GitHub packages
+# - git.netresearch.de for private GitLab packages
+```
+
+### Testing Composer Authentication
+
+```bash
+# Check GitHub OAuth access
+composer diagnose | grep github
+# Expected: github.com oauth access: OK
+
+# Test installing from private repo
+composer require your-org/private-package
+
+# Composer will use:
+# - github-oauth for GitHub packages
+# - gitlab-token for GitLab packages at git.netresearch.de
+```
+
+### Environment Variable vs auth.json
+
+Composer supports two authentication methods:
+
+1. **`COMPOSER_AUTH` environment variable** (used by these dotfiles)
+   - ✅ Works in all contexts (interactive shells, scripts, CI/CD, Docker)
+   - ✅ No file to manage
+   - ✅ Auto-loaded from Bitwarden
+   - ✅ Stored in tmpfs (RAM-only, auto-cleared)
+
+2. **`~/.composer/auth.json` file** (not used)
+   - ❌ Token stored on disk
+   - ❌ Manual management required
+   - ❌ Doesn't work in Docker containers without volume mount
+
+**The environment variable takes precedence**, so even if you have an `auth.json` file, `COMPOSER_AUTH` will be used.
+
+### Composer + Self-Hosted GitLab
+
+For self-hosted GitLab instances, you must specify the domain in `gitlab-token`:
+
+```json
+{
+  "gitlab-token": {
+    "git.netresearch.de": "glpat-..."
+  }
+}
+```
+
+**Not:**
+```json
+{
+  "gitlab-token": {
+    "gitlab.com": "glpat-..."
+  }
+}
+```
+
+This is **automatically handled** by the dotfiles when `GITLAB_HOST` is set.
+
+### Troubleshooting
+
+**Problem:** Composer can't authenticate to GitLab packages
+
+```bash
+# Check COMPOSER_AUTH contains git.netresearch.de
+echo $COMPOSER_AUTH | jq -r '.["gitlab-token"]'
+# Should show: {"git.netresearch.de": "glpat-..."}
+
+# If wrong, reload secrets
+bw lock && bw unlock
+```
+
+**Problem:** Composer can't find packages from git.netresearch.de
+
+```bash
+# Ensure repository is added to composer.json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://git.netresearch.de/group/project.git"
+    }
+  ]
+}
+
+# Or add globally
+composer config --global repositories.netresearch vcs https://git.netresearch.de/group/project.git
+```
+
+---
+
+## Best Practices
+
+### Security
+
+✅ **Use biometric unlock**: Faster and more secure than typing password
+✅ **Lock when leaving**: Run `bw lock` before stepping away
+✅ **Check session status**: `bw status` shows if vault is locked
+✅ **Review token access**: Periodically check what tokens are loaded
+✅ **Rotate tokens**: Regenerate API tokens every 6-12 months
+
+### Workflow
+
+**Daily routine:**
+```bash
+# Morning: Unlock once
+bw unlock
+# All terminals now have access
+
+# Evening: Lock before shutdown
+bw lock
+```
+
+**Project work:**
+```bash
+# Check if unlocked
+bw status
+
+# If locked, unlock
+bw unlock
+
+# Use tokens automatically
+git push  # Uses GITHUB_TOKEN if configured
+composer install  # Uses COMPOSER_AUTH
+```
+
+### Organization
+
+**Bitwarden Vault Structure:**
+```
+Bitwarden Vault
+├── 🔐 Login Items
+│   ├── GitHub (with custom field "token")
+│   ├── GitLab (with custom field "token")
+│   └── Composer (with custom field "token")
+│
+├── 🔑 SSH Keys
+│   ├── GitHub SSH (Ed25519 private key)
+│   ├── GitLab SSH (Ed25519 private key)
+│   └── Work Server SSH (Ed25519 private key)
+│
+└── 🏢 Folders
+    ├── Personal (personal accounts)
+    ├── Development (API tokens, dev creds)
+    └── Work (company accounts - if using personal Bitwarden)
+```
+
+### Backup
+
+**What to backup:**
+- Bitwarden vault (automatically synced to cloud)
+- Emergency Kit (recovery codes, printed)
+- Master password (memorized + written in safe)
+
+**Emergency recovery:**
+1. Download Bitwarden app on new machine
+2. Login with email + master password
+3. Vault syncs automatically
+4. Re-enable biometric unlock (re-enroll fingerprints)
+5. Run `bw unlock` in terminal
+
+---
+
+## Troubleshooting
+
+### Bitwarden CLI Issues
+
+**Problem:** `bw unlock` shows "Session already unlocked"
+```bash
+# Force re-unlock
+bw lock
+bw unlock
+```
+
+**Problem:** Session not persisting across terminals
+```bash
+# Check if session file exists
+ls -la /run/user/$(id -u)/bw-session
+
+# Check if auto-load is enabled
+grep "BW_SESSION" ~/.bash/functions/bitwarden.bash
+
+# Reload bash config
+source ~/.bashrc
+```
+
+**Problem:** Tokens not loading
+```bash
+# Check if load_bw_secrets is defined
+type load_bw_secrets
+
+# Manually load tokens
+load_bw_secrets
+
+# Check token files
+ls -la /run/user/$(id -u)/bw-*
+```
+
+### SSH Agent Issues
+
+**Problem:** SSH keys not working
+```bash
+# Check if SSH agent socket exists
+ls -la ~/.bitwarden-ssh-agent.sock
+
+# Check SSH_AUTH_SOCK
+echo $SSH_AUTH_SOCK
+
+# List keys from Bitwarden SSH agent
+ssh-add -l
+
+# Restart Bitwarden desktop app
+# Settings → Enable SSH Agent (toggle off/on)
+```
+
+**Problem:** Wrong key being used
+```bash
+# Check SSH config
+cat ~/.ssh/config
+
+# Use IdentitiesOnly to force specific key
+# Host github.com
+#     IdentitiesOnly yes
+#     IdentityFile ~/.ssh/id_ed25519_github
+```
+
+### Biometric Unlock Issues
+
+**Problem:** Fingerprint not working in desktop app
+```bash
+# Check fprintd status
+systemctl status fprintd
+
+# List enrolled fingerprints
+fprintd-list $USER
+
+# Re-enroll if needed
+fprintd-enroll
+```
+
+**Problem:** Browser extension can't use biometrics
+- Verify Chrome is .deb (not Flatpak): `which google-chrome`
+- Check native messaging: `ls ~/.config/google-chrome/NativeMessagingHosts/`
+- Restart Chrome completely
+- Check desktop app is running and unlocked
+
+---
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# Unlock vault (stores session, loads tokens)
+bw unlock          # Full
+bw u               # Shortcut
+
+# Lock vault (clears session and tokens)
+bw lock
+
+# Check status
+bw status
+
+# Get password
+bw get "GitHub"    # Full
+bw g "GitHub"      # Shortcut
+
+# Copy to clipboard
+bw copy "GitHub"   # Full
+bw c "GitHub"      # Shortcut
+
+# List items
+bw list items
+
+# Search items
+bw list items --search github
+
+# Reload tokens manually
+load_bw_secrets
+```
+
+### File Locations
+
+| File | Purpose |
+|------|---------|
+| `~/.bash/functions/bitwarden.bash` | Enhanced CLI wrapper |
+| `~/.bash/exports/bitwarden.bash` | SSH agent config |
+| `~/.bash/completions/bitwarden.bash` | Tab completion |
+| `/run/user/$UID/bw-session` | Session token (tmpfs) |
+| `/run/user/$UID/bw-*` | Development tokens (tmpfs) |
+| `~/.bitwarden-ssh-agent.sock` | SSH agent socket |
+
+---
+
+**Document Version:** 2.0
 **Author:** Sebastian
-**Last Review:** 2025-10-20
-**Next Review:** 2026-01-01
+**Last Updated:** 2025-10-24
+**System:** Ubuntu 24.04 with Bitwarden integrated setup
