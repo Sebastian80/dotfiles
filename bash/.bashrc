@@ -18,15 +18,16 @@ esac
 # ============================================
 
 # Load shell dotfiles in a specific order:
-# 1. path          - PATH modifications (loaded first so tools are available)
-# 2. exports/*     - Environment variables (modular)
-# 3. prompt        - Prompt configuration (oh-my-posh)
-# 4. aliases       - Command aliases
-# 5. functions/*   - Bash functions (modular)
-# 6. integrations/* - Terminal enhancement tool integrations (modular)
-# 7. keybindings   - Custom keybindings
-# 8. completion.old + completions/* - Bash completion (modular)
-# 9. local         - Machine-specific settings (git-ignored)
+# 1. path            - PATH modifications (loaded first so tools are available)
+# 2. exports/*       - Environment variables (modular)
+# 3. prompt          - Prompt configuration (oh-my-posh)
+# 4. aliases         - Command aliases
+# 5. functions/*     - Bash functions (modular)
+# 6. bash-completion - Framework (loaded before integrations for proper support)
+# 7. completions/*   - Custom completion scripts (modular)
+# 8. integrations/*  - Terminal enhancement tool integrations (modular)
+# 9. keybindings     - Custom keybindings
+# 10. local          - Machine-specific settings (git-ignored)
 
 # Load PATH first
 [ -r ~/.bash/path.bash ] && [ -f ~/.bash/path.bash ] && source ~/.bash/path.bash
@@ -47,26 +48,32 @@ for file in ~/.bash/functions/*.bash; do
     [ -r "$file" ] && source "$file"
 done
 
+# Load bash-completion framework via Homebrew's official loader
+# This properly sets BASH_COMPLETION_COMPAT_DIR and enables lazy loading
+# Loaded before integrations so tools can utilize bash-completion utilities
+# Requires bash-completion@2 formula: brew install bash-completion@2
+if type brew &>/dev/null; then
+    HOMEBREW_PREFIX="$(brew --prefix)"
+    if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+        source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
+    fi
+fi
+
+# Load custom completion scripts (modular)
+# These can now use bash-completion framework utilities like _init_completion
+[ -r ~/.bash/completion.old ] && [ -f ~/.bash/completion.old ] && source ~/.bash/completion.old
+for file in ~/.bash/completions/*.bash; do
+    [ -r "$file" ] && source "$file"
+done
+
 # Load all integration modules (alphabetical order)
+# Integrations like zoxide and fzf can now utilize bash-completion if needed
 for file in ~/.bash/integrations/*.bash; do
     [ -r "$file" ] && source "$file"
 done
 
 # Load keybindings
 [ -r ~/.bash/keybindings.bash ] && [ -f ~/.bash/keybindings.bash ] && source ~/.bash/keybindings.bash
-
-# Load bash-completion framework (provides _get_comp_words_by_ref and other completion utilities)
-# Requires progcomp and extglob shell options
-if [ -f /home/linuxbrew/.linuxbrew/share/bash-completion/bash_completion ]; then
-    shopt -s progcomp extglob
-    source /home/linuxbrew/.linuxbrew/share/bash-completion/bash_completion
-fi
-
-# Load completion (legacy + new modular)
-[ -r ~/.bash/completion.old ] && [ -f ~/.bash/completion.old ] && source ~/.bash/completion.old
-for file in ~/.bash/completions/*.bash; do
-    [ -r "$file" ] && source "$file"
-done
 
 # Load machine-specific config last
 [ -r ~/.bash/local.bash ] && [ -f ~/.bash/local.bash ] && source ~/.bash/local.bash
