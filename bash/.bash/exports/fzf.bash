@@ -38,17 +38,17 @@ fi
 # -L flag follows symlinks (important for stow-managed dotfiles)
 # Checks for charset=binary to exclude true binaries while allowing JSON, XML, YAML, etc.
 if command -v bat &>/dev/null && command -v eza &>/dev/null; then
-    export FZF_CTRL_T_OPTS="--walker-skip .git,node_modules,target,.venv,__pycache__ --preview 'if [ -d {} ]; then eza --tree --color=always --icons {} | head -200; elif file -bL --mime {} | grep -qv \"charset=binary\"; then bat -n --color=always --line-range :500 {}; else echo \"[Binary file - no preview]\"; fi' --bind 'ctrl-/:change-preview-window(down|hidden|)' --header 'Press CTRL-/ to toggle preview'"
+    export FZF_CTRL_T_OPTS="--walker-skip .git,node_modules,target,.venv,__pycache__ --preview 'if [ -d {} ]; then eza --tree --color=always --icons {} | head -200; elif file -bL --mime {} | grep -qv \"charset=binary\"; then bat -n --color=always --line-range :500 {}; else echo \"[Binary file - no preview]\"; fi' --bind 'ctrl-/:change-preview-window(down|hidden|)' --header '📁 Ctrl+T: File/Directory Finder | CTRL-/ to toggle preview'"
 elif command -v bat &>/dev/null; then
-    export FZF_CTRL_T_OPTS="--walker-skip .git,node_modules,target,.venv,__pycache__ --preview 'if file -bL --mime {} | grep -qv \"charset=binary\"; then bat -n --color=always --line-range :500 {}; else echo \"[Binary file - no preview]\"; fi' --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+    export FZF_CTRL_T_OPTS="--walker-skip .git,node_modules,target,.venv,__pycache__ --preview 'if file -bL --mime {} | grep -qv \"charset=binary\"; then bat -n --color=always --line-range :500 {}; else echo \"[Binary file - no preview]\"; fi' --bind 'ctrl-/:change-preview-window(down|hidden|)' --header '📁 Ctrl+T: File/Directory Finder | CTRL-/ to toggle preview'"
 fi
 
 # Ctrl+R: History Search
 # Simple echo preview for command history (no bat errors!)
-export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview' --exact --header 'Press ? to toggle command preview'"
+export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind 'ctrl-/:toggle-preview' --exact --header '📜 Ctrl+R: Command History | CTRL-/ to toggle preview'"
 
 # Alt+C: Directory Navigator
 # Show directory tree with eza
 if command -v eza &>/dev/null; then
-    export FZF_ALT_C_OPTS="--walker-skip .git,node_modules,target --preview 'eza --tree --color=always --icons {} | head -200'"
+    export FZF_ALT_C_OPTS="--walker-skip .git,node_modules,target --preview 'eza --tree --color=always --icons {} | head -200' --bind 'ctrl-/:change-preview-window(down|hidden|)' --header '🗂️  Alt+C: Directory Navigator | CTRL-/ to toggle preview'"
 fi
