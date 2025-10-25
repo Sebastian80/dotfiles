@@ -1,0 +1,39 @@
+# Ripgrep configuration file
+# Path set via RIPGREP_CONFIG_PATH in ~/.bash/exports
+
+# Search hidden files by default
+--hidden
+
+# Follow symbolic links
+--follow
+
+# Exclude directories
+--glob=!.git/*
+--glob=!node_modules/*
+--glob=!.venv/*
+--glob=!__pycache__/*
+--glob=!*.pyc
+--glob=!.cache/*
+--glob=!.local/share/*
+--glob=!.mozilla/*
+--glob=!.npm/*
+--glob=!target/*
+
+# Smart case search (case insensitive unless uppercase present)
+--smart-case
+
+# Show line numbers
+--line-number
+
+# Colors (similar to grep --color=auto)
+--colors=match:fg:red
+--colors=match:style:bold
+--colors=line:fg:green
+--colors=path:fg:cyan
+--colors=path:style:bold
+
+# Max columns (truncate long lines)
+--max-columns=200
+
+# Use PCRE2 regex engine for advanced features
+# --pcre2

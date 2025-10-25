@@ -4,10 +4,10 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 
 ## Features
 
-- **Modular Bash Configuration**: Split into 8 focused files (path, exports, prompt, aliases, functions, tools, completion, local)
+- **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 7 exports, 10 functions, 3 integrations, 1 completions)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: 21 modern CLI tools via Homebrew (see Tools section)
+- **Modern Tooling**: 23 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
 - **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure
@@ -30,10 +30,19 @@ dotfiles/
 ├── ghostty/        # Ghostty terminal
 ├── oh-my-posh/     # Prompt engine
 ├── eza/            # Modern ls with Catppuccin Frappé theme
+├── fzf/            # Fuzzy finder configuration
+├── glow/           # Markdown viewer configuration
+├── lazygit/        # Git TUI configuration
+├── lazydocker/     # Docker TUI configuration
 ├── yazi/           # File manager
 ├── micro/          # Text editor
 ├── htop/           # System monitor
 ├── btop/           # Modern system monitor
+├── system/         # System-level configurations (requires sudo)
+│   ├── .config/
+│   │   └── sudoers.d/
+│   │       └── homebrew-path
+│   └── README.md
 ├── scripts/        # Installation & maintenance scripts
 │   ├── setup/      # bootstrap.sh, install-*.sh
 │   ├── maintenance/# verify-installation.sh
@@ -67,6 +76,9 @@ cd ~/dotfiles
 # - Check for conflicts and offer backup/adopt options
 # - Install all dotfiles packages (including ~/bin utilities)
 # - Verify symlinks
+
+# Install system configurations (requires sudo)
+make install-system
 ```
 
 ### Manual Installation
@@ -90,7 +102,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+stow bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -196,20 +208,26 @@ stow --restow bash
 
 ## Modular Bash Configuration
 
-The bash configuration is split into focused files:
+The bash configuration is organized into focused modules loaded by `.bashrc`:
 
+### Top-Level Files (5)
 | File | Purpose |
 |------|---------|
-| `path` | PATH modifications and binary locations |
-| `exports` | Environment variables (EDITOR, LOCALE, etc.) |
-| `prompt` | oh-my-posh initialization and prompt setup |
-| `aliases` | Command aliases |
-| `functions` | Custom bash functions |
-| `tools` | Terminal tool integration (bat, eza, fzf, ripgrep, yazi) |
-| `completion` | Bash completion configuration |
-| `local` | Machine-specific settings (git-ignored) |
+| `path.bash` | PATH modifications and binary locations |
+| `aliases.bash` | Command aliases |
+| `prompt.bash` | oh-my-posh initialization and prompt setup |
+| `keybindings.bash` | Custom keybindings (Ctrl+O for yazi) |
+| `local.bash` | Machine-specific settings (git-ignored) |
 
-These are sourced in order by `.bashrc`.
+### Modular Directories
+| Directory | Files | Purpose |
+|-----------|-------|---------|
+| `exports/` | 7 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden) |
+| `functions/` | 10 modules | Custom bash functions organized by category (bitwarden, dev, filesystem, fzf, git, misc, search, system, tools-help, yazi) |
+| `integrations/` | 3 modules | Tool initializations (fzf keybindings, yazi, zoxide) |
+| `completions/` | 1 module | Bash completion for custom commands (bitwarden) |
+
+**Loading Order**: path → exports/* → prompt → aliases → functions/* → integrations/* → keybindings → completions/* → local
 
 ## Machine-Specific Configuration
 
@@ -247,17 +265,78 @@ Use the `.local` suffix pattern for sensitive configs:
 ### Comprehensive Security Guide
 
 See **[SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md)** for detailed guidelines on:
-- SSH key management (Ed25519 best practices)
-- Development secrets with `pass` (GPG-based password manager)
-- API token storage (GitHub, GitLab, Jira, etc.)
-- Separating company vs personal credentials
+- Bitwarden integrated setup (Desktop + Browser + CLI + SSH Agent)
+- Biometric unlock configuration (fingerprint authentication)
+- SSH key management with Bitwarden SSH agent
+- Development token automation (GITHUB_TOKEN, GITLAB_TOKEN, etc.)
+- Session management in tmpfs (RAM-only, auto-cleared)
+- API token storage and best practices
 - Backup and recovery procedures
+
+## Authentication & Secret Management
+
+This dotfiles setup uses **Bitwarden** as a unified authentication solution for all development workflows:
+
+### What It Provides
+- **CLI tools:** GitHub CLI (`gh`), GitLab CLI (`glab`), Composer
+- **SSH keys:** Managed via Bitwarden SSH Agent
+- **Development tokens:** GITHUB_TOKEN, GITLAB_TOKEN, COMPOSER_AUTH
+- **One unlock per session:** Biometric (fingerprint) unlock once, use everywhere
+
+### Quick Start
+
+1. **Install Bitwarden desktop app** (.deb, not Flatpak)
+2. **Enable SSH Agent** in Bitwarden settings
+3. **Unlock once:**
+   ```bash
+   bw unlock
+   ```
+4. **All tokens auto-load** and persist across all terminals
+
+### Key Features
+
+- 🔐 Biometric unlock (fingerprint) for all authentication
+- 💾 Tokens stored in tmpfs (RAM-only, auto-cleared on logout)
+- 🔄 One unlock per session, shared across all terminals
+- 🔑 SSH keys never touch disk unencrypted
+- 🌐 gh CLI configured with `git_protocol: ssh`
+- 🏢 glab CLI configured for self-hosted GitLab (git.netresearch.de)
+- 📦 Composer auth via COMPOSER_AUTH JSON (GitHub + GitLab self-hosted)
+
+### Daily Workflow
+
+```bash
+# Morning: Unlock once (fingerprint or master password)
+bw unlock
+
+# All terminals now have access to:
+# - GITHUB_TOKEN (for gh CLI and Composer)
+# - GITLAB_TOKEN (for glab CLI and Composer)
+# - COMPOSER_AUTH (for private packages)
+# - SSH keys (for git operations)
+
+# Work normally - no re-authentication needed
+gh pr list
+glab mr list
+composer install
+git push
+```
+
+### Architecture
+
+| Operation | Method | Authentication |
+|-----------|--------|----------------|
+| Git clone/push | SSH | Bitwarden SSH Agent |
+| gh CLI (API) | HTTPS | GITHUB_TOKEN |
+| glab CLI (API) | HTTPS | GITLAB_TOKEN |
+| Composer (GitHub) | HTTPS | COMPOSER_AUTH |
+| Composer (GitLab) | HTTPS | COMPOSER_AUTH |
+
+**For complete setup and troubleshooting:** See [SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md)
 
 ## Tools Included
 
-All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list).
-
-**📦 For complete package inventory:** See **[PACKAGES.md](PACKAGES.md)** for detailed list of all 139+ packages organized by installation method (Homebrew, APT, Snap, Flatpak, shell scripts, etc.).
+All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 23 packages).
 
 **🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 
@@ -287,21 +366,20 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list).
 - **htop** - Interactive process viewer
 - **btop** - Beautiful resource monitor with modern TUI
 
+### Password Manager
+- **bitwarden-cli** - Bitwarden CLI for password management and secrets
+
 ### Utilities
 - **jq** - Command-line JSON processor
 - **glow** - Render markdown in the terminal
 - **lazydocker** - Terminal UI for Docker management
+- **xclip** - X11 clipboard utility
 
 ### Development Tools
 - **fnm** - Fast Node.js version manager
 - **uv** - Fast Python package installer and resolver
+- **bash-completion@2** - Programmable completion for Bash 4.2+
 - **Docker Engine** - Container platform (via apt)
-
-### Optional Tools (Bash integration included)
-The bash configuration includes integration code for these tools if you install them:
-- **direnv** - Directory-specific environment variables
-- **asdf** - Multi-language version manager
-- **chafa** - Terminal image viewer
 
 ## Deployment to New Machine
 
@@ -321,10 +399,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash git gtk ghostty oh-my-posh yazi micro htop btop
+stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # 4. Deploy packages
-stow bash git gtk ghostty oh-my-posh yazi micro htop btop
+stow bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile

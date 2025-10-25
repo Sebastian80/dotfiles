@@ -41,6 +41,9 @@
 *.kdbx
 *.kdb
 
+# Password Store (pass) - separate git repo, NEVER include in dotfiles
+.password-store/
+
 # ============================================================================
 # MACHINE-SPECIFIC FILES
 # ============================================================================

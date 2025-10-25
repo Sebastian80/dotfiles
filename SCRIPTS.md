@@ -24,7 +24,8 @@ dotfiles/
 │   │   └── install-fonts.sh   # Nerd Fonts installation
 │   │
 │   ├── maintenance/
-│   │   └── verify-installation.sh  # Verify dotfiles installation
+│   │   ├── verify-installation.sh  # Verify dotfiles installation
+│   │   └── verify-auth.sh          # Verify authentication setup
 │   │
 │   └── utils/
 │       ├── manual-backup.sh        # Manual backup utility
@@ -156,12 +157,14 @@ cd ~/dotfiles
 **What it checks:**
 - Prerequisites (git, stow, Homebrew)
 - Repository status
-- All 10 stow packages
-- 14 critical symlinks
+- All 15 stow packages (bash, bin, git, gtk, ghostty, oh-my-posh, yazi, micro, htop, btop, eza, fzf, glow, lazygit, lazydocker, ripgrep)
+- 22 critical symlinks (includes ~/bin utilities and tool configs)
 - Broken symlinks
 - Homebrew packages
-- Key tools availability
-- Shell configuration
+- Key tools availability (13 tools including gh, glab, composer, bw)
+- Shell configuration (PATH, Homebrew, ~/bin)
+- Authentication setup (Bitwarden, tokens, SSH agent)
+- System configuration (sudoers)
 - Security (no secrets committed)
 - Documentation completeness
 
@@ -172,6 +175,38 @@ cd ~/dotfiles
 ```
 
 **Output:** Pass/Warn/Fail report with detailed analysis
+
+---
+
+#### verify-auth.sh
+**Purpose:** Comprehensive authentication setup verification
+
+**What it checks:**
+- Bitwarden CLI installation and session
+- Development tokens (GITHUB_TOKEN, GITLAB_TOKEN, COMPOSER_AUTH)
+- SSH agent (Bitwarden SSH Agent)
+- GitHub CLI (gh) configuration and authentication
+- GitLab CLI (glab) configuration for self-hosted instance
+- Composer authentication
+- tmpfs storage (RAM-only secrets in /run/user/$UID/)
+- System configuration (Homebrew sudoers)
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/maintenance/verify-auth.sh
+
+# Or via Makefile
+make verify-auth
+```
+
+**Output:** Comprehensive authentication status with color-coded results
+
+**When to use:**
+- After initial authentication setup
+- Troubleshooting authentication issues
+- Verifying Bitwarden integration
+- Checking token availability
 
 ---
 
@@ -454,6 +489,7 @@ dotfiles/
 | Install Docker | `./scripts/setup/install-docker.sh` |
 | Install fonts | `./scripts/setup/install-fonts.sh` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
+| Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |
 | Manual backup | `./scripts/utils/manual-backup.sh` |
 
 ---

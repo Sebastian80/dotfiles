@@ -18,20 +18,52 @@ esac
 # ============================================
 
 # Load shell dotfiles in a specific order:
-# * path       - PATH modifications (loaded first so other scripts can find tools)
-# * exports    - Environment variables
-# * prompt     - Prompt configuration (oh-my-posh)
-# * aliases    - Command aliases
-# * functions  - Bash functions
-# * tools      - Terminal enhancement tool integrations
-# * completion - Bash completion
-# * local      - Machine-specific settings (git-ignored)
+# 1. path          - PATH modifications (loaded first so tools are available)
+# 2. exports/*     - Environment variables (modular)
+# 3. prompt        - Prompt configuration (oh-my-posh)
+# 4. aliases       - Command aliases
+# 5. functions/*   - Bash functions (modular)
+# 6. integrations/* - Terminal enhancement tool integrations (modular)
+# 7. keybindings   - Custom keybindings
+# 8. completion.old + completions/* - Bash completion (modular)
+# 9. local         - Machine-specific settings (git-ignored)
 
-for file in ~/.bash/{path,exports,prompt,aliases,functions,tools,completion,local}; do
-    if [ -r "$file" ] && [ -f "$file" ]; then
-        source "$file"
-    fi
+# Load PATH first
+[ -r ~/.bash/path.bash ] && [ -f ~/.bash/path.bash ] && source ~/.bash/path.bash
+
+# Load all export modules (alphabetical order)
+for file in ~/.bash/exports/*.bash; do
+    [ -r "$file" ] && source "$file"
 done
+
+# Load prompt
+[ -r ~/.bash/prompt.bash ] && [ -f ~/.bash/prompt.bash ] && source ~/.bash/prompt.bash
+
+# Load aliases
+[ -r ~/.bash/aliases.bash ] && [ -f ~/.bash/aliases.bash ] && source ~/.bash/aliases.bash
+
+# Load all function modules (alphabetical order)
+for file in ~/.bash/functions/*.bash; do
+    [ -r "$file" ] && source "$file"
+done
+
+# Load all integration modules (alphabetical order)
+for file in ~/.bash/integrations/*.bash; do
+    [ -r "$file" ] && source "$file"
+done
+
+# Load keybindings
+[ -r ~/.bash/keybindings.bash ] && [ -f ~/.bash/keybindings.bash ] && source ~/.bash/keybindings.bash
+
+# Load completion (legacy + new modular)
+[ -r ~/.bash/completion.old ] && [ -f ~/.bash/completion.old ] && source ~/.bash/completion.old
+for file in ~/.bash/completions/*.bash; do
+    [ -r "$file" ] && source "$file"
+done
+
+# Load machine-specific config last
+[ -r ~/.bash/local.bash ] && [ -f ~/.bash/local.bash ] && source ~/.bash/local.bash
+
 unset file
 
 # ============================================
@@ -48,7 +80,7 @@ shopt -s checkwinsize
 # Autocorrect typos in path names when using `cd`
 shopt -s cdspell
 
-# Enable Bash 4+ features (if available)
+# Enable Bash 4+ features
 if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
     # ** recursive globbing
     shopt -s globstar
@@ -64,19 +96,7 @@ fi
 # History Configuration
 # ============================================
 
-# History size (set here for redundancy, also set in ~/.bash/exports)
-export HISTSIZE=10000
-export HISTFILESIZE=20000
-export HISTCONTROL=ignoreboth:erasedups
-export HISTIGNORE="ls:ll:cd:pwd:exit:clear:history"
-export HISTTIMEFORMAT="%F %T "
-
-# ============================================
-# Less Configuration
-# ============================================
-
-# Make less more friendly for non-text input files
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+# History settings are configured in ~/.bash/exports
 
 # ============================================
 # Chroot Identification
@@ -85,16 +105,6 @@ export HISTTIMEFORMAT="%F %T "
 # Set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# ============================================
-# dircolors Configuration
-# ============================================
-
-# Enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    # Use custom dircolors if available
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
 fi
 
 # ============================================

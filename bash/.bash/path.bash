@@ -24,13 +24,6 @@ if command -v fnm &>/dev/null; then
     eval "$(fnm env 2>/dev/null)"
 fi
 
-
-# Go language support (if Go is installed)
-if [ -d "$HOME/go" ]; then
-    export GOPATH="$HOME/go"
-    export PATH="$GOPATH/bin:$PATH"
-fi
-
 # Local bin directory (alternative location)
 if [ -d "$HOME/bin" ]; then
     export PATH="$HOME/bin:$PATH"

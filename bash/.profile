@@ -16,19 +16,6 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-. "$HOME/.local/bin/env"
-
-
-# Added by Toolbox App
-export PATH="$PATH:/home/sebastian/.local/share/JetBrains/Toolbox/scripts"
+# NOTE: PATH modifications moved to ~/.bash/path for centralized management
+# NOTE: Machine-specific settings moved to ~/.bash/local (git-ignored)
 
