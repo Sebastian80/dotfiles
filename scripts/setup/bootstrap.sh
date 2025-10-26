@@ -34,14 +34,27 @@ step() { echo -e "${BLUE}${ARROW}${NC} ${BOLD}$1${NC}"; }
 success() { echo -e "${GREEN}${SPARKLE} $1${NC}"; }
 working() { echo -e "${CYAN}${GEAR}${NC}  $1"; }
 
-# Check if running from dotfiles directory
-if [[ ! -f "$(pwd)/bootstrap.sh" ]]; then
-    error "Please run this script from the dotfiles directory"
-    error "cd ~/dotfiles && ./bootstrap.sh"
+# Determine dotfiles directory
+# This script can be run from dotfiles root or from scripts/setup/
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# If script is in scripts/setup/, go up two levels to find dotfiles root
+if [[ "$SCRIPT_DIR" == */scripts/setup ]]; then
+    DOTFILES_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+else
+    DOTFILES_DIR="$SCRIPT_DIR"
+fi
+
+# Verify we're in the dotfiles directory by checking for Brewfile
+if [[ ! -f "$DOTFILES_DIR/Brewfile" ]]; then
+    error "Could not find dotfiles directory"
+    error "Please run this script from ~/dotfiles or ~/dotfiles/scripts/setup/"
+    error "  cd ~/dotfiles && ./scripts/setup/bootstrap.sh"
     exit 1
 fi
 
-DOTFILES_DIR="$(pwd)"
+# Change to dotfiles directory
+cd "$DOTFILES_DIR" || exit 1
 
 # Display banner
 echo ""
@@ -88,19 +101,37 @@ if ! command -v brew &> /dev/null; then
     read -p "Would you like to install Homebrew now? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        info "Installing Homebrew (this may take a few minutes)..."
+        echo ""
+        step "Installing Homebrew dependencies..."
+
+        # Install system dependencies first (prevents password prompts during Homebrew install)
+        if command -v apt &> /dev/null; then
+            info "Installing build tools (requires sudo)..."
+            sudo apt update -qq
+            sudo apt install -y build-essential procps curl file git
+            info "✓ System dependencies installed"
+        fi
+
+        echo ""
+        step "Installing Homebrew..."
+        info "This will take 2-3 minutes..."
+
+        # Install Homebrew non-interactively to prevent terminal corruption
+        export NONINTERACTIVE=1
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
         # Add Homebrew to PATH for this session
         if [ -d "/home/linuxbrew/.linuxbrew" ]; then
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-            info "Homebrew installed successfully"
+            info "✓ Homebrew installed successfully"
         else
             error "Homebrew installation may have failed. Please check the output above."
+            warn "You can try manually: NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
         fi
     else
         warn "Skipping Homebrew installation. You can install it later:"
-        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        echo "  sudo apt install -y build-essential procps curl file git"
+        echo "  NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
     fi
 else
     info "Homebrew found: $(brew --version | head -n1)"
@@ -111,11 +142,13 @@ if command -v brew &> /dev/null; then
     echo ""
     step "Homebrew Packages Installation"
     echo ""
-    echo -e "${PACKAGE} ${BOLD}The Brewfile contains 27 packages:${NC}"
-    echo -e "  ${CYAN}→${NC} Modern CLI tools (bat, eza, fzf, ripgrep, yazi)"
-    echo -e "  ${CYAN}→${NC} Development tools (gh, glab, composer, fnm, uv)"
-    echo -e "  ${CYAN}→${NC} Prompt engine (oh-my-posh)"
-    echo -e "  ${CYAN}→${NC} Password manager (bitwarden-cli)"
+    # Count packages in Brewfile
+    PACKAGE_COUNT=$(grep -cE '^\s*brew\s+' "$DOTFILES_DIR/Brewfile" 2>/dev/null || echo "0")
+    echo -e "${PACKAGE} ${BOLD}The Brewfile contains $PACKAGE_COUNT packages:${NC}"
+    echo "  Modern CLI tools (bat, eza, fzf, ripgrep, yazi)"
+    echo "  Development tools (gh, glab, composer, fnm, uv)"
+    echo "  Prompt engine (oh-my-posh)"
+    echo "  Password manager (bitwarden-cli)"
     echo ""
     echo -e "${CLOCK} ${YELLOW}Installation time: 5-10 minutes${NC}"
     echo ""
@@ -123,9 +156,16 @@ if command -v brew &> /dev/null; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         step "Installing Homebrew packages from Brewfile..."
-        if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
+        echo ""
+        info "Installing $PACKAGE_COUNT packages... (this may take 5-10 minutes)"
+        echo ""
+
+        # Install with cleaner output
+        if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock 2>&1 | grep -E "Installing|Using|Upgrading|✔|✗"; then
+            echo ""
             info "✓ Homebrew packages installed successfully"
         else
+            echo ""
             warn "Some packages may have failed to install. Check output above."
         fi
     else
