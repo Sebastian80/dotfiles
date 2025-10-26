@@ -107,6 +107,18 @@ if [[ ${#CONFIG_DIRS[@]} -gt 0 ]]; then
     info "Found: ${#CONFIG_DIRS[@]} config directories"
 fi
 
+# Check for system configuration
+if [[ -f /etc/sudoers.d/homebrew-path ]]; then
+    FOUND_ITEMS+=("system_config")
+    info "Found: System configuration (Homebrew sudoers)"
+fi
+
+# Check for machine-specific config
+if [[ -f "$HOME/.bash/local" ]]; then
+    FOUND_ITEMS+=("bash_local")
+    info "Found: Machine-specific config (~/.bash/local)"
+fi
+
 echo ""
 
 # If nothing found, exit
@@ -151,6 +163,14 @@ for item in "${FOUND_ITEMS[@]}"; do
             for dir in "${CONFIG_DIRS[@]}"; do
                 echo "    - ~/.config/$dir"
             done
+            ;;
+        system_config)
+            echo -e "  ${TRASH} System configuration:"
+            echo "    - /etc/sudoers.d/homebrew-path (Homebrew sudo PATH)"
+            ;;
+        bash_local)
+            echo -e "  ${TRASH} Machine-specific config:"
+            echo "    - ~/.bash/local"
             ;;
     esac
     echo ""
@@ -274,7 +294,29 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " config_dirs " ]]; then
     echo ""
 fi
 
-# 6. Remove bash configurations (if not already removed by unstow)
+# 6. Remove system configuration
+if [[ " ${FOUND_ITEMS[@]} " =~ " system_config " ]]; then
+    step "Removing system configuration..."
+
+    removing "Removing Homebrew sudoers configuration (requires sudo)..."
+    run_cmd "sudo rm -f /etc/sudoers.d/homebrew-path"
+
+    info "System configuration removed"
+    echo ""
+fi
+
+# 7. Remove machine-specific config
+if [[ " ${FOUND_ITEMS[@]} " =~ " bash_local " ]]; then
+    step "Removing machine-specific config..."
+
+    removing "Removing ~/.bash/local..."
+    run_cmd "rm -f ~/.bash/local"
+
+    info "Machine-specific config removed"
+    echo ""
+fi
+
+# 8. Remove bash configurations (if not already removed by unstow)
 step "Cleaning bash configurations..."
 
 if [[ -d "$HOME/.bash" && ! -L "$HOME/.bash" ]]; then
@@ -292,7 +334,7 @@ done
 info "Bash configuration cleaned"
 echo ""
 
-# 7. Restore default system files
+# 9. Restore default system files
 step "Restoring system defaults..."
 
 if [[ -f /etc/skel/.bashrc ]]; then
@@ -313,7 +355,7 @@ fi
 info "System defaults restored"
 echo ""
 
-# 8. Report on backup directories
+# 10. Report on backup directories
 if [[ " ${FOUND_ITEMS[@]} " =~ " backups " ]]; then
     step "Backup directories..."
 
