@@ -1,6 +1,6 @@
 #!/bin/bash
-# Install Ghostty Terminal Emulator
-# https://github.com/ghostty-org/ghostty
+# Install Ghostty Terminal Emulator on Linux
+# https://ghostty.org/
 
 set -e
 
@@ -9,6 +9,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 info() { echo -e "${GREEN}✓${NC} $1"; }
@@ -35,138 +36,393 @@ if command -v ghostty &> /dev/null; then
     fi
 fi
 
-# Detect architecture
-ARCH=$(uname -m)
-case "$ARCH" in
-    x86_64)
-        ARCH_NAME="x86_64"
+# Detect distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    DISTRO=$ID
+    DISTRO_VERSION=$VERSION_ID
+else
+    DISTRO="unknown"
+fi
+
+info "Detected distribution: $DISTRO"
+echo ""
+
+# Show installation options
+echo -e "${CYAN}Available installation methods:${NC}"
+echo ""
+
+case "$DISTRO" in
+    ubuntu|debian|linuxmint|pop)
+        echo "  1. Snap (recommended - official, auto-updates)"
+        echo "  2. Ubuntu .deb package (community-maintained)"
+        echo "  3. Build from source (requires Zig compiler)"
         ;;
-    aarch64|arm64)
-        ARCH_NAME="aarch64"
+    fedora|rhel|centos)
+        echo "  1. Fedora COPR (community repository)"
+        echo "  2. Build from source (requires Zig compiler)"
+        ;;
+    arch|manjaro)
+        echo "  1. Official Arch package (pacman)"
+        echo "  2. AUR development version (ghostty-git)"
         ;;
     *)
-        error "Unsupported architecture: $ARCH"
-        error "Ghostty supports x86_64 and aarch64 only"
-        exit 1
+        echo "  1. Snap (universal Linux package)"
+        echo "  2. Build from source (requires Zig compiler)"
         ;;
 esac
 
-info "Detected architecture: $ARCH_NAME"
+echo ""
+read -p "Choose installation method (1/2/3): " -n 1 -r
+echo ""
+echo ""
 
-# Check for required dependencies
-step "Checking dependencies..."
+INSTALL_METHOD=$REPLY
 
-MISSING_DEPS=()
-for dep in curl tar gtk+3.0; do
-    case "$dep" in
-        gtk+3.0)
-            if ! pkg-config --exists gtk+-3.0 2>/dev/null; then
-                MISSING_DEPS+=("libgtk-3-dev")
+# Method 1: Distribution-specific packages
+if [[ $INSTALL_METHOD == "1" ]]; then
+    case "$DISTRO" in
+        ubuntu|debian|linuxmint|pop)
+            step "Installing Ghostty via Snap..."
+
+            # Check if snap is available
+            if ! command -v snap &> /dev/null; then
+                error "Snap is not installed"
+                echo ""
+                warn "Install snapd first:"
+                echo "  sudo apt update && sudo apt install snapd"
+                exit 1
+            fi
+
+            sudo snap install ghostty --classic
+
+            if command -v ghostty &> /dev/null; then
+                info "✓ Ghostty installed successfully via Snap"
+                INSTALLED_VERSION=$(ghostty --version 2>&1 | head -1 || echo "installed")
+                info "Version: $INSTALLED_VERSION"
+            else
+                error "Installation failed"
+                exit 1
             fi
             ;;
+
+        fedora|rhel|centos)
+            step "Installing Ghostty via COPR..."
+
+            sudo dnf copr enable scottames/ghostty -y
+            sudo dnf install ghostty -y
+
+            if command -v ghostty &> /dev/null; then
+                info "✓ Ghostty installed successfully via COPR"
+            else
+                error "Installation failed"
+                exit 1
+            fi
+            ;;
+
+        arch|manjaro)
+            step "Installing Ghostty via pacman..."
+
+            sudo pacman -S ghostty --noconfirm
+
+            if command -v ghostty &> /dev/null; then
+                info "✓ Ghostty installed successfully"
+            else
+                error "Installation failed"
+                exit 1
+            fi
+            ;;
+
         *)
-            if ! command -v "$dep" &> /dev/null; then
-                MISSING_DEPS+=("$dep")
+            step "Installing Ghostty via Snap..."
+
+            if ! command -v snap &> /dev/null; then
+                error "Snap is not available on this system"
+                echo ""
+                warn "Please choose method 2 to build from source"
+                exit 1
+            fi
+
+            sudo snap install ghostty --classic
+
+            if command -v ghostty &> /dev/null; then
+                info "✓ Ghostty installed successfully via Snap"
+            else
+                error "Installation failed"
+                exit 1
             fi
             ;;
     esac
-done
 
-if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
-    warn "Missing dependencies: ${MISSING_DEPS[*]}"
+# Method 2: Ubuntu .deb or Build from source
+elif [[ $INSTALL_METHOD == "2" ]]; then
+    case "$DISTRO" in
+        ubuntu|debian|linuxmint|pop)
+            step "Installing Ghostty via Ubuntu .deb package..."
+            echo ""
+            info "Downloading latest .deb from community repository..."
+
+            TEMP_DIR=$(mktemp -d)
+            cd "$TEMP_DIR"
+
+            # Get latest release
+            LATEST_URL=$(curl -s https://api.github.com/repos/mkasberg/ghostty-ubuntu/releases/latest | grep "browser_download_url.*\.deb" | cut -d '"' -f 4 | head -1)
+
+            if [ -z "$LATEST_URL" ]; then
+                error "Could not find .deb package"
+                rm -rf "$TEMP_DIR"
+                exit 1
+            fi
+
+            info "Downloading: $(basename "$LATEST_URL")"
+            curl -L -o ghostty.deb "$LATEST_URL"
+
+            step "Installing package..."
+            sudo apt install -y ./ghostty.deb
+
+            cd - > /dev/null
+            rm -rf "$TEMP_DIR"
+
+            if command -v ghostty &> /dev/null; then
+                info "✓ Ghostty installed successfully"
+            else
+                error "Installation failed"
+                exit 1
+            fi
+            ;;
+
+        *)
+            # Build from source for other distros
+            step "Building Ghostty from source..."
+            echo ""
+
+            # Check for required dependencies
+            step "Checking build dependencies..."
+
+            MISSING_DEPS=()
+
+            case "$DISTRO" in
+                fedora|rhel|centos)
+                    DEPS="gtk4-devel gtk4-layer-shell-devel libadwaita-devel gettext"
+                    for dep in $DEPS; do
+                        if ! rpm -q "$dep" &>/dev/null; then
+                            MISSING_DEPS+=("$dep")
+                        fi
+                    done
+                    PKG_MGR="sudo dnf install -y"
+                    ;;
+                arch|manjaro)
+                    DEPS="gtk4 gtk4-layer-shell libadwaita gettext"
+                    for dep in $DEPS; do
+                        if ! pacman -Q "$dep" &>/dev/null; then
+                            MISSING_DEPS+=("$dep")
+                        fi
+                    done
+                    PKG_MGR="sudo pacman -S --noconfirm"
+                    ;;
+                *)
+                    DEPS="libgtk-4-dev libgtk4-layer-shell-dev libadwaita-1-dev gettext libxml2-utils"
+                    for dep in $DEPS; do
+                        if ! dpkg -l "$dep" &>/dev/null 2>&1; then
+                            MISSING_DEPS+=("$dep")
+                        fi
+                    done
+                    PKG_MGR="sudo apt install -y"
+                    ;;
+            esac
+
+            if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+                warn "Missing dependencies: ${MISSING_DEPS[*]}"
+                echo ""
+                read -p "Install missing dependencies? (y/n) " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                    $PKG_MGR ${MISSING_DEPS[@]}
+                else
+                    error "Cannot build without dependencies"
+                    exit 1
+                fi
+            fi
+
+            # Check for Zig
+            if ! command -v zig &> /dev/null; then
+                error "Zig compiler not found"
+                echo ""
+                warn "Ghostty requires Zig to build. Install from:"
+                echo "  https://ziglang.org/download/"
+                echo ""
+                echo "For Zig 0.14.1 (required for Ghostty 1.2.x):"
+                echo "  wget https://ziglang.org/download/0.14.1/zig-linux-x86_64-0.14.1.tar.xz"
+                echo "  tar xf zig-linux-x86_64-0.14.1.tar.xz"
+                echo "  sudo mv zig-linux-x86_64-0.14.1 /usr/local/zig"
+                echo "  export PATH=/usr/local/zig:\$PATH"
+                exit 1
+            fi
+
+            ZIG_VERSION=$(zig version)
+            info "Zig compiler found: $ZIG_VERSION"
+
+            # Download source
+            step "Downloading Ghostty source code..."
+            TEMP_DIR=$(mktemp -d)
+            cd "$TEMP_DIR"
+
+            git clone https://github.com/ghostty-org/ghostty.git
+            cd ghostty
+
+            # Build
+            step "Building Ghostty (this may take a few minutes)..."
+            zig build -Doptimize=ReleaseFast
+
+            # Install
+            echo ""
+            step "Choose installation location:"
+            echo "  1. User-local (~/.local/bin) - no sudo needed"
+            echo "  2. System-wide (/usr/local) - requires sudo"
+            echo ""
+            read -p "Choose (1/2): " -n 1 -r
+            echo
+
+            case $REPLY in
+                1)
+                    step "Installing to ~/.local..."
+                    zig build -p "$HOME/.local" -Doptimize=ReleaseFast
+                    info "Installed to ~/.local/bin/ghostty"
+
+                    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+                        warn "Add ~/.local/bin to PATH in your .bashrc:"
+                        echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+                    fi
+                    ;;
+                2)
+                    step "Installing to /usr/local (requires sudo)..."
+                    sudo zig build -p /usr/local -Doptimize=ReleaseFast
+                    info "Installed to /usr/local/bin/ghostty"
+                    ;;
+                *)
+                    error "Invalid choice"
+                    rm -rf "$TEMP_DIR"
+                    exit 1
+                    ;;
+            esac
+
+            cd - > /dev/null
+            rm -rf "$TEMP_DIR"
+
+            if command -v ghostty &> /dev/null; then
+                info "✓ Ghostty built and installed successfully"
+            else
+                error "Installation failed"
+                exit 1
+            fi
+            ;;
+    esac
+
+# Method 3: Build from source (Ubuntu/Debian specific)
+elif [[ $INSTALL_METHOD == "3" ]]; then
+    # Same as method 2 for non-Ubuntu distros
+    step "Building Ghostty from source..."
     echo ""
-    read -p "Install missing dependencies with apt? (requires sudo) (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        step "Installing dependencies..."
-        sudo apt update
-        sudo apt install -y "${MISSING_DEPS[@]}"
-        info "Dependencies installed"
-    else
-        error "Cannot continue without dependencies"
+
+    # Check dependencies
+    step "Checking build dependencies..."
+    DEPS="libgtk-4-dev libgtk4-layer-shell-dev libadwaita-1-dev gettext libxml2-utils"
+    MISSING_DEPS=()
+
+    for dep in $DEPS; do
+        if ! dpkg -l "$dep" &>/dev/null 2>&1; then
+            MISSING_DEPS+=("$dep")
+        fi
+    done
+
+    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+        warn "Missing dependencies: ${MISSING_DEPS[*]}"
+        echo ""
+        read -p "Install missing dependencies? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            sudo apt install -y ${MISSING_DEPS[@]}
+        else
+            error "Cannot build without dependencies"
+            exit 1
+        fi
+    fi
+
+    # Check for Zig
+    if ! command -v zig &> /dev/null; then
+        error "Zig compiler not found"
+        echo ""
+        warn "Ghostty requires Zig to build. Install from:"
+        echo "  https://ziglang.org/download/"
+        echo ""
+        echo "Quick install Zig 0.14.1:"
+        echo "  wget https://ziglang.org/download/0.14.1/zig-linux-x86_64-0.14.1.tar.xz"
+        echo "  tar xf zig-linux-x86_64-0.14.1.tar.xz"
+        echo "  sudo mv zig-linux-x86_64-0.14.1 /usr/local/zig"
+        echo "  export PATH=/usr/local/zig:\$PATH"
         exit 1
     fi
-else
-    info "All dependencies satisfied"
-fi
 
-# Get latest release
-step "Fetching latest Ghostty release..."
-LATEST_URL=$(curl -s https://api.github.com/repos/ghostty-org/ghostty/releases/latest | grep "browser_download_url.*linux-$ARCH_NAME.tar.gz" | cut -d '"' -f 4)
+    ZIG_VERSION=$(zig version)
+    info "Zig compiler found: $ZIG_VERSION"
 
-if [ -z "$LATEST_URL" ]; then
-    error "Could not find release for $ARCH_NAME"
+    # Download and build
+    step "Downloading Ghostty source..."
+    TEMP_DIR=$(mktemp -d)
+    cd "$TEMP_DIR"
+
+    git clone https://github.com/ghostty-org/ghostty.git
+    cd ghostty
+
+    step "Building Ghostty (this may take a few minutes)..."
+    zig build -Doptimize=ReleaseFast
+
+    # Install
     echo ""
-    warn "You may need to build from source:"
-    echo "  git clone https://github.com/ghostty-org/ghostty"
-    echo "  cd ghostty"
-    echo "  zig build -Doptimize=ReleaseFast"
-    exit 1
-fi
+    echo "Choose installation location:"
+    echo "  1. User-local (~/.local/bin) - no sudo needed"
+    echo "  2. System-wide (/usr/local) - requires sudo"
+    echo ""
+    read -p "Choose (1/2): " -n 1 -r
+    echo
 
-LATEST_VERSION=$(echo "$LATEST_URL" | grep -oP 'v[\d.]+')
-info "Latest version: $LATEST_VERSION"
+    case $REPLY in
+        1)
+            step "Installing to ~/.local..."
+            zig build -p "$HOME/.local" -Doptimize=ReleaseFast
+            info "Installed to ~/.local/bin/ghostty"
 
-# Download
-TEMP_DIR=$(mktemp -d)
-cd "$TEMP_DIR"
+            if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+                warn "Add ~/.local/bin to PATH in your .bashrc:"
+                echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+            fi
+            ;;
+        2)
+            step "Installing to /usr/local (requires sudo)..."
+            sudo zig build -p /usr/local -Doptimize=ReleaseFast
+            info "Installed to /usr/local/bin/ghostty"
+            ;;
+        *)
+            error "Invalid choice"
+            rm -rf "$TEMP_DIR"
+            exit 1
+            ;;
+    esac
 
-step "Downloading Ghostty $LATEST_VERSION..."
-if curl -L -o ghostty.tar.gz "$LATEST_URL"; then
-    info "Download complete"
-else
-    error "Download failed"
+    cd - > /dev/null
     rm -rf "$TEMP_DIR"
+
+    if command -v ghostty &> /dev/null; then
+        info "✓ Ghostty built and installed successfully"
+    else
+        error "Installation failed"
+        exit 1
+    fi
+
+else
+    error "Invalid selection"
     exit 1
 fi
-
-# Extract
-step "Extracting archive..."
-tar xzf ghostty.tar.gz
-info "Extraction complete"
-
-# Install
-echo ""
-step "Installation location"
-echo "Choose installation location:"
-echo "  1. System-wide (/usr/local/bin) - requires sudo, available to all users"
-echo "  2. User-local (~/.local/bin) - no sudo needed, only for current user"
-echo ""
-read -p "Choose (1/2): " -n 1 -r
-echo
-
-case $REPLY in
-    1)
-        INSTALL_DIR="/usr/local"
-        step "Installing to $INSTALL_DIR (requires sudo)..."
-        sudo cp -r ghostty/bin/* "$INSTALL_DIR/bin/"
-        sudo cp -r ghostty/share/* "$INSTALL_DIR/share/" 2>/dev/null || true
-        info "Installed to $INSTALL_DIR"
-        ;;
-    2)
-        INSTALL_DIR="$HOME/.local"
-        mkdir -p "$INSTALL_DIR/bin" "$INSTALL_DIR/share"
-        step "Installing to $INSTALL_DIR..."
-        cp -r ghostty/bin/* "$INSTALL_DIR/bin/"
-        cp -r ghostty/share/* "$INSTALL_DIR/share/" 2>/dev/null || true
-        info "Installed to $INSTALL_DIR"
-
-        # Add to PATH if not already there
-        if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-            warn "Add ~/.local/bin to PATH in your .bashrc:"
-            echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
-        fi
-        ;;
-    *)
-        error "Invalid choice"
-        rm -rf "$TEMP_DIR"
-        exit 1
-        ;;
-esac
-
-# Cleanup
-cd - > /dev/null
-rm -rf "$TEMP_DIR"
 
 # Verify installation
 echo ""
@@ -175,10 +431,10 @@ if command -v ghostty &> /dev/null; then
     INSTALLED_VERSION=$(ghostty --version 2>&1 | head -1 || echo "installed")
     info "✓ Ghostty successfully installed: $INSTALLED_VERSION"
     echo ""
-    info "Ghostty config is already set up at: ~/.config/ghostty"
+    info "Ghostty config is set up at: ~/.config/ghostty"
     info "Launch with: ghostty"
 else
-    error "Installation may have failed - ghostty command not found"
+    error "Installation verification failed"
     exit 1
 fi
 
