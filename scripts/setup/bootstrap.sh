@@ -373,6 +373,40 @@ else
     echo "  cd ~/dotfiles && make install-system"
 fi
 
+# Install Ghostty Terminal Emulator
+echo ""
+step "Ghostty Terminal Emulator"
+echo ""
+info "Ghostty is a modern, fast GPU-accelerated terminal emulator."
+echo "Your dotfiles include Ghostty configuration in ~/.config/ghostty"
+echo ""
+if command -v ghostty &> /dev/null; then
+    GHOSTTY_VERSION=$(ghostty --version 2>&1 | head -1 || echo "installed")
+    info "Ghostty is already installed: $GHOSTTY_VERSION"
+else
+    echo "Ghostty is not currently installed."
+    echo ""
+    read -p "Install Ghostty terminal emulator? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [[ -x "$DOTFILES_DIR/scripts/setup/install-ghostty.sh" ]]; then
+            if "$DOTFILES_DIR/scripts/setup/install-ghostty.sh"; then
+                info "✓ Ghostty installed successfully"
+            else
+                warn "Ghostty installation encountered issues. Check output above."
+                echo "You can install it later with:"
+                echo "  ~/dotfiles/scripts/setup/install-ghostty.sh"
+            fi
+        else
+            error "Ghostty installation script not found at: scripts/setup/install-ghostty.sh"
+        fi
+    else
+        warn "Skipping Ghostty installation."
+        echo "You can install it later with:"
+        echo "  ~/dotfiles/scripts/setup/install-ghostty.sh"
+    fi
+fi
+
 # Install Nerd Fonts
 echo ""
 step "Nerd Fonts Installation"
