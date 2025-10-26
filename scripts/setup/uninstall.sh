@@ -79,7 +79,26 @@ fi
 if command -v ghostty &>/dev/null; then
     FOUND_ITEMS+=("ghostty")
     GHOSTTY_PATH=$(command -v ghostty)
-    info "Found: Ghostty at $GHOSTTY_PATH"
+
+    # Detect installation method
+    GHOSTTY_METHOD="unknown"
+    if snap list ghostty &>/dev/null 2>&1; then
+        GHOSTTY_METHOD="snap"
+    elif [[ "$GHOSTTY_PATH" == /snap/* ]]; then
+        GHOSTTY_METHOD="snap"
+    elif dpkg -l ghostty &>/dev/null 2>&1; then
+        GHOSTTY_METHOD="apt"
+    elif rpm -q ghostty &>/dev/null 2>&1; then
+        GHOSTTY_METHOD="rpm"
+    elif pacman -Q ghostty &>/dev/null 2>&1; then
+        GHOSTTY_METHOD="pacman"
+    elif [[ "$GHOSTTY_PATH" == /usr/local/* ]]; then
+        GHOSTTY_METHOD="source-system"
+    elif [[ "$GHOSTTY_PATH" == */.local/* ]]; then
+        GHOSTTY_METHOD="source-user"
+    fi
+
+    info "Found: Ghostty at $GHOSTTY_PATH ($GHOSTTY_METHOD)"
 fi
 
 # Check for Nerd Fonts
@@ -148,7 +167,7 @@ for item in "${FOUND_ITEMS[@]}"; do
             ;;
         ghostty)
             echo -e "  ${TRASH} Ghostty terminal emulator:"
-            echo "    - $GHOSTTY_PATH"
+            echo "    - $GHOSTTY_PATH (installed via: $GHOSTTY_METHOD)"
             ;;
         nerd_fonts)
             echo -e "  ${TRASH} Nerd Fonts:"
@@ -249,19 +268,53 @@ fi
 if [[ " ${FOUND_ITEMS[@]} " =~ " ghostty " ]]; then
     step "Removing Ghostty..."
 
-    GHOSTTY_PATH=$(command -v ghostty 2>/dev/null || echo "")
-    if [[ -n "$GHOSTTY_PATH" ]]; then
-        if [[ "$GHOSTTY_PATH" == /usr/local/bin/* ]]; then
-            removing "Removing from /usr/local (requires sudo)..."
+    case "$GHOSTTY_METHOD" in
+        snap)
+            removing "Removing Ghostty Snap package..."
+            run_cmd "sudo snap remove ghostty"
+            info "Ghostty snap removed"
+            ;;
+        apt)
+            removing "Removing Ghostty .deb package..."
+            run_cmd "sudo apt remove -y ghostty"
+            run_cmd "sudo apt autoremove -y"
+            info "Ghostty package removed"
+            ;;
+        rpm)
+            removing "Removing Ghostty RPM package..."
+            run_cmd "sudo dnf remove -y ghostty"
+            info "Ghostty package removed"
+            ;;
+        pacman)
+            removing "Removing Ghostty via pacman..."
+            run_cmd "sudo pacman -R --noconfirm ghostty"
+            info "Ghostty package removed"
+            ;;
+        source-system)
+            removing "Removing Ghostty from /usr/local (requires sudo)..."
             run_cmd "sudo rm -f /usr/local/bin/ghostty"
             run_cmd "sudo rm -rf /usr/local/share/ghostty"
-        elif [[ "$GHOSTTY_PATH" == */.local/bin/* ]]; then
-            removing "Removing from ~/.local..."
+            info "Ghostty source build removed"
+            ;;
+        source-user)
+            removing "Removing Ghostty from ~/.local..."
             run_cmd "rm -f ~/.local/bin/ghostty"
             run_cmd "rm -rf ~/.local/share/ghostty"
-        fi
-        info "Ghostty removed"
-    fi
+            info "Ghostty source build removed"
+            ;;
+        *)
+            warn "Unknown Ghostty installation method, attempting manual removal..."
+            GHOSTTY_PATH=$(command -v ghostty 2>/dev/null || echo "")
+            if [[ -n "$GHOSTTY_PATH" ]]; then
+                removing "Removing from $GHOSTTY_PATH..."
+                if [[ "$GHOSTTY_PATH" == /usr/* ]]; then
+                    run_cmd "sudo rm -f $GHOSTTY_PATH"
+                else
+                    run_cmd "rm -f $GHOSTTY_PATH"
+                fi
+            fi
+            ;;
+    esac
     echo ""
 fi
 
