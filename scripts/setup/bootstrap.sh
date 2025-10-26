@@ -178,6 +178,33 @@ if command -v brew &> /dev/null; then
 fi
 
 echo ""
+
+# Check if bash-completion@2 is installed (critical for our bash config)
+if command -v brew &> /dev/null && ! brew list bash-completion@2 &> /dev/null; then
+    echo ""
+    warn "WARNING: bash-completion@2 is not installed!"
+    warn "Your bash config requires this package to work properly."
+    echo ""
+    echo "The dotfiles assume Homebrew packages are installed."
+    echo "Without them, many features won't work (completions, modern tools, etc.)"
+    echo ""
+    read -p "Do you want to install Homebrew packages now before continuing? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock; then
+            info "✓ Homebrew packages installed"
+        else
+            warn "Some packages failed. Continuing anyway..."
+        fi
+    else
+        warn "Continuing without Homebrew packages. Some features may not work."
+        warn "Install later with: brew bundle install --file=~/dotfiles/Brewfile"
+        echo ""
+        read -p "Press Enter to continue..." -r
+    fi
+fi
+
+echo ""
 step "Checking for conflicts..."
 
 # List of packages to install (all 15 user-facing packages)
@@ -346,6 +373,40 @@ else
     echo "  cd ~/dotfiles && make install-system"
 fi
 
+# Install Nerd Fonts
+echo ""
+step "Nerd Fonts Installation"
+echo ""
+info "Nerd Fonts are required for oh-my-posh icons and beautiful terminal UI."
+echo "Without them, you'll see missing/broken icons in your prompt."
+echo ""
+echo "Available fonts:"
+echo "  • JetBrainsMono Nerd Font (recommended)"
+echo "  • FiraCode Nerd Font"
+echo "  • Hack Nerd Font"
+echo "  • And many more..."
+echo ""
+read -p "Install Nerd Fonts now? (recommended) (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ -x "$DOTFILES_DIR/scripts/setup/install-fonts.sh" ]]; then
+        step "Installing Nerd Fonts..."
+        if "$DOTFILES_DIR/scripts/setup/install-fonts.sh"; then
+            info "✓ Nerd Fonts installed successfully"
+        else
+            warn "Font installation encountered issues. Check output above."
+            echo "You can install them later with:"
+            echo "  ~/dotfiles/scripts/setup/install-fonts.sh"
+        fi
+    else
+        error "Font installation script not found at: scripts/setup/install-fonts.sh"
+    fi
+else
+    warn "Skipping Nerd Fonts installation."
+    echo "You can install them later with:"
+    echo "  ~/dotfiles/scripts/setup/install-fonts.sh"
+fi
+
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}                              ${GREEN}║${NC}"
@@ -365,7 +426,7 @@ echo -e "  ${CYAN}1.${NC} Reload your shell: ${MAGENTA}source ~/.bashrc${NC}"
 echo -e "  ${CYAN}2.${NC} Review the configuration files"
 echo -e "  ${CYAN}3.${NC} Add machine-specific settings to ${MAGENTA}~/.bash/local${NC}"
 echo ""
-echo -e "${BOLD}${YELLOW}Optional Installations:${NC}"
+echo -e "${BOLD}${YELLOW}Optional Next Steps:${NC}"
 if ! command -v brew &> /dev/null || ! brew list bat &> /dev/null; then
     echo -e "  ${PACKAGE} Install Homebrew packages:"
     echo -e "    ${CYAN}→${NC} ${MAGENTA}brew bundle install --file=~/dotfiles/Brewfile${NC}"
@@ -374,8 +435,10 @@ if [[ ! -f /etc/sudoers.d/homebrew-path ]]; then
     echo -e "  ${GEAR} Install system configuration:"
     echo -e "    ${CYAN}→${NC} ${MAGENTA}cd ~/dotfiles && make install-system${NC}"
 fi
-echo -e "  ${STAR} Install Nerd Fonts (for oh-my-posh icons):"
-echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-fonts.sh${NC}"
+if ! fc-list | grep -q "NerdFont"; then
+    echo -e "  ${STAR} Install Nerd Fonts (if skipped):"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-fonts.sh${NC}"
+fi
 echo -e "  🐳 Install Docker Engine:"
 echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-docker.sh${NC}"
 echo -e "  🔐 Configure authentication (Bitwarden):"
