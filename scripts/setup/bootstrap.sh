@@ -59,8 +59,8 @@ cd "$DOTFILES_DIR" || exit 1
 # Display banner
 echo ""
 echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}  ${BOLD}${MAGENTA}Sebastian's Dotfiles Bootstrap${NC}                        ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}  ${ROCKET} Modern CLI tools & configs with GNU Stow         ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  ${BOLD}${MAGENTA}Sebastian's Dotfiles Bootstrap${NC}                           ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  ${ROCKET} Modern CLI tools & configs with GNU Stow              ${CYAN}║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 step "Starting installation..."
@@ -443,7 +443,7 @@ fi
 
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}                              ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}                                ${GREEN}║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${BOLD}${CYAN}What was installed:${NC}"
