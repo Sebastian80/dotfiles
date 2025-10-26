@@ -441,6 +441,43 @@ else
     echo "  ~/dotfiles/scripts/setup/install-fonts.sh"
 fi
 
+# Install Docker Engine
+echo ""
+step "Docker Engine Installation"
+echo ""
+info "Docker Engine enables container-based development workflows."
+echo "Includes Docker Engine, docker-compose plugin, and adds you to docker group."
+echo ""
+echo "What you get:"
+echo "  • Docker Engine (latest from official repository)"
+echo "  • Docker Compose plugin (v2 syntax)"
+echo "  • containerd runtime"
+echo "  • User added to docker group (requires logout/login)"
+echo ""
+warn "Note: This installs Docker Engine (CLI), not Docker Desktop."
+echo ""
+read -p "Install Docker Engine now? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ -x "$DOTFILES_DIR/scripts/setup/install-docker.sh" ]]; then
+        step "Installing Docker Engine..."
+        if "$DOTFILES_DIR/scripts/setup/install-docker.sh"; then
+            info "✓ Docker Engine installed successfully"
+            warn "IMPORTANT: Log out and log back in for docker group to take effect!"
+        else
+            warn "Docker installation encountered issues. Check output above."
+            echo "You can install it later with:"
+            echo "  ~/dotfiles/scripts/setup/install-docker.sh"
+        fi
+    else
+        error "Docker installation script not found at: scripts/setup/install-docker.sh"
+    fi
+else
+    warn "Skipping Docker Engine installation."
+    echo "You can install it later with:"
+    echo "  ~/dotfiles/scripts/setup/install-docker.sh"
+fi
+
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}                                ${GREEN}║${NC}"
@@ -453,6 +490,15 @@ if command -v brew &> /dev/null && brew list bat &> /dev/null; then
 fi
 if [[ -f /etc/sudoers.d/homebrew-path ]]; then
     echo -e "  ${CHECK} System configuration (Homebrew sudo PATH)"
+fi
+if command -v ghostty &> /dev/null; then
+    echo -e "  ${CHECK} Ghostty terminal emulator"
+fi
+if fc-list | grep -q "NerdFont" 2>/dev/null; then
+    echo -e "  ${CHECK} Nerd Fonts"
+fi
+if command -v docker &> /dev/null; then
+    echo -e "  ${CHECK} Docker Engine + docker-compose"
 fi
 echo ""
 echo -e "${BOLD}${BLUE}Next Steps:${NC}"
@@ -469,12 +515,18 @@ if [[ ! -f /etc/sudoers.d/homebrew-path ]]; then
     echo -e "  ${GEAR} Install system configuration:"
     echo -e "    ${CYAN}→${NC} ${MAGENTA}cd ~/dotfiles && make install-system${NC}"
 fi
-if ! fc-list | grep -q "NerdFont"; then
+if ! command -v ghostty &> /dev/null; then
+    echo -e "  👻 Install Ghostty terminal emulator (if skipped):"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-ghostty.sh${NC}"
+fi
+if ! fc-list | grep -q "NerdFont" 2>/dev/null; then
     echo -e "  ${STAR} Install Nerd Fonts (if skipped):"
     echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-fonts.sh${NC}"
 fi
-echo -e "  🐳 Install Docker Engine:"
-echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-docker.sh${NC}"
+if ! command -v docker &> /dev/null; then
+    echo -e "  🐳 Install Docker Engine (if skipped):"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-docker.sh${NC}"
+fi
 echo -e "  🔐 Configure authentication (Bitwarden):"
 echo -e "    ${CYAN}→${NC} See ${MAGENTA}INSTALLATION.md${NC} Step 7 or ${MAGENTA}SECRET_MANAGEMENT.md${NC}"
 echo ""
