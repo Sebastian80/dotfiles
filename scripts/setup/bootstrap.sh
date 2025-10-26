@@ -160,13 +160,15 @@ if command -v brew &> /dev/null; then
         info "Installing $PACKAGE_COUNT packages... (this may take 5-10 minutes)"
         echo ""
 
-        # Install with cleaner output
-        if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock 2>&1 | grep -E "Installing|Using|Upgrading|✔|✗"; then
+        # Install and capture output
+        if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock; then
             echo ""
             info "✓ Homebrew packages installed successfully"
         else
             echo ""
-            warn "Some packages may have failed to install. Check output above."
+            warn "Some packages failed to install."
+            warn "This is often OK - some packages may not be available on your system."
+            warn "You can retry later with: brew bundle install --file=~/dotfiles/Brewfile"
         fi
     else
         warn "Skipping Homebrew package installation."
@@ -212,22 +214,29 @@ if [[ $CONFLICTS -gt 0 ]]; then
             info "Creating backup in $BACKUP_DIR"
             mkdir -p "$BACKUP_DIR"
 
-            # Backup conflicting files
+            # Backup conflicting files by parsing stow dry-run output
             for package in "${PACKAGES[@]}"; do
                 if [[ -d "$package" ]]; then
-                    stow -n -v "$package" 2>&1 | grep "existing target" | while read -r line; do
-                        # Extract filename from stow output
-                        file=$(echo "$line" | sed -n 's/.*existing target is \([^:]*\).*/\1/p')
-                        if [[ -n "$file" && -e "$HOME/$file" ]]; then
-                            # Create parent directory in backup
-                            mkdir -p "$BACKUP_DIR/$(dirname "$file")"
-                            # Move file to backup
-                            mv "$HOME/$file" "$BACKUP_DIR/$file"
-                            info "Backed up: $file"
-                        fi
-                    done
+                    # Get list of conflicting files
+                    conflicts=$(stow -n -v "$package" 2>&1 | grep "existing target is neither" | sed 's/.*existing target is neither a link nor a directory: //' || true)
+
+                    if [[ -n "$conflicts" ]]; then
+                        while IFS= read -r file; do
+                            file=$(echo "$file" | tr -d '\n\r')
+                            if [[ -n "$file" && -e "$HOME/$file" ]]; then
+                                # Create parent directory in backup
+                                mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+                                # Move file to backup
+                                if mv "$HOME/$file" "$BACKUP_DIR/$file" 2>/dev/null; then
+                                    info "Backed up: $file"
+                                fi
+                            fi
+                        done <<< "$conflicts"
+                    fi
                 fi
             done
+            echo ""
+            info "Backup complete. Files saved to: $BACKUP_DIR"
             ;;
         2)
             # Adopt existing files
