@@ -161,7 +161,7 @@ if command -v brew &> /dev/null; then
         echo ""
 
         # Install and capture output
-        if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock; then
+        if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
             echo ""
             info "✓ Homebrew packages installed successfully"
         else
@@ -191,7 +191,7 @@ if command -v brew &> /dev/null && ! brew list bash-completion@2 &> /dev/null; t
     read -p "Do you want to install Homebrew packages now before continuing? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock; then
+        if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
             info "✓ Homebrew packages installed"
         else
             warn "Some packages failed. Continuing anyway..."
