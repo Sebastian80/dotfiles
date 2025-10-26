@@ -1,0 +1,354 @@
+#!/bin/bash
+# Dotfiles Uninstall Script
+# Safely remove Sebastian's dotfiles and all installed components
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Unicode symbols
+CHECK="✓"
+CROSS="✗"
+ARROW="→"
+WARN="⚠"
+TRASH="🗑️"
+CLEAN="🧹"
+SPARKLE="✨"
+
+# Functions
+info() { echo -e "${GREEN}${CHECK}${NC} $1"; }
+warn() { echo -e "${YELLOW}${WARN}${NC}  $1"; }
+error() { echo -e "${RED}${CROSS}${NC} $1"; }
+step() { echo -e "${BLUE}${ARROW}${NC} ${BOLD}$1${NC}"; }
+success() { echo -e "${GREEN}${SPARKLE} $1${NC}"; }
+removing() { echo -e "${CYAN}${TRASH}${NC}  $1"; }
+
+# Determine dotfiles directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ "$SCRIPT_DIR" == */scripts/setup ]]; then
+    DOTFILES_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+else
+    DOTFILES_DIR="$SCRIPT_DIR"
+fi
+
+# Display banner
+echo ""
+echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║${NC}  ${BOLD}${MAGENTA}Dotfiles Uninstall Script${NC}                                ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  ${CLEAN} Safely remove all dotfiles and components             ${CYAN}║${NC}"
+echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+# Dry run mode
+DRY_RUN=false
+if [[ "$1" == "--dry-run" || "$1" == "-n" ]]; then
+    DRY_RUN=true
+    warn "DRY RUN MODE - No changes will be made"
+    echo ""
+fi
+
+# Detect what's installed
+step "Scanning installed components..."
+echo ""
+
+FOUND_ITEMS=()
+
+# Check for stowed dotfiles
+if [[ -L "$HOME/.bashrc" ]] || [[ -L "$HOME/.gitconfig" ]]; then
+    FOUND_ITEMS+=("stowed_dotfiles")
+    info "Found: Stowed dotfiles (symlinks detected)"
+fi
+
+# Check for Homebrew
+if command -v brew &>/dev/null; then
+    FOUND_ITEMS+=("homebrew")
+    BREW_PACKAGES=$(brew list --formula 2>/dev/null | wc -l)
+    info "Found: Homebrew with $BREW_PACKAGES packages"
+fi
+
+# Check for Ghostty
+if command -v ghostty &>/dev/null; then
+    FOUND_ITEMS+=("ghostty")
+    GHOSTTY_PATH=$(command -v ghostty)
+    info "Found: Ghostty at $GHOSTTY_PATH"
+fi
+
+# Check for Nerd Fonts
+if [[ -d "$HOME/.local/share/fonts/NerdFonts" ]]; then
+    FOUND_ITEMS+=("nerd_fonts")
+    info "Found: Nerd Fonts"
+fi
+
+# Check for backup directories
+if compgen -G "$HOME/dotfiles-backup-*" > /dev/null; then
+    FOUND_ITEMS+=("backups")
+    BACKUP_COUNT=$(ls -d "$HOME/dotfiles-backup-"* 2>/dev/null | wc -l)
+    info "Found: $BACKUP_COUNT backup directory(ies)"
+fi
+
+# Check for config directories
+CONFIG_DIRS=()
+for dir in ghostty htop yazi micro btop lazygit lazydocker gtk-3.0 gtk-4.0; do
+    if [[ -d "$HOME/.config/$dir" ]]; then
+        CONFIG_DIRS+=("$dir")
+    fi
+done
+if [[ ${#CONFIG_DIRS[@]} -gt 0 ]]; then
+    FOUND_ITEMS+=("config_dirs")
+    info "Found: ${#CONFIG_DIRS[@]} config directories"
+fi
+
+echo ""
+
+# If nothing found, exit
+if [[ ${#FOUND_ITEMS[@]} -eq 0 ]]; then
+    success "No dotfiles installation detected - system is clean!"
+    exit 0
+fi
+
+# Show what will be removed
+echo -e "${BOLD}The following will be removed:${NC}"
+echo ""
+
+for item in "${FOUND_ITEMS[@]}"; do
+    case $item in
+        stowed_dotfiles)
+            echo -e "  ${TRASH} Stowed dotfiles symlinks:"
+            echo "    - ~/.bashrc, ~/.bash_profile, ~/.bash/"
+            echo "    - ~/.gitconfig"
+            echo "    - ~/.config/ghostty, ~/.config/yazi, ~/.config/htop, etc."
+            echo "    - ~/.local/bin/* (custom scripts)"
+            ;;
+        homebrew)
+            echo -e "  ${TRASH} Homebrew installation:"
+            echo "    - /home/linuxbrew/.linuxbrew/"
+            echo "    - All $BREW_PACKAGES installed packages"
+            echo "    - ~/.cache/Homebrew"
+            ;;
+        ghostty)
+            echo -e "  ${TRASH} Ghostty terminal emulator:"
+            echo "    - $GHOSTTY_PATH"
+            ;;
+        nerd_fonts)
+            echo -e "  ${TRASH} Nerd Fonts:"
+            echo "    - ~/.local/share/fonts/NerdFonts/"
+            ;;
+        backups)
+            echo -e "  ${TRASH} Backup directories:"
+            echo "    - ~/dotfiles-backup-*/"
+            ;;
+        config_dirs)
+            echo -e "  ${TRASH} Configuration directories:"
+            for dir in "${CONFIG_DIRS[@]}"; do
+                echo "    - ~/.config/$dir"
+            done
+            ;;
+    esac
+    echo ""
+done
+
+# Confirmation prompt
+if [[ "$DRY_RUN" == false ]]; then
+    echo -e "${BOLD}${RED}WARNING: This action cannot be undone!${NC}"
+    echo ""
+    echo "Your shell will be restored to system defaults."
+    echo "Original files in backup directories will be kept for manual review."
+    echo ""
+    read -p "Are you sure you want to uninstall everything? (yes/no) " -r
+    echo ""
+
+    if [[ ! "$REPLY" == "yes" ]]; then
+        info "Uninstall cancelled"
+        exit 0
+    fi
+fi
+
+# Start uninstall process
+echo ""
+step "Starting uninstall process..."
+echo ""
+
+# Function to execute or simulate
+run_cmd() {
+    if [[ "$DRY_RUN" == true ]]; then
+        echo -e "${CYAN}[DRY RUN]${NC} $1"
+    else
+        eval "$1"
+    fi
+}
+
+# 1. Unstow dotfiles
+if [[ " ${FOUND_ITEMS[@]} " =~ " stowed_dotfiles " ]]; then
+    step "Unstowing dotfiles..."
+
+    if [[ -d "$DOTFILES_DIR" ]]; then
+        cd "$DOTFILES_DIR"
+        PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop fzf eza lazygit lazydocker glow)
+
+        for package in "${PACKAGES[@]}"; do
+            if [[ -d "$package" ]]; then
+                removing "Unstowing: $package"
+                run_cmd "stow -D '$package' 2>/dev/null || true"
+            fi
+        done
+        info "Dotfiles unstowed"
+    else
+        warn "Dotfiles directory not found, skipping unstow"
+    fi
+    echo ""
+fi
+
+# 2. Remove Homebrew
+if [[ " ${FOUND_ITEMS[@]} " =~ " homebrew " ]]; then
+    step "Uninstalling Homebrew..."
+
+    if command -v brew &>/dev/null && [[ "$DRY_RUN" == false ]]; then
+        removing "Removing all Homebrew packages..."
+        brew list --formula 2>/dev/null | xargs brew uninstall --force 2>/dev/null || true
+        info "All packages removed"
+    fi
+
+    removing "Removing Homebrew installation..."
+    run_cmd "sudo rm -rf /home/linuxbrew/.linuxbrew"
+    run_cmd "rm -rf ~/.linuxbrew"
+    run_cmd "rm -rf ~/.cache/Homebrew"
+    info "Homebrew uninstalled"
+    echo ""
+fi
+
+# 3. Remove Ghostty
+if [[ " ${FOUND_ITEMS[@]} " =~ " ghostty " ]]; then
+    step "Removing Ghostty..."
+
+    GHOSTTY_PATH=$(command -v ghostty 2>/dev/null || echo "")
+    if [[ -n "$GHOSTTY_PATH" ]]; then
+        if [[ "$GHOSTTY_PATH" == /usr/local/bin/* ]]; then
+            removing "Removing from /usr/local (requires sudo)..."
+            run_cmd "sudo rm -f /usr/local/bin/ghostty"
+            run_cmd "sudo rm -rf /usr/local/share/ghostty"
+        elif [[ "$GHOSTTY_PATH" == */.local/bin/* ]]; then
+            removing "Removing from ~/.local..."
+            run_cmd "rm -f ~/.local/bin/ghostty"
+            run_cmd "rm -rf ~/.local/share/ghostty"
+        fi
+        info "Ghostty removed"
+    fi
+    echo ""
+fi
+
+# 4. Remove Nerd Fonts
+if [[ " ${FOUND_ITEMS[@]} " =~ " nerd_fonts " ]]; then
+    step "Removing Nerd Fonts..."
+
+    removing "Removing font files..."
+    run_cmd "rm -rf ~/.local/share/fonts/NerdFonts"
+
+    if [[ "$DRY_RUN" == false ]]; then
+        removing "Updating font cache..."
+        fc-cache -f 2>/dev/null || true
+    fi
+
+    info "Nerd Fonts removed"
+    echo ""
+fi
+
+# 5. Remove remaining config directories
+if [[ " ${FOUND_ITEMS[@]} " =~ " config_dirs " ]]; then
+    step "Cleaning up configuration directories..."
+
+    for dir in "${CONFIG_DIRS[@]}"; do
+        removing "Removing ~/.config/$dir"
+        run_cmd "rm -rf ~/.config/$dir"
+    done
+
+    info "Config directories cleaned"
+    echo ""
+fi
+
+# 6. Remove bash configurations (if not already removed by unstow)
+step "Cleaning bash configurations..."
+
+if [[ -d "$HOME/.bash" && ! -L "$HOME/.bash" ]]; then
+    removing "Removing ~/.bash directory..."
+    run_cmd "rm -rf ~/.bash"
+fi
+
+for file in .bashrc .bash_profile .bash_logout .inputrc; do
+    if [[ -L "$HOME/$file" ]]; then
+        removing "Removing symlink: ~/$file"
+        run_cmd "rm -f ~/.local/$file"
+    fi
+done
+
+info "Bash configuration cleaned"
+echo ""
+
+# 7. Restore default system files
+step "Restoring system defaults..."
+
+if [[ -f /etc/skel/.bashrc ]]; then
+    removing "Restoring default .bashrc..."
+    run_cmd "cp /etc/skel/.bashrc ~/.bashrc"
+fi
+
+if [[ -f /etc/skel/.bash_logout ]]; then
+    removing "Restoring default .bash_logout..."
+    run_cmd "cp /etc/skel/.bash_logout ~/.bash_logout"
+fi
+
+if [[ -f /etc/skel/.profile ]]; then
+    removing "Restoring default .profile..."
+    run_cmd "cp /etc/skel/.profile ~/.profile"
+fi
+
+info "System defaults restored"
+echo ""
+
+# 8. Report on backup directories
+if [[ " ${FOUND_ITEMS[@]} " =~ " backups " ]]; then
+    step "Backup directories..."
+
+    warn "Backup directories are kept for manual review:"
+    for backup in "$HOME/dotfiles-backup-"*; do
+        if [[ -d "$backup" ]]; then
+            echo "  - $backup"
+        fi
+    done
+    echo ""
+    echo "You can safely delete these after verifying you don't need the files:"
+    echo "  rm -rf ~/dotfiles-backup-*"
+    echo ""
+fi
+
+# Summary
+echo ""
+echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
+if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${CYAN}║${NC}  ${BOLD}Dry Run Complete - No Changes Made${NC}                       ${CYAN}║${NC}"
+else
+    echo -e "${CYAN}║${NC}  ${BOLD}${GREEN}Uninstall Complete!${NC}                                      ${CYAN}║${NC}"
+fi
+echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+if [[ "$DRY_RUN" == false ]]; then
+    success "All components have been removed"
+    echo ""
+    info "Next steps:"
+    echo "  1. Logout and login again for a clean shell"
+    echo "  2. Review backup directories in ~/dotfiles-backup-*"
+    echo "  3. Optionally remove the dotfiles repository"
+    echo ""
+else
+    info "Run without --dry-run to perform actual uninstall"
+    echo ""
+fi
