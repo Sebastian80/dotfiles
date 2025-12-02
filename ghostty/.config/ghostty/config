@@ -76,8 +76,8 @@ window-save-state = never
 # Added via PR: https://github.com/ghostty-org/ghostty/pull/4200
 gtk-custom-css = tab-style.css
 
-# Compact tabs (not wide GNOME-style tabs)
-gtk-wide-tabs = false
+# Wide GNOME-style tabs for better readability
+gtk-wide-tabs = true
 
 # Tab position: top or bottom (left/right not supported in this GTK version)
 gtk-tabs-location = top
