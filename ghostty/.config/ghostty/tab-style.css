@@ -1,5 +1,5 @@
 headerbar {
-  min-height: 24px;
+  min-height: 36px;
   padding: 0;
   margin: 0;
 }
@@ -7,26 +7,26 @@ headerbar {
 /* Tabbar background - the area around tabs */
 tabbar tabbox {
   margin: 0;
-  padding: 4px;
-  min-height: 10px;
+  padding: 6px;
+  min-height: 28px;
   background-color: #232634;
   font-family: monospace;
 }
 
 /* Individual tabs - rounded corners */
 tabbar tabbox tab {
-  margin: 2px;
-  padding: 4px 12px;
+  margin: 3px;
+  padding: 8px 24px;
   color: #838ba7;
   background-color: #414559;
   border-radius: 8px;
   border: none;
 }
 
-/* Active/selected tab - rounded with lighter background */
+/* Active/selected tab - Catppuccin Frappe blue accent */
 tabbar tabbox tab:selected {
-  background-color: #51576d;
-  color: #c6d0f5;
+  background-color: #8caaee;
+  color: #232634;
   font-weight: bold;
 }
 
@@ -37,5 +37,5 @@ tabbar tabbox tab:hover {
 }
 
 tabbar tabbox tab label {
-  font-size: 13px;
+  font-size: 18px;
 }
