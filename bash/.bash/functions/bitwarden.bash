@@ -77,8 +77,8 @@ fi
 #                    Used by: gh CLI, Composer (via COMPOSER_AUTH)
 #   GITLAB_TOKEN   - From item: 8cff5d6b-ba18-484b-add5-b37f00f82acc (Gitlab)
 #                    Used by: glab CLI, Composer (via COMPOSER_AUTH)
-#   COMPOSER_AUTH  - Generated from GitHub + GitLab tokens in proper JSON format
-#                    Format: {"github-oauth":{"github.com":"..."},"gitlab-token":{"gitlab.com":"..."}}
+#   COMPOSER_AUTH  - Generated from GitHub + GitLab + Magento tokens in proper JSON format
+#                    Format: {"github-oauth":{...},"gitlab-token":{...},"http-basic":{"repo.magento.com":{...}}}
 #
 # Usage:
 #   load_bw_secrets         # Load and display status
@@ -123,9 +123,24 @@ load_bw_secrets() {
         [[ "$quiet" == false ]] && echo "   🔑 GITLAB_TOKEN loaded"
     fi
 
-    # Composer auth (generated from GitHub + GitLab tokens)
+    # Magento repo credentials (from "Magento Repository Access" item)
+    local magento_item=$(command bw get item f8192a75-1052-4038-b7b5-aee4007a9051 2>/dev/null)
+    local magento_user=$(echo "$magento_item" | jq -r '.login.username // empty' 2>/dev/null)
+    local magento_pass=$(echo "$magento_item" | jq -r '.login.password // empty' 2>/dev/null)
+    if [[ -n "$magento_user" && -n "$magento_pass" ]]; then
+        [[ "$quiet" == false ]] && echo "   🔑 Magento repo credentials loaded"
+    fi
+
+    # Composer auth (generated from GitHub + GitLab + Magento tokens)
     # Build proper Composer auth.json format
-    if [[ -n "$github_token" && "$github_token" != "null" ]] || [[ -n "$gitlab_token" && "$gitlab_token" != "null" ]]; then
+    local has_composer_auth=false
+    if [[ -n "$github_token" && "$github_token" != "null" ]] || \
+       [[ -n "$gitlab_token" && "$gitlab_token" != "null" ]] || \
+       [[ -n "$magento_user" && -n "$magento_pass" ]]; then
+        has_composer_auth=true
+    fi
+
+    if [[ "$has_composer_auth" == true ]]; then
         local composer_auth='{'
 
         # Add GitHub OAuth if token exists
@@ -146,12 +161,18 @@ load_bw_secrets() {
             composer_auth+='}'
         fi
 
+        # Add Magento repo http-basic auth if credentials exist
+        if [[ -n "$magento_user" && -n "$magento_pass" ]]; then
+            [[ "$composer_auth" != '{' ]] && composer_auth+=','
+            composer_auth+='"http-basic":{"repo.magento.com":{"username":"'"$magento_user"'","password":"'"$magento_pass"'"}}'
+        fi
+
         composer_auth+='}'
 
         export COMPOSER_AUTH="$composer_auth"
         echo "$composer_auth" > "/run/user/$(id -u)/bw-composer-auth"
         chmod 600 "/run/user/$(id -u)/bw-composer-auth"
-        [[ "$quiet" == false ]] && echo "   📦 COMPOSER_AUTH loaded (GitHub + GitLab)"
+        [[ "$quiet" == false ]] && echo "   📦 COMPOSER_AUTH loaded (GitHub + GitLab + Magento)"
     fi
 
     if [[ "$quiet" == false ]]; then
