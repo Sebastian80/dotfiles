@@ -8,7 +8,7 @@
 # ============================================
 if command -v oh-my-posh &>/dev/null; then
     # Initialize oh-my-posh with custom theme
-    eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/clean-detailed.omp.json)"
+    eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/netresearch.omp.json)"
 
     # Enable oh-my-posh's built-in OSC 133;C support (marks command execution)
     # This provides FTCS (Final Term Command Set) marks for better terminal integration
