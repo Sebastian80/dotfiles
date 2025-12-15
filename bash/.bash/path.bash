@@ -4,8 +4,11 @@
 # Loaded by: .bash_profile and .bashrc
 
 # Homebrew (must be first to prioritize brew packages)
+# PERFORMANCE: Hardcode the prefix to avoid expensive `brew --prefix` calls (~150ms each)
 if [ -d "/home/linuxbrew/.linuxbrew" ]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    # Explicitly export HOMEBREW_PREFIX for use in other scripts (avoids calling brew --prefix)
+    export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 fi
 
 # Add ~/.local/bin to PATH (if not already present)

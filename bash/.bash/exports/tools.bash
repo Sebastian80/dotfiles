@@ -28,7 +28,8 @@ fi
 # eza - Modern ls with icons and git integration
 if command -v eza &>/dev/null; then
     export EZA_COLORS="da=1;34:gm=1;34"        # Custom colors: directories=blue, git modified=blue
-    export EZA_ICONS_AUTO=1                    # Automatically show file icons
+    # Note: EZA_ICONS_AUTO is not a valid eza option - icons are controlled via --icons flag
+    # Our aliases in aliases.bash already include --icons for icon support
 fi
 
 # ripgrep - Configuration file location

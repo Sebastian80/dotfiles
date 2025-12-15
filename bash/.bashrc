@@ -52,11 +52,9 @@ done
 # This properly sets BASH_COMPLETION_COMPAT_DIR and enables lazy loading
 # Loaded before integrations so tools can utilize bash-completion utilities
 # Requires bash-completion@2 formula: brew install bash-completion@2
-if type brew &>/dev/null; then
-    HOMEBREW_PREFIX="$(brew --prefix)"
-    if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
-        source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
-    fi
+# PERFORMANCE: Use cached HOMEBREW_PREFIX from path.bash (avoids ~150ms brew --prefix call)
+if [[ -n "$HOMEBREW_PREFIX" && -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+    source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
 fi
 
 # Load custom completion scripts (modular)
