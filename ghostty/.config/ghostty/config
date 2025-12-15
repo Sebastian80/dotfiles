@@ -28,7 +28,7 @@ theme = dark:Catppuccin Frappe,light:Catppuccin Latte
 # Perfect for Oh My Posh icons and powerline symbols
 font-family = "JetBrains Mono"
 font-size = 13
-font-thicken = true
+# font-thicken = true    # macOS only, no effect on Linux
 
 # Enable font ligatures for better code readability
 # Each font-feature must be on its own line
@@ -116,10 +116,13 @@ cursor-opacity = 0.9
 shell-integration = none
 
 # ========================================
-# Behavior
+# Behavior & Security
 # ========================================
 # Don't confirm close when at a prompt
 confirm-close-surface = false
+
+# Prevent window title escape sequence injection (CVE-2024-56803)
+title-report = false
 
 # Scrollback buffer in bytes (100MB - enough for AI tool output)
 scrollback-limit = 100000000
@@ -131,7 +134,7 @@ gtk-single-instance = true
 grapheme-width-method = unicode
 
 # Bold text keeps its color instead of becoming bright
-bold-is-bright = false
+# (default behavior, bold-is-bright was deprecated in 1.2 → use bold-color = bright to enable)
 
 # ========================================
 # Performance
@@ -163,9 +166,10 @@ mouse-scroll-multiplier = precision:5,discrete:3
 # Don't auto-copy selection to clipboard (use Ctrl+Shift+C instead)
 copy-on-select = false
 
-clipboard-read = allow
+clipboard-read = ask
 clipboard-write = allow
 clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
 
 # ========================================
 # Custom Keybindings
