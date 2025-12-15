@@ -18,15 +18,15 @@ linemode = "mtime"         # Display modification time (options: none, size, mti
 # ========================================
 [preview]
 tab_size = 2               # Tab width in preview pane
-max_width = 2000           # Maximum preview width in pixels (allows full-width previews)
-max_height = 2000          # Maximum preview height in pixels (allows tall previews)
-image_quality = 75         # Image preview quality (0-100)
+max_width = 1000           # Maximum preview width in pixels (balanced for performance)
+max_height = 1200          # Maximum preview height in pixels (balanced for performance)
+image_quality = 75         # Image preview quality (50-90, higher = better but slower)
 
 # ========================================
 # Performance Settings
 # ========================================
 [tasks]
-micro_workers = 10         # Number of concurrent micro tasks
+micro_workers = 5          # Number of concurrent micro tasks (default, safer for USB/network)
 macro_workers = 10         # Number of concurrent macro tasks
 bizarre_retry = 3          # Retry count for failed tasks
 
