@@ -6,7 +6,12 @@
 # Colors
 GREEN  := \033[0;32m
 YELLOW := \033[1;33m
+CYAN   := \033[0;36m
+RED    := \033[0;31m
 NC     := \033[0m # No Color
+
+# Package list - all stow packages to manage (DRY: defined once, used everywhere)
+PACKAGES := bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # Default target
 .DEFAULT_GOAL := help
@@ -22,7 +27,7 @@ help: ## Show this help message
 
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
-	@stow -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+	@stow -v $(PACKAGES)
 	@echo "$(GREEN)✓ Installation complete$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Manual step required:$(NC)"
@@ -31,14 +36,14 @@ install: ## Install all dotfiles (create symlinks)
 
 uninstall: ## Uninstall all dotfiles (remove symlinks)
 	@echo "$(YELLOW)Removing all dotfiles symlinks...$(NC)"
-	@stow -D -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+	@stow -D -v $(PACKAGES)
 	@echo "$(GREEN)✓ Uninstallation complete$(NC)"
 
 update: ## Update dotfiles (restow after git pull)
 	@echo "$(GREEN)Updating dotfiles from git...$(NC)"
 	@git pull --rebase
 	@echo "$(GREEN)Restowing packages...$(NC)"
-	@stow -R -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+	@stow -R -v $(PACKAGES)
 	@echo "$(GREEN)✓ Update complete$(NC)"
 
 link: install ## Alias for install
@@ -51,7 +56,7 @@ list: ## List all stow packages
 
 test: ## Test stow (dry run, shows what would be created)
 	@echo "$(YELLOW)Dry run - showing what would be created:$(NC)"
-	@stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+	@stow -n -v $(PACKAGES)
 
 clean: ## Clean up broken symlinks in home directory
 	@echo "$(YELLOW)Finding broken symlinks in home directory...$(NC)"

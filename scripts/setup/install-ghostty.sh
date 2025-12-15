@@ -17,6 +17,15 @@ warn() { echo -e "${YELLOW}⚠${NC}  $1"; }
 error() { echo -e "${RED}✗${NC} $1"; }
 step() { echo -e "${BLUE}→${NC} $1"; }
 
+# Cleanup trap - ensure temp directories are removed on exit
+TEMP_DIR=""
+cleanup() {
+    if [[ -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
+        rm -rf "$TEMP_DIR"
+    fi
+}
+trap cleanup EXIT
+
 echo ""
 echo "════════════════════════════════════════════════════"
 echo "  Ghostty Terminal Emulator Installation"
@@ -37,12 +46,13 @@ if command -v ghostty &> /dev/null; then
 fi
 
 # Detect distribution
+# SECURITY: Parse os-release instead of sourcing (prevents code injection)
 if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    DISTRO=$ID
-    DISTRO_VERSION=$VERSION_ID
+    DISTRO=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+    DISTRO_VERSION=$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
 else
     DISTRO="unknown"
+    DISTRO_VERSION=""
 fi
 
 info "Detected distribution: $DISTRO"

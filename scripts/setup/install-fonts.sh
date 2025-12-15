@@ -14,6 +14,15 @@ info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
+# Cleanup trap - ensure temp directories are removed on exit
+temp_dir=""
+cleanup() {
+    if [[ -n "$temp_dir" && -d "$temp_dir" ]]; then
+        rm -rf "$temp_dir"
+    fi
+}
+trap cleanup EXIT
+
 # Font installation directory
 FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
@@ -37,8 +46,11 @@ for font in "${FONTS[@]}"; do
     # Download URL
     url="https://github.com/ryanoasis/nerd-fonts/releases/download/${NERD_FONTS_VERSION}/${font}.zip"
 
-    # Create temp directory
-    temp_dir=$(mktemp -d)
+    # Create temp directory (uses global var for cleanup trap)
+    temp_dir=$(mktemp -d) || {
+        warn "Failed to create temp directory"
+        continue
+    }
 
     # Download font
     if curl -fLo "$temp_dir/${font}.zip" "$url"; then
@@ -49,8 +61,9 @@ for font in "${FONTS[@]}"; do
         warn "✗ Failed to download $font"
     fi
 
-    # Cleanup
+    # Cleanup (trap will also catch this on unexpected exit)
     rm -rf "$temp_dir"
+    temp_dir=""
 done
 
 echo ""

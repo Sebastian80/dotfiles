@@ -57,9 +57,6 @@ set visible-stats on
 set colored-stats on
 set colored-completion-prefix on
 
-# Single tab shows all matches immediately
-set show-all-if-ambiguous on
-
 # Enable 8-bit input (for UTF-8)
 set input-meta on
 set output-meta on
