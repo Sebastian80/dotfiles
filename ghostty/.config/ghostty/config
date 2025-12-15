@@ -46,6 +46,7 @@ font-feature = +liga
 # Add padding for a cleaner look
 window-padding-x = 10
 window-padding-y = 10
+window-padding-balance = true
 
 # Transparency disabled - titlebar was too transparent and showing windows behind
 # background-opacity = 0.92
@@ -120,8 +121,17 @@ shell-integration = none
 # Don't confirm close when at a prompt
 confirm-close-surface = false
 
-# Better scrollback
-scrollback-limit = 10000
+# Scrollback buffer in bytes (100MB - enough for AI tool output)
+scrollback-limit = 100000000
+
+# Single instance mode - reuse process for new windows (faster, less RAM)
+gtk-single-instance = true
+
+# Proper emoji and international character widths
+grapheme-width-method = unicode
+
+# Bold text keeps its color instead of becoming bright
+bold-is-bright = false
 
 # ========================================
 # Performance
@@ -266,6 +276,45 @@ keybind = ctrl+x=text:\x18
 keybind = ctrl+y=text:\x19
 # Ctrl+Z: SUB - Suspend (SIGTSTP)
 keybind = ctrl+z=text:\x1a
+
+# ========================================
+# Cursor Movement (Word-wise)
+# ========================================
+# Ctrl+Left: Move cursor one word backward
+keybind = ctrl+left=esc:b
+
+# Ctrl+Right: Move cursor one word forward
+keybind = ctrl+right=esc:f
+
+# Alt+Left: Move cursor one word backward (alternative)
+keybind = alt+left=esc:b
+
+# Alt+Right: Move cursor one word forward (alternative)
+keybind = alt+right=esc:f
+
+# ========================================
+# Word Deletion Keybinds
+# ========================================
+# Alt+Backspace: Delete word backward (Meta-Backspace = \x1b\x7f)
+keybind = alt+backspace=text:\x1b\x7f
+
+# Ctrl+Backspace: Delete word backward (same as Ctrl+W)
+keybind = ctrl+backspace=text:\x17
+
+# Alt+Delete: Delete word forward (Meta-Delete)
+keybind = alt+delete=esc:[3;3~
+
+# Ctrl+Delete: Delete word forward
+keybind = ctrl+delete=esc:[3;5~
+
+# ========================================
+# Claude Code Compatibility
+# ========================================
+# Shift+Enter: Insert newline (Claude Code expects \n, not modifyOtherKeys sequence)
+keybind = shift+enter=text:\n
+
+# Ctrl+Enter: Same as Enter (Ghostty sends escape sequence by default)
+keybind = ctrl+enter=text:\n
 
 # Note: You can add more overrides as you discover problematic key combinations
 # Format: keybind = ctrl+<key>=text:\x<hex_code>
