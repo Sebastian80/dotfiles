@@ -15,8 +15,9 @@
 
 if command -v fzf &>/dev/null; then
     # Determine fzf installation path
-    if command -v brew &>/dev/null; then
-        FZF_BASE="$(brew --prefix)/opt/fzf"
+    # PERFORMANCE: Use cached HOMEBREW_PREFIX (avoids ~150ms brew --prefix call)
+    if [[ -n "$HOMEBREW_PREFIX" ]]; then
+        FZF_BASE="${HOMEBREW_PREFIX}/opt/fzf"
     fi
 
     # Load fzf keybindings (Ctrl+R, Ctrl+T, Alt+C)

@@ -109,8 +109,8 @@ load_bw_secrets() {
     local github_token=$(command bw get item db6b3004-7194-4175-b4ff-b37f00ea56ad 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
     if [[ -n "$github_token" && "$github_token" != "null" ]]; then
         export GITHUB_TOKEN="$github_token"
-        echo "$github_token" > "/run/user/$(id -u)/bw-github-token"
-        chmod 600 "/run/user/$(id -u)/bw-github-token"
+        # Use umask in subshell to ensure secure permissions from creation (no race window)
+        (umask 077; echo "$github_token" > "/run/user/${UID:-$(id -u)}/bw-github-token")
         [[ "$quiet" == false ]] && echo "   🔑 GITHUB_TOKEN loaded"
     fi
 
@@ -118,8 +118,8 @@ load_bw_secrets() {
     local gitlab_token=$(command bw get item 8cff5d6b-ba18-484b-add5-b37f00f82acc 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
     if [[ -n "$gitlab_token" && "$gitlab_token" != "null" ]]; then
         export GITLAB_TOKEN="$gitlab_token"
-        echo "$gitlab_token" > "/run/user/$(id -u)/bw-gitlab-token"
-        chmod 600 "/run/user/$(id -u)/bw-gitlab-token"
+        # Use umask in subshell to ensure secure permissions from creation (no race window)
+        (umask 077; echo "$gitlab_token" > "/run/user/${UID:-$(id -u)}/bw-gitlab-token")
         [[ "$quiet" == false ]] && echo "   🔑 GITLAB_TOKEN loaded"
     fi
 
@@ -170,8 +170,8 @@ load_bw_secrets() {
         composer_auth+='}'
 
         export COMPOSER_AUTH="$composer_auth"
-        echo "$composer_auth" > "/run/user/$(id -u)/bw-composer-auth"
-        chmod 600 "/run/user/$(id -u)/bw-composer-auth"
+        # Use umask in subshell to ensure secure permissions from creation (no race window)
+        (umask 077; echo "$composer_auth" > "/run/user/${UID:-$(id -u)}/bw-composer-auth")
         [[ "$quiet" == false ]] && echo "   📦 COMPOSER_AUTH loaded (GitHub + GitLab + Magento)"
     fi
 
@@ -250,9 +250,9 @@ bw() {
             if [[ -n "$BW_SESSION" ]]; then
                 export BW_SESSION
                 # Store session in tmpfs (auto-cleared on logout/shutdown/reboot)
-                local BW_SESSION_FILE="/run/user/$(id -u)/bw-session"
-                echo "$BW_SESSION" > "$BW_SESSION_FILE"
-                chmod 600 "$BW_SESSION_FILE"
+                # Use umask in subshell to ensure secure permissions from creation (no race window)
+                local BW_SESSION_FILE="/run/user/${UID:-$(id -u)}/bw-session"
+                (umask 077; echo "$BW_SESSION" > "$BW_SESSION_FILE")
                 echo ""
                 echo "✅ Bitwarden unlocked successfully!"
                 echo "📦 Session stored in tmpfs (auto-cleared on logout)"
@@ -270,7 +270,8 @@ bw() {
             command bw lock
             unset BW_SESSION GITHUB_TOKEN GITLAB_TOKEN COMPOSER_AUTH
             # Clear all Bitwarden files from tmpfs (session + tokens + composer auth)
-            rm -f "/run/user/$(id -u)"/bw-*
+            # Quote properly to prevent glob expansion issues
+            rm -f "/run/user/${UID:-$(id -u)}/"bw-*
             echo "🔒 Bitwarden locked (session, tokens, and Composer auth cleared)"
             ;;
         sync)

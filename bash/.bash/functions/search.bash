@@ -24,7 +24,8 @@ ff() {
     elif command -v fdfind &>/dev/null; then
         fdfind "$@"
     else
-        find . -iname "*$@*" 2>/dev/null
+        # Use $* to join arguments into single pattern (avoids word splitting issues)
+        find . -iname "*$**" 2>/dev/null
     fi
 }
 

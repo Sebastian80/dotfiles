@@ -1,3 +1,114 @@
 [user]
 	email = sebastian.ertner@netresearch.de
 	name = Sebastian
+
+# ============================================
+# Core Settings
+# ============================================
+[core]
+	editor = micro
+	autocrlf = input
+	# Use delta for beautiful diffs (installed via Homebrew)
+	pager = delta
+	# Treat spaces before tabs and all kinds of trailing whitespace as an error
+	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+[init]
+	defaultBranch = main
+
+# ============================================
+# Push/Pull/Fetch Behavior
+# ============================================
+[push]
+	default = simple
+	# Automatically set up tracking for new branches
+	autoSetupRemote = true
+
+[pull]
+	# Prefer rebase over merge for cleaner history
+	rebase = true
+
+[fetch]
+	# Remove remote-tracking branches that no longer exist
+	prune = true
+
+# ============================================
+# Delta Pager Configuration
+# ============================================
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = false
+	syntax-theme = Dracula
+
+[interactive]
+	diffFilter = delta --color-only
+
+# ============================================
+# Diff & Merge Settings
+# ============================================
+[diff]
+	colorMoved = default
+	# Show more context in diffs
+	context = 3
+
+[merge]
+	# Show original content in conflicts
+	conflictstyle = diff3
+
+# ============================================
+# Useful Aliases
+# ============================================
+# Note: Many shortcuts also defined in ~/.bash/aliases.bash
+[alias]
+	# Status shortcuts
+	st = status
+	s = status -sb
+
+	# Branch shortcuts
+	br = branch
+	co = checkout
+	sw = switch
+
+	# Commit shortcuts
+	ci = commit
+	amend = commit --amend --no-edit
+
+	# Log visualization
+	lg = log --oneline --graph --decorate
+	ll = log --oneline --graph --decorate --all
+	last = log -1 HEAD
+
+	# Undo shortcuts
+	unstage = reset HEAD --
+	undo = reset --soft HEAD~1
+
+	# Show changes
+	df = diff
+	dfs = diff --staged
+
+	# Quick operations
+	aa = add -A
+	ap = add -p
+
+# ============================================
+# Color Settings
+# ============================================
+[color]
+	ui = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+
+[color "status"]
+	added = green
+	changed = yellow
+	untracked = cyan
