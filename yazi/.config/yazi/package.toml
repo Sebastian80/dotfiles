@@ -8,12 +8,17 @@ use = "yazi-rs/plugins:toggle-pane"
 rev = "9a52857"
 hash = "8a7c58225816a163a6e8730c0adafbc8"
 
-# Piper plugin removed - requires yazi 25.9.15+ (we have 25.5.31)
-# Using rich-preview directly for markdown instead
+[[plugin.deps]]
+use = "saumyajyoti/omp"
+rev = "7a0624c"
+hash = "ca913db57342496f96c533725a64ccc4"
+
+# Piper plugin - requires yazi 25.9.15+ (we have 25.5.31)
+# Re-enable when stable yazi updates:
 # [[plugin.deps]]
 # use = "yazi-rs/plugins:piper"
-# rev = "9a52857"
-# hash = "a20327710c3a8d37ee0972128dcb6a31"
+# rev = "19dc890"
+# hash = "b26d542e75151835d7bc885f6dda74cb"
 
 [[flavor.deps]]
 use = "sanjinso/monokai-vibrant"
