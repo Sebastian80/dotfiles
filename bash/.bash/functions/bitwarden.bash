@@ -44,7 +44,8 @@ if command -v bw &>/dev/null; then
     [[ -f "$_BW_RUNDIR/bw-composer-auth" ]] && export COMPOSER_AUTH=$(command cat "$_BW_RUNDIR/bw-composer-auth")
 
     # Auto-prompt for unlock in interactive shells (only if vault is locked)
-    if [[ $- == *i* ]] && [[ -z "$BW_SESSION" ]]; then
+    # PERFORMANCE: Set BW_AUTO_CHECK=0 in ~/.bash/local.bash to disable this check (~20-50ms)
+    if [[ "${BW_AUTO_CHECK:-1}" == "1" ]] && [[ $- == *i* ]] && [[ -z "$BW_SESSION" ]]; then
         # Check if vault is locked
         _bw_status=$(command bw status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
         if [[ "$_bw_status" == "locked" ]]; then
