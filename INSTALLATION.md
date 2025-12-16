@@ -10,7 +10,7 @@ This guide walks you through completing the dotfiles setup with GNU Stow.
 - Git repository initialized
 - Comprehensive .gitignore for security
 - README.md with full documentation
-- bootstrap.sh for automated installation
+- scripts/setup/bootstrap.sh for automated installation
 - Makefile for easy management
 - GNU Stow installed (`stow 2.3.1`)
 - Homebrew installed with all modern CLI tools
@@ -63,7 +63,7 @@ If you see conflicts (existing files), you have two options:
 **Option A: Backup existing files** (Recommended)
 ```bash
 # Run the bootstrap script (handles backups automatically)
-./bootstrap.sh
+./scripts/setup/bootstrap.sh
 ```
 
 **Option B: Manual backup**
@@ -83,7 +83,7 @@ mv ~/.gitconfig ~/dotfiles-backup-$(date +%Y%m%d)/
 
 ```bash
 cd ~/dotfiles
-./bootstrap.sh
+./scripts/setup/bootstrap.sh
 ```
 
 The script will:
@@ -405,7 +405,7 @@ git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
 
 # Run bootstrap
 cd ~/dotfiles
-./bootstrap.sh
+./scripts/setup/bootstrap.sh
 
 # Or use make
 make install
@@ -440,7 +440,7 @@ sudo apt install stow
 ### Stow reports "existing target" conflicts
 **Solution 1**: Use bootstrap script
 ```bash
-./bootstrap.sh  # Offers to backup automatically
+./scripts/setup/bootstrap.sh  # Offers to backup automatically
 ```
 
 **Solution 2**: Manually backup and retry
@@ -546,7 +546,7 @@ After completing installation:
 - **GNU Stow Manual**: https://www.gnu.org/software/stow/manual/
 - **Your README**: `~/dotfiles/README.md`
 - **Makefile Help**: `make help`
-- **Bootstrap Script**: `./bootstrap.sh --help`
+- **Bootstrap Script**: `./scripts/setup/bootstrap.sh --help`
 
 ---
 

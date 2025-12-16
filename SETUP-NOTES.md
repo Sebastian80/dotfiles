@@ -91,7 +91,7 @@ git log --oneline | fzf --preview 'git show {1}'
 ls -d */ | fzf --preview 'eza --tree {}'
 ```
 
-**Config Location**: `~/dotfiles/bash/.bash/exports`
+**Config Location**: `~/.config/fzf/` (stowed from `~/dotfiles/fzf/`)
 
 ---
 
@@ -110,7 +110,7 @@ ls -d */ | fzf --preview 'eza --tree {}'
 
 ### bat (Syntax Highlighter)
 **Use**: Syntax-highlighted file viewing
-**Config**: `~/dotfiles/bat/.config/bat/config`
+**Config**: Uses Homebrew defaults (no custom config)
 **Commands**:
 ```bash
 bat file.py                    # View with syntax
@@ -129,7 +129,7 @@ eza -la                        # All files, long format
 
 ### fzf (Fuzzy Finder)
 **Use**: Interactive file/command search
-**Config**: `~/dotfiles/bash/.bash/exports`
+**Config**: `~/.config/fzf/config` (UI options) + `~/.bash/exports/fzf.bash` (shell integration)
 **Keybindings**: See "fzf Usage" section above
 **Integration**: Ctrl+T, Ctrl+R, Alt+C in bash
 
@@ -184,5 +184,5 @@ echo $FZF_CTRL_T_OPTS
 
 ---
 
-**Last Updated**: 2025-10-21
+**Last Updated**: 2025-12-16
 **Status**: Production Ready
