@@ -101,7 +101,23 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
 
     # Save multi-line commands as one history entry
     shopt -s cmdhist
+
+    # cd by just typing directory name (no 'cd' needed)
+    shopt -s autocd
+
+    # Case-insensitive globbing (*.JPG matches *.jpg)
+    shopt -s nocaseglob
+
+    # Extended pattern matching: !(exclude), *(zero-or-more), +(one-or-more)
+    shopt -s extglob
 fi
+
+# ============================================
+# Set Options
+# ============================================
+
+# Prevent accidental file overwrites with > (use >| to force)
+set -o noclobber
 
 # ============================================
 # History Configuration
