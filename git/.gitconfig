@@ -39,7 +39,16 @@
 	navigate = true
 	line-numbers = true
 	side-by-side = false
-	syntax-theme = Dracula
+	syntax-theme = OneHalfDark
+	# One Dark style - muted green/red backgrounds
+	plus-style = syntax "#2d3b2d"
+	plus-emph-style = syntax "#3d5a3d"
+	minus-style = syntax "#3b2d2d"
+	minus-emph-style = syntax "#5a3d3d"
+	# Line numbers in One Dark gray
+	line-numbers-plus-style = "#98c379"
+	line-numbers-minus-style = "#e06c75"
+	line-numbers-zero-style = "#5c6370"
 
 [interactive]
 	diffFilter = delta --color-only

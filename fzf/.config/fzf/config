@@ -23,12 +23,12 @@
 --bind=ctrl-d:preview-page-down
 
 # ========================================
-# Color Scheme
+# Color Scheme (One Dark - matches Oh My Posh prompt)
 # ========================================
-# Uncomment to customize colors (Catppuccin Frappe example):
-# --color=bg+:#414559,bg:#303446,spinner:#f2d5cf,hl:#e78284
-# --color=fg:#c6d0f5,header:#e78284,info:#ca9ee6,pointer:#f2d5cf
-# --color=marker:#f2d5cf,fg+:#c6d0f5,prompt:#ca9ee6,hl+:#e78284
+# Teal accents (#2F99A4) matching prompt brackets
+# Start with dark base, then override with custom colors
+--color=dark
+--color=bg+:#3e4451,bg:-1,fg:#abb2bf,fg+:#ffffff,hl:#2F99A4,hl+:#2F99A4,info:#2F99A4,prompt:#2F99A4,pointer:#2F99A4,marker:#98c379,spinner:#2F99A4,header:#5c6370,border:#3e4451,gutter:-1
 
 # ========================================
 # Performance
