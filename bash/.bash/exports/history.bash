@@ -27,3 +27,10 @@ export HISTIGNORE="ls:ll:cd:pwd:exit:clear:history"
 
 # Add timestamp to history (format: YYYY-MM-DD HH:MM:SS)
 export HISTTIMEFORMAT="%F %T "
+
+# Immediate history saving (survives crashes, syncs across terminals)
+# -a: append current session to history file
+# -c: clear current session history
+# -r: read history file into current session
+# This runs after every command via PROMPT_COMMAND
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a"
