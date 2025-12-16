@@ -59,7 +59,6 @@ fi
 
 # Load custom completion scripts (modular)
 # These can now use bash-completion framework utilities like _init_completion
-[ -r ~/.bash/completion.old ] && [ -f ~/.bash/completion.old ] && source ~/.bash/completion.old
 for file in ~/.bash/completions/*.bash; do
     [ -r "$file" ] && source "$file"
 done

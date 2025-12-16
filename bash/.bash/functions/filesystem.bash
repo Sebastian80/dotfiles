@@ -9,6 +9,7 @@
 # Functions:
 #   mkd        - Create directory and cd into it
 #   up         - Go up N directories
+#   back/fwd   - Directory history navigation (pushd/popd)
 #   extract    - Extract various archive formats
 #   archive    - Create archives in various formats
 #   preview    - Preview file with appropriate tool
@@ -30,6 +31,37 @@ up() {
         d="../$d"
     done
     cd "$d" || return
+}
+
+# Directory history navigation using pushd/popd
+# Use 'cd' normally - these let you go back/forward
+# Usage: back    - Go to previous directory
+#        fwd     - Go forward (after going back)
+#        dirs    - Show directory stack
+#
+# Enhanced cd that automatically pushes to stack
+cd() {
+    if [ -n "$1" ]; then
+        builtin pushd "$1" > /dev/null || return
+    else
+        builtin pushd ~ > /dev/null || return
+    fi
+}
+
+# Go back in directory history
+back() {
+    builtin popd > /dev/null || return
+    pwd
+}
+
+# Go forward - swap top two entries
+fwd() {
+    builtin pushd +1 > /dev/null 2>&1 || echo "No forward history"
+}
+
+# Show directory stack nicely
+dh() {
+    dirs -v | head -20
 }
 
 # Extract most known archive formats
