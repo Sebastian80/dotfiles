@@ -1,41 +1,115 @@
+/* ========================================
+ * Netresearch Modern Bubble Tabs
+ * ========================================
+ * Inspired by modern browser tabs (Arc, Chrome)
+ *
+ * Official Netresearch Colors:
+ *   Primary Teal:  #2f99a4
+ *   Dark Teal:     #0a6e77
+ *   Text Gray:     #585961
+ * ======================================== */
+
+/* Slim header bar */
 headerbar {
-  min-height: 36px;
+  min-height: 32px;
   padding: 0;
   margin: 0;
+  background: transparent;
 }
 
-/* Tabbar background - the area around tabs */
+/* Tab bar container - clean dark background */
 tabbar tabbox {
   margin: 0;
-  padding: 6px;
+  padding: 2px 6px;
   min-height: 28px;
-  background-color: #232634;
-  font-family: monospace;
+  background: #1a1d21;
 }
 
-/* Individual tabs - rounded corners */
+/* ========================================
+ * Individual Tabs - Compact Pill Style
+ * ======================================== */
 tabbar tabbox tab {
-  margin: 3px;
-  padding: 8px 24px;
-  color: #838ba7;
-  background-color: #414559;
-  border-radius: 8px;
+  margin: 2px;
+  padding: 5px 10px;
+  min-height: 22px;
+
+  /* Rounded pill shape */
+  border-radius: 12px;
+
+  /* Clean background */
+  background-color: transparent;
   border: none;
+  outline: none;
+
+  /* Text styling - better contrast */
+  color: #9ca3af;
+
+  /* Smooth transitions */
+  transition: all 150ms ease;
 }
 
-/* Active/selected tab - Catppuccin Frappe blue accent */
+/* ========================================
+ * Hover State - Subtle highlight
+ * ======================================== */
+tabbar tabbox tab:hover:not(:selected) {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #d1d5db;
+}
+
+/* ========================================
+ * Active Tab - Muted Teal with hint of green
+ * ======================================== */
 tabbar tabbox tab:selected {
-  background-color: #8caaee;
-  color: #232634;
-  font-weight: bold;
+  background-color: #3a6b6e;
+  color: #e5e7eb;
 }
 
-/* Hovered tab */
-tabbar tabbox tab:hover {
-  background-color: #51576d;
-  color: #ffffff;
-}
-
+/* ========================================
+ * Tab Labels - Readable font
+ * ======================================== */
 tabbar tabbox tab label {
-  font-size: 18px;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: italic;
+}
+
+tabbar tabbox tab:selected label {
+  font-size: 13px;
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* ========================================
+ * Close Button
+ * ======================================== */
+tabbar tabbox tab button {
+  min-width: 14px;
+  min-height: 14px;
+  padding: 2px;
+  margin-left: 4px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+tabbar tabbox tab:hover button {
+  opacity: 0.5;
+}
+
+tabbar tabbox tab button:hover {
+  background-color: #ef4444;
+  opacity: 1;
+}
+
+/* ========================================
+ * New Tab Button (+)
+ * ======================================== */
+tabbar tabbox > button {
+  padding: 4px 8px;
+  border-radius: 10px;
+  color: #6b7280;
+}
+
+tabbar tabbox > button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #2f99a4;
 }

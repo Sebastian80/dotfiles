@@ -35,6 +35,9 @@ font-size = 13
 font-feature = +calt
 font-feature = +liga
 
+# Line height adjustment (pixels or percentage, e.g., 2 or 10%)
+adjust-cell-height = 2
+
 # Alternative fonts (if installed):
 # font-family = "Fira Code"
 # font-family = "CascadiaCode Nerd Font"
@@ -57,10 +60,10 @@ window-padding-balance = true
 
 # Window theme (titlebar color) - only works when gtk-adwaita is enabled (default)
 # Disabled due to GTK parser errors
-# window-theme = ghostty
-# Custom titlebar colors (Catppuccin Frappe)
-# window-titlebar-background = #232634
-# window-titlebar-foreground = #c6d0f5
+# Window theme - use Netresearch colors
+window-theme = ghostty
+window-titlebar-background = #1a1d21
+window-titlebar-foreground = #9ca3af
 
 # Window size (optional - comment out to use default)
 # window-height = 35
@@ -93,6 +96,9 @@ gtk-toolbar-style = flat
 # This makes titlebar not too fat
 # gtk-titlebar = false
 
+# Merge tabs into titlebar for cleaner look
+gtk-titlebar-style = tabs
+
 # Optional: Disable all libadwaita features for even slimmer UI (uncomment to enable)
 # WARNING: This will disable window-theme and other adwaita-related features
 # gtk-adwaita = false
@@ -100,10 +106,10 @@ gtk-toolbar-style = flat
 # ========================================
 # Cursor
 # ========================================
-cursor-style = bar
+cursor-style = underline
 cursor-style-blink = true
-cursor-color = #ffffff
-cursor-opacity = 0.9
+cursor-color = #2F99A4
+cursor-opacity = 1.0
 
 # ========================================
 # Shell Integration
