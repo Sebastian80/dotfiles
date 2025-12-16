@@ -14,11 +14,17 @@ if command -v oh-my-posh &>/dev/null; then
     # _omp_hook sets _omp_start_time='' (empty) at the end, but the check
     # [[ -n "${_omp_start_time+x}" ]] tests if SET, not if HAS VALUE.
     # When no command runs (just Enter), it calculates now - "" = now - 0 = epoch time.
-    # Solution: Add a post-hook that unsets empty _omp_start_time values.
-    function _omp_timer_fix() {
-        [[ -z "$_omp_start_time" ]] && unset _omp_start_time
-    }
-    PROMPT_COMMAND+=(_omp_timer_fix)
+    # Solution: Wrap _omp_hook to unset empty _omp_start_time BEFORE it runs.
+    if declare -f _omp_hook &>/dev/null; then
+        # Copy original function to new name
+        eval "$(declare -f _omp_hook | sed '1s/_omp_hook/_omp_hook_orig/')"
+        # Redefine _omp_hook with fix
+        _omp_hook() {
+            # Clear empty timer to prevent epoch calculation
+            [[ -z "$_omp_start_time" ]] && unset _omp_start_time
+            _omp_hook_orig
+        }
+    fi
 
     # Enable oh-my-posh's built-in OSC 133;C support (marks command execution)
     # This provides FTCS (Final Term Command Set) marks for better terminal integration
