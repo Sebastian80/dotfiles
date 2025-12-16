@@ -225,9 +225,9 @@ The bash configuration is organized into focused modules loaded by `.bashrc`:
 | `exports/` | 7 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden) |
 | `functions/` | 10 modules | Custom bash functions organized by category (bitwarden, dev, filesystem, fzf, git, misc, search, system, tools-help, yazi) |
 | `integrations/` | 3 modules | Tool initializations (fzf keybindings, yazi, zoxide) |
-| `completions/` | 1 module | Bash completion for custom commands (bitwarden) |
+| `completions/` | 4 modules | Custom completions (bitwarden, composer, dynamic lazy-loading, ripgrep) |
 
-**Loading Order**: path → exports/* → prompt → aliases → functions/* → integrations/* → keybindings → completions/* → local
+**Loading Order**: path → exports/* → prompt → aliases → functions/* → bash-completion → completions/* → integrations/* → keybindings → local
 
 ## Machine-Specific Configuration
 
