@@ -1,0 +1,39 @@
+# Credentials and secrets
+.credentials.json
+*.pem
+*.key
+
+# Machine-specific settings
+settings.local.json
+
+# Backups
+*.backup
+*.backup-*
+*.bak
+
+# Ephemeral data
+cache/
+debug/
+docs/
+file-history/
+history.jsonl
+memories/
+paste-cache/
+plans/
+projects/
+session-env/
+shell-snapshots/
+stats-cache.json
+statsig/
+telemetry/
+todos/
+
+# Internal directories
+.claude/
+.serena/
+
+# Plugins managed separately
+plugins/
+
+# Old/unused scripts
+statusline-enhanced.sh
