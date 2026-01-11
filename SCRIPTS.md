@@ -154,7 +154,7 @@ cd ~/dotfiles
 **What it does:**
 1. Installs Node.js 20 (default) and 22 via fnm
 2. Sets Node 20 as default version
-3. Installs global npm packages (@anthropic-ai/claude-code)
+3. Installs global npm packages with detailed output
 
 **Usage:**
 ```bash
@@ -165,7 +165,11 @@ cd ~/dotfiles
 **Installed:**
 - Node.js v20 (default)
 - Node.js v22
-- @anthropic-ai/claude-code (Claude Code CLI)
+
+**NPM Global Packages:**
+| Package | Command | Description |
+|---------|---------|-------------|
+| @anthropic-ai/claude-code | `claude` | AI coding assistant CLI |
 
 ---
 
@@ -173,8 +177,9 @@ cd ~/dotfiles
 **Purpose:** Install Python CLI tools via uv
 
 **What it does:**
-1. Installs claude-code-tools via uv tool
-2. Verifies installation
+1. Displays package manifest with all provided commands
+2. Installs packages via uv tool
+3. Verifies installation
 
 **Usage:**
 ```bash
@@ -182,8 +187,15 @@ cd ~/dotfiles
 ./scripts/setup/install-uv-tools.sh
 ```
 
-**Installed:**
-- claude-code-tools (provides: tmux-cli, aichat, env-safe, gdoc2md, md2gdoc, vault)
+**UV Tool Packages:**
+| Package | Command | Description |
+|---------|---------|-------------|
+| claude-code-tools | `tmux-cli` | Terminal multiplexer CLI control |
+| | `aichat` | AI chat interface |
+| | `env-safe` | Environment variable safety |
+| | `gdoc2md` | Google Docs to Markdown |
+| | `md2gdoc` | Markdown to Google Docs |
+| | `vault` | Secret management |
 
 ---
 
