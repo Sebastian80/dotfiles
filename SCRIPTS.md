@@ -195,7 +195,7 @@ cd ~/dotfiles
 | | `env-safe` | Safe .env inspection (no secret exposure) |
 | | `gdoc2md` | Google Docs to Markdown |
 | | `md2gdoc` | Markdown to Google Docs |
-| | `vault` | Secret management |
+| | `vault` | Encrypted .env backup/sync |
 
 ---
 
