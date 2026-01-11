@@ -192,7 +192,7 @@ cd ~/dotfiles
 |---------|---------|-------------|
 | claude-code-tools | `tmux-cli` | Terminal multiplexer CLI control |
 | | `aichat` | Claude Code session management |
-| | `env-safe` | Environment variable safety |
+| | `env-safe` | Safe .env inspection (no secret exposure) |
 | | `gdoc2md` | Google Docs to Markdown |
 | | `md2gdoc` | Markdown to Google Docs |
 | | `vault` | Secret management |
