@@ -7,7 +7,7 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 - **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 7 exports, 10 functions, 3 integrations, 1 completions)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: 24 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
+- **Modern Tooling**: 25 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
 - **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure

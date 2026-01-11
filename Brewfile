@@ -27,6 +27,7 @@ brew "tmux"         # Terminal multiplexer for session management
 # Utilities
 brew "jq"           # JSON processor
 brew "glow"         # Markdown viewer
+brew "rich-cli"     # Rich terminal output (JSON, CSV, markdown, syntax)
 brew "btop"         # Resource monitor with beautiful TUI
 brew "htop"         # Interactive process viewer
 brew "micro"        # Modern terminal text editor
