@@ -7,7 +7,7 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 - **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 7 exports, 10 functions, 3 integrations, 1 completions)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: 23 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
+- **Modern Tooling**: 24 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
 - **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure
@@ -38,6 +38,7 @@ dotfiles/
 ├── micro/          # Text editor
 ├── htop/           # System monitor
 ├── btop/           # Modern system monitor
+├── tmux/           # Terminal multiplexer
 ├── system/         # System-level configurations (requires sudo)
 │   ├── .config/
 │   │   └── sudoers.d/
@@ -102,7 +103,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
+stow bash bin git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -336,13 +337,14 @@ git push
 
 ## Tools Included
 
-All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 23 packages).
+All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 24 packages).
 
 **🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 
 ### Terminal
 - **ghostty** - Modern GPU-accelerated terminal (via apt)
 - **oh-my-posh** - Cross-platform prompt engine with custom themes
+- **tmux** - Terminal multiplexer for session management
 
 ### Modern CLI Tools (Rust-based)
 - **bat** - `cat` with syntax highlighting and Git integration
@@ -402,7 +404,7 @@ cd ~/dotfiles
 stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # 4. Deploy packages
-stow bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
+stow bash bin git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile

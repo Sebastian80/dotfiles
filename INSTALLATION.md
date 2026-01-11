@@ -49,7 +49,7 @@ make test
 Or manually:
 ```bash
 cd ~/dotfiles
-stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
+stow -n -v bash bin git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
 ```
 
 **What to look for**:
@@ -106,7 +106,7 @@ make install
 Install all packages:
 ```bash
 cd ~/dotfiles
-stow bash git gtk ghostty oh-my-posh yazi micro htop btop
+stow bash git gtk ghostty oh-my-posh tmux yazi micro htop btop
 ```
 
 Or install selectively:
@@ -536,7 +536,7 @@ After completing installation:
 6. **Consider future enhancements**:
    - Add pre-commit hooks for secret scanning
    - Set up GitHub Actions for testing
-   - Add more tool configs (nvim, tmux, etc.)
+   - Add more tool configs (nvim, etc.)
    - Create machine-specific branches if needed
 
 ---
