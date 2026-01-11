@@ -533,7 +533,19 @@ After completing installation:
    brew bundle install --file=~/dotfiles/Brewfile
    ```
 
-6. **Consider future enhancements**:
+6. **Install Node.js and npm globals**:
+   ```bash
+   ./scripts/setup/install-node.sh
+   ```
+   Installs Node.js 20 (default) + 22 via fnm, plus Claude Code CLI.
+
+7. **Install UV tools**:
+   ```bash
+   ./scripts/setup/install-uv-tools.sh
+   ```
+   Installs claude-code-tools (provides tmux-cli, aichat, etc.)
+
+8. **Consider future enhancements**:
    - Add pre-commit hooks for secret scanning
    - Set up GitHub Actions for testing
    - Add more tool configs (nvim, etc.)

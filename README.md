@@ -337,7 +337,7 @@ git push
 
 ## Tools Included
 
-All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 24 packages).
+All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 25 packages).
 
 **🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 
