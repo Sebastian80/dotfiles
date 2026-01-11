@@ -111,7 +111,7 @@ load_bw_secrets() {
     if [[ -n "$github_token" && "$github_token" != "null" ]]; then
         export GITHUB_TOKEN="$github_token"
         # Use umask in subshell to ensure secure permissions from creation (no race window)
-        (umask 077; echo "$github_token" > "/run/user/${UID:-$(id -u)}/bw-github-token")
+        (umask 077; echo "$github_token" >| "/run/user/${UID:-$(id -u)}/bw-github-token")
         [[ "$quiet" == false ]] && echo "   🔑 GITHUB_TOKEN loaded"
     fi
 
@@ -120,7 +120,7 @@ load_bw_secrets() {
     if [[ -n "$gitlab_token" && "$gitlab_token" != "null" ]]; then
         export GITLAB_TOKEN="$gitlab_token"
         # Use umask in subshell to ensure secure permissions from creation (no race window)
-        (umask 077; echo "$gitlab_token" > "/run/user/${UID:-$(id -u)}/bw-gitlab-token")
+        (umask 077; echo "$gitlab_token" >| "/run/user/${UID:-$(id -u)}/bw-gitlab-token")
         [[ "$quiet" == false ]] && echo "   🔑 GITLAB_TOKEN loaded"
     fi
 
@@ -172,7 +172,7 @@ load_bw_secrets() {
 
         export COMPOSER_AUTH="$composer_auth"
         # Use umask in subshell to ensure secure permissions from creation (no race window)
-        (umask 077; echo "$composer_auth" > "/run/user/${UID:-$(id -u)}/bw-composer-auth")
+        (umask 077; echo "$composer_auth" >| "/run/user/${UID:-$(id -u)}/bw-composer-auth")
         [[ "$quiet" == false ]] && echo "   📦 COMPOSER_AUTH loaded (GitHub + GitLab + Magento)"
     fi
 
@@ -245,6 +245,14 @@ bw() {
             ;;
         unlock|u)
             shift
+            # Check if already unlocked
+            local _status=$(command bw status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+            if [[ "$_status" == "unlocked" ]]; then
+                echo "✅ Bitwarden already unlocked"
+                # Reload secrets in case they're missing from environment
+                load_bw_secrets
+                return 0
+            fi
             echo "🔓 Unlocking Bitwarden vault..."
             # Use declare -g to make it global (visible to parent shell)
             declare -g BW_SESSION=$(command bw unlock --raw)
@@ -253,7 +261,7 @@ bw() {
                 # Store session in tmpfs (auto-cleared on logout/shutdown/reboot)
                 # Use umask in subshell to ensure secure permissions from creation (no race window)
                 local BW_SESSION_FILE="/run/user/${UID:-$(id -u)}/bw-session"
-                (umask 077; echo "$BW_SESSION" > "$BW_SESSION_FILE")
+                (umask 077; echo "$BW_SESSION" >| "$BW_SESSION_FILE")
                 echo ""
                 echo "✅ Bitwarden unlocked successfully!"
                 echo "📦 Session stored in tmpfs (auto-cleared on logout)"
