@@ -27,6 +27,10 @@ cache_tokens=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_i
 total_tokens=$((input_tokens + cache_tokens))
 percent=$((total_tokens * 100 / context_size))
 
+# Format as K (e.g., 190K/200K)
+tokens_k=$((total_tokens / 1000))
+context_k=$((context_size / 1000))
+
 # Git info
 branch=""
 git_status=""
@@ -101,8 +105,8 @@ fi
 # Segment 4: Model (teal text, matching branding color)
 output+="${BG_DARK}${FG_TEAL}${BOLD}  $model ${RESET}"
 
-# Segment 5: Context usage (color-coded text)
-output+="${BG_DARK}${CTX_FG}${BOLD}󰍛 ${percent}% ${RESET}"
+# Segment 5: Context usage (color-coded text) - e.g., 190K/200K
+output+="${BG_DARK}${CTX_FG}${BOLD}󰍛 ${tokens_k}K/${context_k}K ${RESET}"
 
 # Single powerline separator at end
 output+="${FG_DARK}${SEP}${RESET}"
