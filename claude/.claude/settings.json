@@ -1,6 +1,7 @@
 {
   "cleanupPeriodDays": 30,
   "env": {
+    "BASH_ENV": "/home/sebastian/.bash/path.bash",
     "BASH_DEFAULT_TIMEOUT_MS": "60000",
     "BASH_MAX_TIMEOUT_MS": "600000",
     "MCP_TIMEOUT": "60000",
