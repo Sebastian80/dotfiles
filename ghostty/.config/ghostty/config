@@ -36,7 +36,7 @@ font-feature = +calt
 font-feature = +liga
 
 # Line height adjustment (pixels or percentage, e.g., 2 or 10%)
-adjust-cell-height = 2
+adjust-cell-height = 10%
 
 # Alternative fonts (if installed):
 # font-family = "Fira Code"
@@ -130,8 +130,9 @@ confirm-close-surface = false
 # Prevent window title escape sequence injection (CVE-2024-56803)
 title-report = false
 
-# Scrollback buffer in bytes (100MB - enough for AI tool output)
-scrollback-limit = 100000000
+# Scrollback buffer in lines (10k lines prevents HyperlinkMapOutOfMemory on resize)
+# Large buffers with many hyperlinks (from Claude Code etc.) exhaust memory during resize
+scrollback-limit = 10000
 
 # Single instance mode - reuse process for new windows (faster, less RAM)
 gtk-single-instance = true
@@ -238,9 +239,9 @@ keybind = ctrl+h=text:\x08
 # Many of these are printable ASCII control characters that bash expects
 # Comments moved above keybinds to prevent them being included in the action
 
-# Ctrl+A: SOH - Beginning of line
+# Ctrl+A: SOH - Beginning of line / tmux prefix
 keybind = ctrl+a=text:\x01
-# Ctrl+B: STX - Backward char
+# Ctrl+B: STX - Backward char / tmux default prefix
 keybind = ctrl+b=text:\x02
 # Ctrl+C: ETX - Interrupt (SIGINT)
 keybind = ctrl+c=text:\x03
@@ -320,6 +321,9 @@ keybind = ctrl+delete=esc:[3;5~
 # ========================================
 # Claude Code Compatibility
 # ========================================
+# Shift+Space: Just send regular space (not CSI u sequence)
+keybind = shift+space=text:\x20
+
 # Shift+Enter: Insert newline (Claude Code expects \n, not modifyOtherKeys sequence)
 keybind = shift+enter=text:\n
 
@@ -328,3 +332,66 @@ keybind = ctrl+enter=text:\n
 
 # Note: You can add more overrides as you discover problematic key combinations
 # Format: keybind = ctrl+<key>=text:\x<hex_code>
+
+# Close current pane/split (Ghostty-level, not tmux)
+keybind = ctrl+shift+q=close_surface
+
+# ========================================
+# tmux Window Switching (Alt+1-9)
+# ========================================
+# Pass Alt+1-9 to tmux for window switching (when inside tmux)
+# Ghostty tabs still work with Ctrl+Shift+T, Ctrl+Tab, etc.
+keybind = alt+1=text:\x1b1
+keybind = alt+2=text:\x1b2
+keybind = alt+3=text:\x1b3
+keybind = alt+4=text:\x1b4
+keybind = alt+5=text:\x1b5
+keybind = alt+6=text:\x1b6
+keybind = alt+7=text:\x1b7
+keybind = alt+8=text:\x1b8
+keybind = alt+9=text:\x1b9
+
+# ========================================
+# German Keyboard Compatibility (Claude Code)
+# ========================================
+# Problem: Ctrl+international_characters (Ä, Ö, Ü, ß) have no legacy ASCII encoding
+# Ghostty sends CSI u sequences like \x1b[196;5u for Ctrl+Ä (196 = Unicode of Ä)
+# Claude Code doesn't understand these sequences and displays them literally
+#
+# Solution: Ignore these key combinations since they have no standard terminal meaning
+# The CSI u format is: \x1b[<unicode_codepoint>;5u where 5 = ctrl modifier
+#
+# Unicode codepoints:
+#   Ä = U+00C4 (196), ä = U+00E4 (228)
+#   Ö = U+00D6 (214), ö = U+00F6 (246)
+#   Ü = U+00DC (220), ü = U+00FC (252)
+#   ß = U+00DF (223)
+
+# Ctrl+Umlauts: Ignore (no legacy encoding exists)
+# Ghostty accepts Unicode characters directly in keybinds
+keybind = ctrl+ä=ignore
+keybind = ctrl+shift+ä=ignore
+keybind = ctrl+ö=ignore
+keybind = ctrl+shift+ö=ignore
+keybind = ctrl+ü=ignore
+keybind = ctrl+shift+ü=ignore
+keybind = ctrl+ß=ignore
+
+# Alt+Ctrl+Umlauts: Also ignore to prevent CSI u sequences
+keybind = ctrl+alt+ä=ignore
+keybind = ctrl+alt+ö=ignore
+keybind = ctrl+alt+ü=ignore
+keybind = ctrl+alt+ß=ignore
+
+# Ctrl+Punctuation: Ignore keys without legacy ASCII control codes
+# Use Unicode characters directly (like umlauts above)
+# ' (apostrophe) = U+0027 (39) → CSI 39;5u
+# # (hash) = U+0023 (35) → CSI 35;5u
+# + (plus) = U+002B (43) → CSI 43;5u
+# < (less than) = U+003C (60) → CSI 60;5u
+keybind = ctrl+'=ignore
+keybind = ctrl+shift+'=ignore
+keybind = ctrl+#=ignore
+keybind = ctrl++=ignore
+keybind = ctrl+<=ignore
+keybind = ctrl+shift+<=ignore
