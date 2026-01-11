@@ -21,6 +21,9 @@ brew "glab"         # GitLab CLI
 # Password Manager
 brew "bitwarden-cli"  # Bitwarden CLI for password management
 
+# Terminal Multiplexer
+brew "tmux"         # Terminal multiplexer for session management
+
 # Utilities
 brew "jq"           # JSON processor
 brew "glow"         # Markdown viewer
