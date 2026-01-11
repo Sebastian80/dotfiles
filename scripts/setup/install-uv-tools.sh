@@ -24,7 +24,7 @@ cmd() { echo -e "  ${CYAN}$1${NC} - $2"; }
 # Format: "package|command1:desc,command2:desc,..."
 
 UV_TOOLS=(
-    "claude-code-tools|tmux-cli:Terminal multiplexer CLI control,aichat:Claude Code session management,env-safe:Safe .env inspection (no secret exposure),gdoc2md:Google Docs to Markdown,md2gdoc:Markdown to Google Docs,vault:Secret management"
+    "claude-code-tools|tmux-cli:Terminal multiplexer CLI control,aichat:Claude Code session management,env-safe:Safe .env inspection (no secret exposure),gdoc2md:Google Docs to Markdown,md2gdoc:Markdown to Google Docs,vault:Encrypted .env backup/sync"
 )
 
 echo ""
