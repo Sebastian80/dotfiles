@@ -21,7 +21,10 @@ dotfiles/
 │   ├── setup/
 │   │   ├── bootstrap.sh       # Automated initial setup
 │   │   ├── install-docker.sh  # Docker Engine installation
-│   │   └── install-fonts.sh   # Nerd Fonts installation
+│   │   ├── install-fonts.sh   # Nerd Fonts installation
+│   │   ├── install-ghostty.sh # Ghostty terminal installation
+│   │   ├── install-node.sh    # Node.js + npm globals
+│   │   └── install-uv-tools.sh # UV Python tools
 │   │
 │   ├── maintenance/
 │   │   ├── verify-installation.sh  # Verify dotfiles installation
@@ -142,6 +145,45 @@ cd ~/dotfiles
 ```
 
 **Installed:** 186 font files (Nerd Fonts v3.2.1)
+
+---
+
+#### install-node.sh
+**Purpose:** Install Node.js via fnm and global npm packages
+
+**What it does:**
+1. Installs Node.js 20 (default) and 22 via fnm
+2. Sets Node 20 as default version
+3. Installs global npm packages (@anthropic-ai/claude-code)
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/setup/install-node.sh
+```
+
+**Installed:**
+- Node.js v20 (default)
+- Node.js v22
+- @anthropic-ai/claude-code (Claude Code CLI)
+
+---
+
+#### install-uv-tools.sh
+**Purpose:** Install Python CLI tools via uv
+
+**What it does:**
+1. Installs claude-code-tools via uv tool
+2. Verifies installation
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/setup/install-uv-tools.sh
+```
+
+**Installed:**
+- claude-code-tools (provides: tmux-cli, aichat, env-safe, gdoc2md, md2gdoc, vault)
 
 ---
 
@@ -488,6 +530,8 @@ dotfiles/
 | Fresh install | `./scripts/setup/bootstrap.sh` |
 | Install Docker | `./scripts/setup/install-docker.sh` |
 | Install fonts | `./scripts/setup/install-fonts.sh` |
+| Install Node.js | `./scripts/setup/install-node.sh` |
+| Install UV tools | `./scripts/setup/install-uv-tools.sh` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
 | Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |
 | Manual backup | `./scripts/utils/manual-backup.sh` |
