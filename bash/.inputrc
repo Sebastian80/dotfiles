@@ -22,13 +22,18 @@
 # Without this, pressing Ctrl+M would display "109;5u" as literal text
 "\e[": skip-csi-sequence
 
-# Additional CSI sequence starters (for compatibility with other escape sequences)
-"\e]": skip-csi-sequence
-"\e\\": skip-csi-sequence
+# NOTE: Do NOT add "\e]": skip-csi-sequence here!
+# \e] starts OSC sequences (like OSC 8 hyperlinks) - skipping them breaks clickable links
+# "\e\\": skip-csi-sequence  # Also removed - this is the ST (string terminator) for OSC
 
 # ========================================
 # Basic Readline Configuration
 # ========================================
+
+# Timeout (ms) to wait for additional characters in ambiguous key sequences
+# Prevents fast typing from triggering wrong bindings (e.g., ^[[A showing as raw escape)
+# Default is 500; lower values feel snappier but may cause issues with fast input
+set keyseq-timeout 100
 
 # Use vi or emacs editing mode (emacs is default)
 set editing-mode emacs
@@ -61,6 +66,10 @@ set colored-completion-prefix on
 set input-meta on
 set output-meta on
 set convert-meta off
+
+# Enable bracketed paste mode
+# Prevents pasted text from being interpreted as commands while typing
+set enable-bracketed-paste on
 
 # ========================================
 # History Navigation
