@@ -15,7 +15,7 @@
           "powerline_symbol": "\ue0b0",
           "foreground": "#2F99A4",
           "background": "#3e4451",
-          "template": " <b>[</b><#ffffff,b>n</><b>]</b><#5c6370>|</>"
+          "template": " <b>[</b><#ffffff,b>n</><b>]</b> "
         },
         {
           "type": "session",
@@ -26,7 +26,7 @@
           "foreground_templates": [
             "{{ if .Root }}#e06c75{{ end }}"
           ],
-          "template": "{{ if or .Root .SSHSession }}{{ .UserName }}<#5c6370>|</>{{ end }}"
+          "template": "{{ if or .Root .SSHSession }}{{ .UserName }} {{ end }}"
         },
         {
           "type": "path",
@@ -47,7 +47,7 @@
               "~/Videos": " Vids"
             }
           },
-          "template": "{{ .Path }}<#5c6370>|</>"
+          "template": "{{ .Path }} "
         },
         {
           "type": "git",
@@ -74,7 +74,7 @@
             "display_mode": "context",
             "fetch_version": true
           },
-          "template": "<#5c6370>|</> <#98c379>\ue718</> {{ .Major }}.{{ .Minor }} "
+          "template": " <#98c379>\ue718</> {{ .Major }}.{{ .Minor }} "
         },
         {
           "type": "python",
@@ -87,7 +87,7 @@
             "fetch_version": true,
             "fetch_virtual_env": true
           },
-          "template": "<#5c6370>|</> <#FFD43B>\ue235</> {{ if .Venv }}({{ .Venv }}) {{ end }}{{ .Major }}.{{ .Minor }} "
+          "template": " <#FFD43B>\ue235</> {{ if .Venv }}({{ .Venv }}) {{ end }}{{ .Major }}.{{ .Minor }} "
         },
         {
           "type": "rust",
@@ -99,7 +99,7 @@
             "display_mode": "context",
             "fetch_version": true
           },
-          "template": "<#5c6370>|</> <#e06c75>\ue7a8</> {{ .Major }}.{{ .Minor }} "
+          "template": " <#e06c75>\ue7a8</> {{ .Major }}.{{ .Minor }} "
         },
         {
           "type": "go",
@@ -111,7 +111,7 @@
             "display_mode": "context",
             "fetch_version": true
           },
-          "template": "<#5c6370>|</> <#56b6c2>\ue627</> {{ .Major }}.{{ .Minor }} "
+          "template": " <#56b6c2>\ue627</> {{ .Major }}.{{ .Minor }} "
         },
         {
           "type": "php",
@@ -123,7 +123,7 @@
             "display_mode": "context",
             "fetch_version": true
           },
-          "template": "<#5c6370>|</> <#c678dd>\ue608</> {{ .Major }}.{{ .Minor }} "
+          "template": " <#c678dd>\ue608</> {{ .Major }}.{{ .Minor }} "
         },
         {
           "type": "java",
@@ -135,7 +135,7 @@
             "display_mode": "context",
             "fetch_version": true
           },
-          "template": "<#5c6370>|</> <#e06c75>\ue738</> {{ .Major }}.{{ .Minor }} "
+          "template": " <#e06c75>\ue738</> {{ .Major }}.{{ .Minor }} "
         },
         {
           "type": "docker",
@@ -143,7 +143,7 @@
           "powerline_symbol": "\ue0b0",
           "foreground": "#abb2bf",
           "background": "#3e4451",
-          "template": "<#5c6370>|</> <#0db7ed>\uf308</> {{ .Context }} "
+          "template": " <#0db7ed>\uf308</> {{ .Context }} "
         },
         {
           "type": "executiontime",
@@ -155,7 +155,7 @@
             "threshold": 500,
             "style": "roundrock"
           },
-          "template": "<#5c6370>|</> 󰔛 {{ .FormattedMs }} "
+          "template": " 󰔛 {{ .FormattedMs }} "
         }
       ]
     },
