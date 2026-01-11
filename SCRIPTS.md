@@ -191,7 +191,7 @@ cd ~/dotfiles
 | Package | Command | Description |
 |---------|---------|-------------|
 | claude-code-tools | `tmux-cli` | Terminal multiplexer CLI control |
-| | `aichat` | AI chat interface |
+| | `aichat` | Claude Code session management |
 | | `env-safe` | Environment variable safety |
 | | `gdoc2md` | Google Docs to Markdown |
 | | `md2gdoc` | Markdown to Google Docs |
