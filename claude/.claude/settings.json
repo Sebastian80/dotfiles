@@ -21,7 +21,6 @@
       "Skill(*)",
       "mcp__plugin_episodic-memory_episodic-memory__*",
       "mcp__playwright__*",
-
       "Read(/etc/**)",
       "Read(/usr/**)",
       "Read(/var/**)",
@@ -29,7 +28,6 @@
       "Read(/proc/**)",
       "Read(/tmp/**)",
       "Read(/home/linuxbrew/**)",
-
       "Bash(git:*)",
       "Bash(docker:*)",
       "Bash(docker-compose:*)",
@@ -43,12 +41,10 @@
       "Bash(uv:*)",
       "Bash(pip:*)",
       "Bash(cargo:*)",
-
       "Bash(jira:*)",
       "Bash(glab:*)",
       "Bash(serena:*)",
       "Bash(gh:*)",
-
       "Bash(cat:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
@@ -68,7 +64,6 @@
       "Bash(realpath:*)",
       "Bash(dirname:*)",
       "Bash(basename:*)",
-
       "Bash(ps:*)",
       "Bash(pgrep:*)",
       "Bash(top:*)",
@@ -91,7 +86,6 @@
       "Bash(lspci:*)",
       "Bash(lsusb:*)",
       "Bash(lsblk:*)",
-
       "Bash(echo:*)",
       "Bash(printf:*)",
       "Bash(cd:*)",
@@ -103,7 +97,6 @@
       "Bash(ln:*)",
       "Bash(chmod:*)",
       "Bash(chown:*)",
-
       "Bash(jq:*)",
       "Bash(yq:*)",
       "Bash(curl:*)",
@@ -123,7 +116,6 @@
       "Bash([:*)",
       "Bash(true:*)",
       "Bash(false:*)",
-
       "Bash(brew:*)",
       "Bash(apt:*)",
       "Bash(apt-get:*)",
@@ -131,22 +123,19 @@
       "Bash(dpkg:*)",
       "Bash(snap:*)",
       "Bash(flatpak:*)",
-
       "Bash(systemctl:*)",
       "Bash(journalctl:*)",
       "Bash(dconf:*)",
       "Bash(gsettings:*)",
       "Bash(xdg-open:*)",
-
       "Bash(ssh:*)",
       "Bash(scp:*)",
       "Bash(rsync:*)",
       "Bash(ssh-add:*)",
       "Bash(ssh-keygen:*)",
-
       "Bash(tmux:*)",
+      "Bash(tmux-cli:*)",
       "Bash(screen:*)",
-
       "Bash(bat:*)",
       "Bash(eza:*)",
       "Bash(fzf:*)",
@@ -162,12 +151,10 @@
       "Bash(oh-my-posh:*)",
       "Bash(fnm:*)",
       "Bash(nvm:*)",
-
       "Bash(sqlite3:*)",
       "Bash(mysql:*)",
       "Bash(psql:*)",
       "Bash(redis-cli:*)",
-
       "Bash(notify-send:*)",
       "Bash(xdotool:*)",
       "Bash(wmctrl:*)",
@@ -190,7 +177,6 @@
       "Write(*.env)",
       "Write(*credentials*)",
       "Write(*secret*)",
-
       "Bash(rm -rf /:*)",
       "Bash(rm -rf /home:*)",
       "Bash(rm -rf ~:*)",
@@ -213,7 +199,6 @@
       "Bash(kill:*)",
       "Bash(killall:*)",
       "Bash(pkill:*)",
-
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git push origin master:*)",
@@ -223,12 +208,10 @@
       "Bash(git branch -D:*)",
       "Bash(git push --delete:*)",
       "Bash(git rebase:*)",
-
       "Bash(npm publish:*)",
       "Bash(docker push:*)",
       "Bash(composer require:*)",
       "Bash(pip install:*)",
-
       "Bash(reboot:*)",
       "Bash(shutdown:*)",
       "Bash(poweroff:*)"
@@ -256,7 +239,9 @@
     "jira@sebastian-marketplace": true,
     "serena-integration@sebastian-marketplace": true,
     "episodic-memory@episodic-memory-dev": true,
-    "ralph-loop@claude-plugins-official": true
+    "ralph-loop@claude-plugins-official": true,
+    "superpowers-lab@local": true,
+    "canvas@claude-canvas": true
   },
   "sandbox": {
     "enabled": true,
@@ -272,5 +257,7 @@
       "killall",
       "pkill"
     ]
-  }
+  },
+  "autoUpdatesChannel": "stable",
+  "minimumVersion": "2.1.3"
 }

@@ -86,8 +86,8 @@ fi
 output=""
 
 # All segments on same dark background, matching Oh My Posh style
-# Segment 1: Claude branding [n] (teal text)
-output+="${BG_DARK}${FG_TEAL}${BOLD} [n] ${RESET}"
+# Segment 1: Claude branding [n] (teal brackets, white n)
+output+="${BG_DARK}${FG_TEAL}${BOLD} [${FG_WHITE}n${FG_TEAL}] ${RESET}"
 
 # Segment 2: Directory (light text)
 output+="${BG_DARK}${FG_LIGHT}${dir_name} ${RESET}"
