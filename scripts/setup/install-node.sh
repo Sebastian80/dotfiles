@@ -9,20 +9,28 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; }
 step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+cmd() { echo -e "  ${CYAN}$1${NC} - $2"; }
 
-# Node versions to install
+# ============================================
+# Node.js Versions
+# ============================================
 NODE_DEFAULT="20"
 NODE_VERSIONS=("20" "22")
 
-# Global npm packages
+# ============================================
+# NPM Global Packages Manifest
+# ============================================
+# Format: "package|command1:desc,command2:desc,..."
+
 NPM_GLOBALS=(
-    "@anthropic-ai/claude-code"
+    "@anthropic-ai/claude-code|claude:AI coding assistant CLI"
 )
 
 echo ""
@@ -57,16 +65,34 @@ info "Default Node: $(node --version)"
 
 # Step 3: Install global npm packages
 step "Installing global npm packages..."
-for package in "${NPM_GLOBALS[@]}"; do
-    package_name=$(echo "$package" | cut -d'@' -f1-2)
-    if npm list -g "$package_name" &> /dev/null; then
-        info "$package_name already installed"
+echo ""
+
+for entry in "${NPM_GLOBALS[@]}"; do
+    # Parse package name and commands
+    package="${entry%%|*}"
+    commands="${entry#*|}"
+
+    echo -e "${GREEN}Package:${NC} $package"
+    echo -e "${GREEN}Provides:${NC}"
+
+    # Parse and display commands
+    IFS=',' read -ra CMD_LIST <<< "$commands"
+    for item in "${CMD_LIST[@]}"; do
+        cmd_name="${item%%:*}"
+        cmd_desc="${item#*:}"
+        cmd "$cmd_name" "$cmd_desc"
+    done
+    echo ""
+
+    # Install if not present
+    if npm list -g "$package" &> /dev/null; then
+        info "$package already installed"
     else
-        info "Installing $package_name..."
+        info "Installing $package..."
         npm install -g "$package"
     fi
+    echo ""
 done
-info "All npm globals installed"
 
 # Step 4: Verify installation
 step "Verifying installation..."
