@@ -19,7 +19,7 @@
       "Read",
       "WebFetch",
       "WebSearch",
-      "Skill(*)",
+      "Skill",
       "mcp__plugin_episodic-memory_episodic-memory__*",
       "mcp__playwright__*",
       "Read(/etc/**)",
@@ -161,7 +161,16 @@
       "Bash(wmctrl:*)",
       "Bash(xrandr:*)",
       "Bash(xprop:*)",
-      "Bash(xwininfo:*)"
+      "Bash(xwininfo:*)",
+      "Bash(bun:*)",
+      "Bash(pip3:*)",
+      "Bash(pipx:*)",
+      "Bash(uvx:*)",
+      "Bash(fold:*)",
+      "Bash(glxinfo:*)",
+      "Bash(vainfo:*)",
+      "Bash(bwrap:*)",
+      "Bash(claude:*)"
     ],
     "deny": [
       "Read(.env*)",
