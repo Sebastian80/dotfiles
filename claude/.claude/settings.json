@@ -22,6 +22,7 @@
       "Skill",
       "mcp__plugin_episodic-memory_episodic-memory__*",
       "mcp__playwright__*",
+      "mcp__claude-in-chrome__*",
       "Read(/etc/**)",
       "Read(/usr/**)",
       "Read(/var/**)",
