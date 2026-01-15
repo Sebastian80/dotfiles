@@ -105,8 +105,8 @@ fi
 # Segment 4: Model (teal text, matching branding color)
 output+="${BG_DARK}${FG_TEAL}${BOLD}  $model ${RESET}"
 
-# Segment 5: Context usage (color-coded text) - e.g., 190K/200K
-output+="${BG_DARK}${CTX_FG}${BOLD}󰍛 ${tokens_k}K/${context_k}K ${RESET}"
+# Segment 5: Context usage (color-coded text) - e.g., 190K/200K (95%)
+output+="${BG_DARK}${CTX_FG}${BOLD}󰍛 ${tokens_k}K/${context_k}K (${percent}%) ${RESET}"
 
 # Single powerline separator at end
 output+="${FG_DARK}${SEP}${RESET}"

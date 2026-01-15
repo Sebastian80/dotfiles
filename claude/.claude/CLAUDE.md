@@ -118,3 +118,56 @@ For complete methodology, see the systematic-debugging skill
 - Document architectural decisions and their outcomes for future reference
 - Track patterns in user feedback to improve collaboration over time
 - When you notice something that should be fixed but is unrelated to your current task, document it in your journal rather than fixing it immediately
+
+## Bash Tool Quirks
+
+**NEVER use pipes (`|`) in bash commands.** Pipes trigger permission prompts even with sandbox enabled - this is by design, not a bug. The security model breaks down piped commands and checks each part separately.
+
+```bash
+# BAD - triggers permission prompt
+cat file | head -10
+grep pattern file | wc -l
+
+# GOOD - no prompt needed
+head -10 file
+grep -c pattern file
+```
+
+Alternatives to pipes:
+- Use tool flags instead: `grep -c` instead of `grep | wc -l`
+- Use the Read tool with `limit` parameter instead of `head`/`tail`
+- Use `&&` chaining (allowed) instead of pipes (not allowed)
+- Accept that some complex commands will prompt
+
+**Pipes to Python stdin don't work.** This fails silently:
+```bash
+# BROKEN - stdin is empty
+command | python3 -c "import sys; json.load(sys.stdin)"
+```
+
+Use these instead:
+```bash
+# Option 1: Temp file
+command > /tmp/out.json && python3 -c "..." < /tmp/out.json
+
+# Option 2: Process substitution
+python3 -c "..." < <(command)
+
+# Option 3: Use jq instead of Python for JSON
+command | jq '.field'
+```
+
+**If a Bash command fails, STOP and diagnose before retrying.** Don't retry variations of the same broken pattern. Analyze the error message first.
+
+## Claude Code Plugin Cache
+
+**Multiple plugin versions can coexist.** Before editing plugin files in `~/.claude/plugins/cache/`, verify which version is active:
+```bash
+# Check symlink target
+readlink -f ~/.local/bin/plugin-name
+
+# List all versions
+ls ~/.claude/plugins/cache/publisher/plugin-name/
+```
+
+Edit the version the symlink points to, not necessarily the highest/lowest version number.
