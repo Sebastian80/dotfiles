@@ -130,9 +130,8 @@ confirm-close-surface = false
 # Prevent window title escape sequence injection (CVE-2024-56803)
 title-report = false
 
-# Scrollback buffer in lines (10k lines prevents HyperlinkMapOutOfMemory on resize)
-# Large buffers with many hyperlinks (from Claude Code etc.) exhaust memory during resize
-scrollback-limit = 10000
+# Scrollback buffer in lines (increased for longer history, accepts higher RAM usage)
+scrollback-limit = 100000
 
 # Single instance mode - reuse process for new windows (faster, less RAM)
 gtk-single-instance = true
