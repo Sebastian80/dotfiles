@@ -22,3 +22,8 @@
 if [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
     export SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
 fi
+
+# Suppress Node.js deprecation warnings for Bitwarden CLI
+# The bw command uses Homebrew's Node which shows punycode deprecation warnings (DEP0040)
+# This is harmless but noisy - suppress until Bitwarden updates their dependencies
+export NODE_NO_WARNINGS=1
