@@ -14,7 +14,6 @@
     "commit": "",
     "pr": ""
   },
-  "plansDirectory": ".claude/plan",
   "permissions": {
     "allow": [
       "Bash",
@@ -26,7 +25,10 @@
       "Skill",
       "Edit",
       "Write",
-      "mcp__*"
+      "mcp__plugin_claude-mem_mcp-search____IMPORTANT",
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "mcp__plugin_claude-mem_mcp-search__timeline",
+      "mcp__plugin_claude-mem_mcp-search__get_observations"
     ],
     "deny": [
       "Read(.env*)",
@@ -102,13 +104,12 @@
   "enabledPlugins": {
     "superpowers@superpowers-dev": true,
     "jira@sebastian-marketplace": true,
-    "project-memory-integration@local": true,
     "code-nav@sebastian-marketplace": true,
     "agent-browser@sebastian-marketplace": true,
     "cc-docs@sebastian-marketplace": true,
     "tmux-cli@sebastian-marketplace": true,
     "validate-frontmatter@sebastian-marketplace": true,
-    "project-memory@sebastian-marketplace": true
+    "claude-mem@thedotmack": true
   },
   "language": "english",
   "sandbox": {
@@ -126,6 +127,7 @@
       "pkill"
     ]
   },
+  "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
-  "alwaysThinkingEnabled": true
+  "plansDirectory": ".claude/plan"
 }
