@@ -7,6 +7,7 @@ brew "bat"          # cat with syntax highlighting
 brew "eza"          # Modern ls replacement
 brew "fd"           # Modern find replacement
 brew "ripgrep"      # Modern grep replacement (rg)
+brew "ast-grep"     # AST-based structural code search (sg)
 brew "fzf"          # Fuzzy finder
 brew "yazi"         # Terminal file manager
 brew "zoxide"       # Smarter cd command

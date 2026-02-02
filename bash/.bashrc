@@ -141,3 +141,5 @@ fi
 # Uncomment to show a welcome message when opening a new terminal
 # echo "Welcome to $(hostname)!"
 # echo "Type 'tools' for a list of available terminal enhancement tools."
+
+alias claude-mem='bun "/home/sebastian/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
