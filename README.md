@@ -25,6 +25,11 @@ dotfiles/
 │       ├── dotfiles-backup
 │       ├── docker-clean
 │       └── switch-theme
+├── claude/         # Claude Code AI assistant
+│   └── .claude/
+│       ├── CLAUDE.md       # Global instructions
+│       ├── settings.json   # Permissions, plugins, hooks
+│       └── rules/          # Modular topic-specific rules
 ├── git/            # Git configuration
 ├── gtk/            # GTK theme configuration
 ├── ghostty/        # Ghostty terminal
@@ -103,7 +108,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -378,6 +383,9 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list o
 - **lazydocker** - Terminal UI for Docker management
 - **xclip** - X11 clipboard utility
 
+### AI Development
+- **Claude Code** - Anthropic's AI coding assistant CLI, configured via `claude/` stow package (CLAUDE.md instructions, permission model, plugin list, modular rules)
+
 ### Development Tools
 - **fnm** - Fast Node.js version manager
 - **uv** - Fast Python package installer and resolver
@@ -405,7 +413,7 @@ cd ~/dotfiles
 stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # 4. Deploy packages
-stow bash bin git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile

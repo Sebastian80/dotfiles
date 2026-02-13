@@ -49,7 +49,7 @@ make test
 Or manually:
 ```bash
 cd ~/dotfiles
-stow -n -v bash bin git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
 ```
 
 **What to look for**:
@@ -106,7 +106,7 @@ make install
 Install all packages:
 ```bash
 cd ~/dotfiles
-stow bash git gtk ghostty oh-my-posh tmux yazi micro htop btop
+stow bash claude git gtk ghostty oh-my-posh tmux yazi micro htop btop
 ```
 
 Or install selectively:
