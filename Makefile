@@ -11,7 +11,7 @@ RED    := \033[0;31m
 NC     := \033[0m # No Color
 
 # Package list - all stow packages to manage (DRY: defined once, used everywhere)
-PACKAGES := bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+PACKAGES := bash bin claude git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # Default target
 .DEFAULT_GOAL := help
@@ -93,6 +93,9 @@ htop: ## Install htop configuration only
 
 btop: ## Install btop configuration only
 	@stow -v btop
+
+claude: ## Install Claude Code configuration only
+	@stow -v claude
 
 gtk: ## Install GTK theme configuration only
 	@stow -v gtk
