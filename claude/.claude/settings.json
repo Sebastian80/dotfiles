@@ -17,6 +17,8 @@
   "permissions": {
     "allow": [
       "Bash",
+      "Bash(ast-grep*)",
+      "Bash(sg *)",
       "Read",
       "Glob",
       "Grep",
@@ -109,7 +111,8 @@
     "cc-docs@sebastian-marketplace": true,
     "tmux-cli@sebastian-marketplace": true,
     "validate-frontmatter@sebastian-marketplace": true,
-    "claude-mem@thedotmack": true
+    "claude-mem@thedotmack": true,
+    "ast-grep@ast-grep-marketplace": true
   },
   "language": "english",
   "sandbox": {
