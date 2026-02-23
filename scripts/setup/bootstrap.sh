@@ -207,8 +207,8 @@ fi
 echo ""
 step "Checking for conflicts..."
 
-# List of packages to install (all 15 user-facing packages)
-PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
+# List of packages to install (all 18 stow packages)
+PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
 
 # Check for conflicts
 CONFLICTS=0
@@ -340,11 +340,11 @@ echo ""
 step "Post-installation tasks..."
 
 # Check for machine-specific local config
-if [[ ! -f "$HOME/.bash/local" ]]; then
-    info "Creating empty .bash/local for machine-specific config..."
-    touch "$HOME/.bash/local"
-    echo "# Machine-specific bash configuration" > "$HOME/.bash/local"
-    echo "# This file is git-ignored" >> "$HOME/.bash/local"
+if [[ ! -f "$HOME/.bash/local.bash" ]]; then
+    info "Creating empty .bash/local.bash for machine-specific config..."
+    touch "$HOME/.bash/local.bash"
+    echo "# Machine-specific bash configuration" > "$HOME/.bash/local.bash"
+    echo "# This file is git-ignored" >> "$HOME/.bash/local.bash"
 fi
 
 # Install system configuration
@@ -484,9 +484,9 @@ echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}        
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${BOLD}${CYAN}What was installed:${NC}"
-echo -e "  ${CHECK} GNU Stow and dotfiles packages (16 configs)"
+echo -e "  ${CHECK} GNU Stow and dotfiles packages (18 configs)"
 if command -v brew &> /dev/null && brew list bat &> /dev/null; then
-    echo -e "  ${CHECK} Homebrew packages (27 modern CLI tools)"
+    echo -e "  ${CHECK} Homebrew packages ($PACKAGE_COUNT tools from Brewfile)"
 fi
 if [[ -f /etc/sudoers.d/homebrew-path ]]; then
     echo -e "  ${CHECK} System configuration (Homebrew sudo PATH)"
@@ -504,7 +504,7 @@ echo ""
 echo -e "${BOLD}${BLUE}Next Steps:${NC}"
 echo -e "  ${CYAN}1.${NC} Reload your shell: ${MAGENTA}source ~/.bashrc${NC}"
 echo -e "  ${CYAN}2.${NC} Review the configuration files"
-echo -e "  ${CYAN}3.${NC} Add machine-specific settings to ${MAGENTA}~/.bash/local${NC}"
+echo -e "  ${CYAN}3.${NC} Add machine-specific settings to ${MAGENTA}~/.bash/local.bash${NC}"
 echo ""
 echo -e "${BOLD}${YELLOW}Optional Next Steps:${NC}"
 if ! command -v brew &> /dev/null || ! brew list bat &> /dev/null; then

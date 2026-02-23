@@ -211,7 +211,7 @@ cd ~/dotfiles
 **What it checks:**
 - Prerequisites (git, stow, Homebrew)
 - Repository status
-- All 15 stow packages (bash, bin, git, gtk, ghostty, oh-my-posh, yazi, micro, htop, btop, eza, fzf, glow, lazygit, lazydocker, ripgrep)
+- All 18 stow packages (bash, bin, btop, claude, eza, fzf, ghostty, git, glow, gtk, htop, lazydocker, lazygit, micro, oh-my-posh, ripgrep, tmux, yazi)
 - 22 critical symlinks (includes ~/bin utilities and tool configs)
 - Broken symlinks
 - Homebrew packages
@@ -388,9 +388,8 @@ make bin          # Install only bin/ package
 
 **Relevant targets:**
 ```makefile
-install: bash bin git gtk ghostty oh-my-posh yazi micro htop btop
-uninstall: bash bin git gtk ghostty oh-my-posh yazi micro htop btop
-update: bash bin git gtk ghostty oh-my-posh yazi micro htop btop
+# PACKAGES variable (defined once, used by install/uninstall/update):
+PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 ```
 
 ---

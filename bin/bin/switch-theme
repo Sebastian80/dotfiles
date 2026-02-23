@@ -24,14 +24,14 @@ if [ -z "$1" ]; then
     echo ""
     echo "Browse all themes at: https://ohmyposh.dev/docs/themes"
     echo ""
-    echo "Current theme in ~/.bashrc:"
-    grep "oh-my-posh init bash" ~/.bashrc | tail -1
+    echo "Current theme in ~/.bash/prompt.bash:"
+    grep "oh-my-posh init bash" ~/.bash/prompt.bash | tail -1
     exit 0
 fi
 
 THEME=$1
 THEME_FILE="$HOME/.config/oh-my-posh/themes/${THEME}.omp.json"
-BASHRC="$HOME/.bashrc"
+PROMPT_FILE="$HOME/.bash/prompt.bash"
 
 # Download theme if it doesn't exist
 if [ ! -f "$THEME_FILE" ]; then
@@ -51,15 +51,15 @@ if [ ! -f "$THEME_FILE" ]; then
     fi
 fi
 
-# Backup bashrc
-cp "$BASHRC" "$BASHRC.backup-$(date +%Y%m%d-%H%M%S)"
+# Backup prompt config
+cp "$PROMPT_FILE" "$PROMPT_FILE.backup-$(date +%Y%m%d-%H%M%S)"
 
 # Replace the oh-my-posh init line
-sed -i "s|eval \"\$(oh-my-posh init bash --config .*)\"|eval \"\$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/${THEME}.omp.json)\"|g" "$BASHRC"
+sed -i "s|eval \"\$(oh-my-posh init bash --config .*)\"|eval \"\$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/${THEME}.omp.json)\"|g" "$PROMPT_FILE"
 
 echo ""
 echo "✓ Theme switched to: ${THEME}"
-echo "✓ Backup created: $BASHRC.backup-$(date +%Y%m%d-%H%M%S)"
+echo "✓ Backup created: $PROMPT_FILE.backup-*"
 echo ""
 echo "To apply the changes, run:"
 echo "  source ~/.bashrc"
