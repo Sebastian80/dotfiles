@@ -34,15 +34,18 @@ brew "htop"         # Interactive process viewer
 brew "micro"        # Modern terminal text editor
 brew "lazydocker"   # Terminal UI for docker commands
 brew "xclip"        # X11 clipboard utility (required for clipboard ops in terminals)
+brew "moor"         # Nice pager for humans (better less)
+brew "Valkyrie00/homebrew-bbrew/bbrew"  # Terminal UI for managing Homebrew packages
 
-# Development Version Managers
-brew "fnm"          # Fast Node.js version manager
-brew "uv"           # Fast Python package manager
-brew "composer"     # PHP dependency manager
+# MCP Tools
+brew "f/mcptools/mcp"     # CLI for inspecting and debugging MCP servers
+
+# Development Tools
+brew "oven-sh/bun/bun"    # JavaScript runtime, bundler, and package manager
+brew "fnm"                # Fast Node.js version manager
+brew "uv"                 # Fast Python package manager
+brew "composer"           # PHP dependency manager
 
 # Prompt & Shell
 brew "oh-my-posh"   # Prompt theme engine
 brew "bash-completion@2"  # Programmable completion for Bash 4.2+
-
-# Build Tools (optional, for compiling from source if needed)
-# brew "gcc"

@@ -82,7 +82,7 @@ fi
 # 3. Check Stow Packages
 section "Stow Packages"
 
-PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
+PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
 
 for package in "${PACKAGES[@]}"; do
     if [[ -d "$package" ]]; then
@@ -213,10 +213,10 @@ check_tool composer "composer (PHP dependency manager)"
 # 8. Check Shell Configuration
 section "Shell Configuration"
 
-if [[ -f ~/.bash/local ]]; then
-    success "Machine-specific config (~/.bash/local) exists"
+if [[ -f ~/.bash/local.bash ]]; then
+    success "Machine-specific config (~/.bash/local.bash) exists"
 else
-    warn "Machine-specific config (~/.bash/local) not found (optional)"
+    warn "Machine-specific config (~/.bash/local.bash) not found (optional)"
 fi
 
 # Check if Homebrew is in PATH

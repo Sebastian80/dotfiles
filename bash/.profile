@@ -17,5 +17,5 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # NOTE: PATH modifications moved to ~/.bash/path for centralized management
-# NOTE: Machine-specific settings moved to ~/.bash/local (git-ignored)
+# NOTE: Machine-specific settings moved to ~/.bash/local.bash (git-ignored)
 

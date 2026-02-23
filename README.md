@@ -4,10 +4,10 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 
 ## Features
 
-- **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 7 exports, 10 functions, 3 integrations, 1 completions)
+- **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 8 exports, 10 functions, 3 integrations, 4 completions)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: 26 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
+- **Modern Tooling**: 32 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
 - **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure
@@ -39,6 +39,7 @@ dotfiles/
 ├── glow/           # Markdown viewer configuration
 ├── lazygit/        # Git TUI configuration
 ├── lazydocker/     # Docker TUI configuration
+├── ripgrep/        # Ripgrep search configuration
 ├── yazi/           # File manager
 ├── micro/          # Text editor
 ├── htop/           # System monitor
@@ -108,7 +109,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -228,7 +229,7 @@ The bash configuration is organized into focused modules loaded by `.bashrc`:
 ### Modular Directories
 | Directory | Files | Purpose |
 |-----------|-------|---------|
-| `exports/` | 7 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden) |
+| `exports/` | 8 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden, claude) |
 | `functions/` | 10 modules | Custom bash functions organized by category (bitwarden, dev, filesystem, fzf, git, misc, search, system, tools-help, yazi) |
 | `integrations/` | 3 modules | Tool initializations (fzf keybindings, yazi, zoxide) |
 | `completions/` | 4 modules | Custom completions (bitwarden, composer, dynamic lazy-loading, ripgrep) |
@@ -240,7 +241,7 @@ The bash configuration is organized into focused modules loaded by `.bashrc`:
 Create a `local` file in any package for machine-specific overrides:
 
 ```bash
-# bash/.bash/local (this file is git-ignored)
+# bash/.bash/local.bash (this file is git-ignored)
 export WORK_ENV=true
 export CUSTOM_PATH="/opt/work/bin"
 ```
@@ -342,7 +343,7 @@ git push
 
 ## Tools Included
 
-All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 25 packages).
+All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 32 packages).
 
 **🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 
@@ -366,6 +367,7 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list o
 - **difftastic** - Structural diff tool that understands syntax
 - **lazygit** - Terminal UI for git commands
 - **gh** - GitHub CLI for working with issues, PRs, repos
+- **glab** - GitLab CLI for self-hosted GitLab (git.netresearch.de)
 
 ### Editors
 - **micro** - Modern, intuitive terminal text editor (mouse support!)
@@ -380,15 +382,21 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list o
 ### Utilities
 - **jq** - Command-line JSON processor
 - **glow** - Render markdown in the terminal
+- **rich-cli** - Rich terminal output (JSON, CSV, markdown, syntax highlighting)
+- **moor** - Nice pager for humans (better less)
 - **lazydocker** - Terminal UI for Docker management
+- **bbrew** - Terminal UI for managing Homebrew packages
 - **xclip** - X11 clipboard utility
 
-### AI Development
+### AI & MCP
 - **Claude Code** - Anthropic's AI coding assistant CLI, configured via `claude/` stow package (CLAUDE.md instructions, permission model, plugin list, modular rules)
+- **mcp** - CLI for inspecting and debugging MCP servers
 
 ### Development Tools
+- **bun** - JavaScript runtime, bundler, and package manager
 - **fnm** - Fast Node.js version manager
 - **uv** - Fast Python package installer and resolver
+- **composer** - PHP dependency manager
 - **bash-completion@2** - Programmable completion for Bash 4.2+
 - **Docker Engine** - Container platform (via apt)
 
@@ -410,10 +418,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin git gtk ghostty oh-my-posh yazi micro htop btop eza fzf glow lazygit lazydocker
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # 4. Deploy packages
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile
