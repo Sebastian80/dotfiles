@@ -53,6 +53,9 @@ $RECYCLE.BIN/
 # Claude Code
 **/.claude/settings.local.json
 
+# claude-mem auto-generated folder context files
+**/CLAUDE.md
+
 # Node.js
 node_modules/
 npm-debug.log*

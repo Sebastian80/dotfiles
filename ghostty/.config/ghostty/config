@@ -108,7 +108,7 @@ gtk-titlebar-style = tabs
 # ========================================
 cursor-style = underline
 cursor-style-blink = true
-cursor-color = #2F99A4
+cursor-color = #FFFFFF
 cursor-opacity = 1.0
 
 # ========================================
@@ -384,13 +384,16 @@ keybind = ctrl+alt+ß=ignore
 
 # Ctrl+Punctuation: Ignore keys without legacy ASCII control codes
 # Use Unicode characters directly (like umlauts above)
+# DISABLED: These silently swallow keypresses, which can break app shortcuts
+# (e.g. ctrl++=ignore broke Ghostty's zoom-in). Accepting occasional CSI u
+# sequences in output is preferable to silently broken functionality.
 # ' (apostrophe) = U+0027 (39) → CSI 39;5u
 # # (hash) = U+0023 (35) → CSI 35;5u
 # + (plus) = U+002B (43) → CSI 43;5u
 # < (less than) = U+003C (60) → CSI 60;5u
-keybind = ctrl+'=ignore
-keybind = ctrl+shift+'=ignore
-keybind = ctrl+#=ignore
-keybind = ctrl++=ignore
-keybind = ctrl+<=ignore
-keybind = ctrl+shift+<=ignore
+# keybind = ctrl+'=ignore
+# keybind = ctrl+shift+'=ignore
+# keybind = ctrl+#=ignore
+# keybind = ctrl++=ignore
+# keybind = ctrl+<=ignore
+# keybind = ctrl+shift+<=ignore
