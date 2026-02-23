@@ -139,6 +139,10 @@ fi
 # Usage: sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+# WireGuard VPN
+alias vpnup='sudo wg-quick up wg0'
+alias vpndown='sudo wg-quick down wg0'
+
 # Show open ports
 alias ports='netstat -tulanp'
 

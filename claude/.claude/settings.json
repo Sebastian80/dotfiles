@@ -8,7 +8,8 @@
     "MAX_MCP_OUTPUT_TOKENS": "50000",
     "DISABLE_TELEMETRY": "1",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
-    "ENABLE_TOOL_SEARCH": "true"
+    "ENABLE_TOOL_SEARCH": "true",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "attribution": {
     "commit": "",
@@ -26,11 +27,7 @@
       "WebSearch",
       "Skill",
       "Edit",
-      "Write",
-      "mcp__plugin_claude-mem_mcp-search____IMPORTANT",
-      "mcp__plugin_claude-mem_mcp-search__search",
-      "mcp__plugin_claude-mem_mcp-search__timeline",
-      "mcp__plugin_claude-mem_mcp-search__get_observations"
+      "Write"
     ],
     "deny": [
       "Read(.env*)",
@@ -106,12 +103,8 @@
   "enabledPlugins": {
     "superpowers@superpowers-dev": true,
     "jira@sebastian-marketplace": true,
-    "code-nav@sebastian-marketplace": true,
-    "agent-browser@sebastian-marketplace": true,
-    "cc-docs@sebastian-marketplace": true,
     "tmux-cli@sebastian-marketplace": true,
-    "validate-frontmatter@sebastian-marketplace": true,
-    "claude-mem@thedotmack": true,
+    "agent-browser@agent-browser": true,
     "ast-grep@ast-grep-marketplace": true
   },
   "language": "english",
