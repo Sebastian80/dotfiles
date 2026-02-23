@@ -49,7 +49,7 @@ make test
 Or manually:
 ```bash
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 ```
 
 **What to look for**:
@@ -106,7 +106,7 @@ make install
 Install all packages:
 ```bash
 cd ~/dotfiles
-stow bash claude git gtk ghostty oh-my-posh tmux yazi micro htop btop
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 ```
 
 Or install selectively:
@@ -481,7 +481,7 @@ Before pushing to GitHub:
 - [ ] Check for API keys: `grep -r "api_key" .`
 - [ ] Check for tokens: `grep -r "token" .`
 - [ ] No SSH private keys: `find . -name "id_rsa" -o -name "id_ed25519"`
-- [ ] Machine-specific files in `.bash/local` (git-ignored)
+- [ ] Machine-specific files in `.bash/local.bash` (git-ignored)
 
 ---
 
@@ -490,7 +490,7 @@ Before pushing to GitHub:
 The `.gitignore` automatically excludes:
 
 - `*.local` - Machine-specific configs
-- `.bash/local` - Your local bash settings
+- `.bash/local.bash` - Your local bash settings
 - `*_secret`, `*_private` - Sensitive files
 - `.env`, `.env.*` - Environment files
 - SSH private keys
@@ -516,7 +516,7 @@ After completing installation:
 2. **Customize for this machine**:
    ```bash
    # Add machine-specific settings (git-ignored)
-   vim ~/.bash/local
+   vim ~/.bash/local.bash
    ```
 
 3. **Review and clean up**:

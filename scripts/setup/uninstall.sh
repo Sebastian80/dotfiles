@@ -133,9 +133,9 @@ if [[ -f /etc/sudoers.d/homebrew-path ]]; then
 fi
 
 # Check for machine-specific config
-if [[ -f "$HOME/.bash/local" ]]; then
+if [[ -f "$HOME/.bash/local.bash" ]]; then
     FOUND_ITEMS+=("bash_local")
-    info "Found: Machine-specific config (~/.bash/local)"
+    info "Found: Machine-specific config (~/.bash/local.bash)"
 fi
 
 echo ""
@@ -189,7 +189,7 @@ for item in "${FOUND_ITEMS[@]}"; do
             ;;
         bash_local)
             echo -e "  ${TRASH} Machine-specific config:"
-            echo "    - ~/.bash/local"
+            echo "    - ~/.bash/local.bash"
             ;;
     esac
     echo ""
@@ -231,7 +231,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " stowed_dotfiles " ]]; then
 
     if [[ -d "$DOTFILES_DIR" ]]; then
         cd "$DOTFILES_DIR"
-        PACKAGES=(bash bin git gtk ghostty oh-my-posh yazi micro htop btop fzf eza lazygit lazydocker glow)
+        PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
 
         for package in "${PACKAGES[@]}"; do
             if [[ -d "$package" ]]; then
@@ -362,8 +362,8 @@ fi
 if [[ " ${FOUND_ITEMS[@]} " =~ " bash_local " ]]; then
     step "Removing machine-specific config..."
 
-    removing "Removing ~/.bash/local..."
-    run_cmd "rm -f ~/.bash/local"
+    removing "Removing ~/.bash/local.bash..."
+    run_cmd "rm -f ~/.bash/local.bash"
 
     info "Machine-specific config removed"
     echo ""
