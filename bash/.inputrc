@@ -20,7 +20,7 @@
 # Bind ESC [ to skip-csi-sequence
 # This consumes CSI u sequences like ^[[109;5u (Ctrl+M)
 # Without this, pressing Ctrl+M would display "109;5u" as literal text
-"\e[": skip-csi-sequence
+# "\e[": skip-csi-sequence
 
 # NOTE: Do NOT add "\e]": skip-csi-sequence here!
 # \e] starts OSC sequences (like OSC 8 hyperlinks) - skipping them breaks clickable links
