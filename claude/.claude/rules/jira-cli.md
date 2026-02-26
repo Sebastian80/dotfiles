@@ -6,3 +6,4 @@
 - To update issue fields (description, summary, etc.), use `-X PATCH`: `jira issue KEY -X PATCH --description "..."`. Without `-X PATCH` it's a GET that silently ignores write flags.
 - Use dedicated endpoints for sub-resources: `jira comments KEY`, `jira attachments KEY`, `jira transitions KEY`. Don't parse the full issue JSON to extract comments or attachments.
 - When parsing `--format json` output, fields are at `.data.fields`, NOT `.fields`. The CLI wraps responses in `{"success": true, "data": {...}}`.
+- Use dedicated commands for links (`jira link`) and sprints (`jira sprint`). Unknown flags on `jira issue` are silently ignored — the GET response looks like success.
