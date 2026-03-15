@@ -2,7 +2,7 @@
 
 Complete guide to scripts and utilities in this dotfiles repository.
 
-**Last Updated:** 2025-10-20
+**Last Updated:** 2026-03-15
 
 ---
 
@@ -31,8 +31,7 @@ dotfiles/
 │   │   └── verify-auth.sh          # Verify authentication setup
 │   │
 │   └── utils/
-│       ├── manual-backup.sh        # Manual backup utility
-│       └── legacy-ghostty/         # Deprecated scripts (reference only)
+│       └── manual-backup.sh        # Manual backup utility
 │
 └── [other stow packages...]
 ```
@@ -124,9 +123,7 @@ cd ~/dotfiles
 ```
 
 **Installed:**
-- Docker CE 28.5.1
-- Docker Compose v2.40.1
-- Docker Buildx v0.29.1
+- Docker CE, Docker Compose, Docker Buildx (latest stable versions)
 
 ---
 
@@ -144,7 +141,7 @@ cd ~/dotfiles
 ./scripts/setup/install-fonts.sh
 ```
 
-**Installed:** 186 font files (Nerd Fonts v3.2.1)
+**Installed:** JetBrainsMono, FiraCode, Meslo (Nerd Fonts, latest version)
 
 ---
 
@@ -196,6 +193,24 @@ cd ~/dotfiles
 | | `gdoc2md` | Google Docs to Markdown |
 | | `md2gdoc` | Markdown to Google Docs |
 | | `vault` | Encrypted .env backup/sync |
+
+---
+
+#### uninstall.sh
+**Purpose:** Safely remove all dotfiles and installed components
+
+**What it does:**
+1. Scans for installed components (stowed dotfiles, Homebrew, Ghostty, fonts, etc.)
+2. Shows what will be removed
+3. Asks for confirmation before proceeding
+4. Unstows all packages, removes components, restores system defaults
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/setup/uninstall.sh          # Full uninstall (with confirmation)
+./scripts/setup/uninstall.sh --dry-run # Preview only, no changes
+```
 
 ---
 
@@ -278,21 +293,6 @@ make verify-auth
 cd ~/dotfiles
 ./scripts/utils/manual-backup.sh
 ```
-
----
-
-#### legacy-ghostty/ (Deprecated)
-**Purpose:** Historical reference only
-
-**Contents:**
-- `install-simple.sh` - Old APT installation
-- `install-terminal-tools.sh` - Manual downloads
-- `install-glow.sh` - Glow installer
-- `install-yazi.sh` - Yazi installer
-
-**Status:** ❌ Deprecated - Use Homebrew and bootstrap.sh instead
-
-See `scripts/utils/legacy-ghostty/README.md` for details.
 
 ---
 
@@ -543,6 +543,7 @@ dotfiles/
 | Install fonts | `./scripts/setup/install-fonts.sh` |
 | Install Node.js | `./scripts/setup/install-node.sh` |
 | Install UV tools | `./scripts/setup/install-uv-tools.sh` |
+| Uninstall all | `./scripts/setup/uninstall.sh` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
 | Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |
 | Manual backup | `./scripts/utils/manual-backup.sh` |
@@ -550,5 +551,5 @@ dotfiles/
 ---
 
 **Document Version:** 1.0
-**Last Updated:** 2025-10-20
+**Last Updated:** 2026-03-15
 **Maintained by:** Sebastian
