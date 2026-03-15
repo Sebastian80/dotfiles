@@ -127,3 +127,5 @@
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/home/linuxbrew/.linuxbrew/bin/gh auth git-credential
+[safe]
+	directory = /home/sebastian/workspace/oro-6.1-dev/vendor/netresearch/oro-mollie-fix-bundle

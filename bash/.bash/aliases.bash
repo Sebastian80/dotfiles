@@ -143,6 +143,12 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 alias vpnup='sudo wg-quick up wg0'
 alias vpndown='sudo wg-quick down wg0'
 
+# ESET Endpoint Antivirus
+alias eea-stop='sudo systemctl stop eea.service'
+alias eea-start='sudo systemctl start eea.service'
+alias eea-restart='sudo systemctl restart eea.service'
+alias eea-status='systemctl status eea.service'
+
 # Show open ports
 alias ports='netstat -tulanp'
 
