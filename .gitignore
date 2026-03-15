@@ -147,6 +147,10 @@ oh-my-posh/.config/oh-my-posh/cache/
 yazi/.config/yazi/state.toml
 yazi/.config/yazi/*.toml-*
 
+# Claude Code
+claude/.claude/settings.json
+claude/.claude/skills/
+
 # Ghostty
 ghostty/.config/ghostty/*.backup-*
 
