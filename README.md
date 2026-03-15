@@ -29,7 +29,10 @@ dotfiles/
 │   └── .claude/
 │       ├── CLAUDE.md       # Global instructions
 │       ├── settings.json   # Permissions, plugins, hooks
-│       └── rules/          # Modular topic-specific rules
+│       ├── rules/          # Modular topic-specific rules
+│       ├── commands/       # Custom slash commands
+│       ├── skills/         # Custom skills (docs-with-mermaid, ide-index-mcp)
+│       └── hooks/          # Event hooks
 ├── git/            # Git configuration
 ├── gtk/            # GTK theme configuration
 ├── ghostty/        # Ghostty terminal
@@ -71,7 +74,7 @@ dotfiles/
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+git clone git@github.com:Sebastian80/dotfiles.git ~/dotfiles
 
 # Run bootstrap script (installs stow, Homebrew, and deploys dotfiles)
 cd ~/dotfiles
@@ -92,7 +95,7 @@ make install-system
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+git clone git@github.com:Sebastian80/dotfiles.git ~/dotfiles
 
 # Install prerequisites
 sudo apt update && sudo apt install -y git stow
@@ -408,11 +411,11 @@ sudo apt update
 sudo apt install -y git stow
 
 # 2. Clone dotfiles
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+git clone git@github.com:Sebastian80/dotfiles.git ~/dotfiles
 
 # 3. Run automated setup (recommended)
 cd ~/dotfiles
-./bootstrap.sh
+./scripts/setup/bootstrap.sh
 
 # OR Manual deployment:
 
@@ -487,8 +490,7 @@ MIT License - Feel free to use and modify
 
 ## Author
 
-Sebastian - 2025
+Sebastian - 2025-2026
 
 ---
 
-**Note**: Remember to replace `yourusername` with your actual GitHub username in the clone URLs above.

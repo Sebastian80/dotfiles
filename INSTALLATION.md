@@ -324,7 +324,7 @@ git push -u origin main
 Then:
 ```bash
 cd ~/dotfiles
-git remote add origin https://github.com/YOUR_USERNAME/dotfiles.git
+git remote add origin git@github.com:Sebastian80/dotfiles.git
 git push -u origin main
 ```
 
@@ -401,7 +401,7 @@ git push
 
 ```bash
 # Clone repo
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
+git clone git@github.com:Sebastian80/dotfiles.git ~/dotfiles
 
 # Run bootstrap
 cd ~/dotfiles
@@ -525,7 +525,7 @@ After completing installation:
    rm -rf ~/dotfiles-backup-20251019_134818
    ```
 
-4. **Set up GitHub repo** (see Step 6 above)
+4. **Set up GitHub repo** (see Step 8 above)
 
 5. **Install modern CLI tools via Homebrew**:
    ```bash
