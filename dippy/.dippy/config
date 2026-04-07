@@ -1,0 +1,37 @@
+# Dippy config — Sebastian's global rules
+#
+# Lives at ~/.dippy/config (loaded by Dippy automatically).
+# Per-project overrides go in <project>/.dippy
+#
+# Dippy ships with sensible defaults — see src/dippy/core/allowlists.py.
+# This file only ADDS to the defaults: steering messages and personal preferences.
+#
+# Syntax:
+#   allow <pattern>                  — auto-approve
+#   ask   <pattern> "<msg>"          — prompt user (with optional hint)
+#   deny  <pattern> "<msg>"          — block (msg goes back to the model so it adapts)
+#   deny-redirect <glob> "<msg>"     — block shell redirects writing to matching paths
+
+#---- Tooling conventions (CLAUDE.md says use uv/pnpm) ----#
+deny python3                              "Use 'uv run python' — runs in project venv per CLAUDE.md toolchain rule"
+deny python                               "Use 'uv run python' — runs in project venv per CLAUDE.md toolchain rule"
+deny pip install                          "Use 'uv add' for project deps, 'uv tool install' for global tools"
+deny pip3 install                         "Use 'uv add' for project deps, 'uv tool install' for global tools"
+
+#---- Secrets-write protection (sandbox is off, this is the only writeguard) ----#
+deny-redirect **/.env*                    "Never write secrets — ask Sebastian to do it"
+deny-redirect ~/.ssh/**                   "Don't touch SSH config — ask Sebastian"
+deny-redirect ~/.aws/**                   "Don't touch AWS credentials — ask Sebastian"
+deny-redirect ~/.gnupg/**                 "Don't touch GPG keyring — ask Sebastian"
+deny-redirect ~/.env.jira                 "Don't touch Jira credentials"
+
+#---- Override-able destructives — prompt Sebastian, allow case-by-case approval ----#
+ask rm -rf                                "rm -rf — confirm? (consider 'gio trash' / 'trash' for recoverable delete)"
+ask git push --force                      "git push --force — confirm? (--force-with-lease is safer if remote may have moved)"
+ask git commit --amend                    "git commit --amend — confirm? (CLAUDE.md prefers new commits over amending)"
+ask git rebase -i                         "interactive rebase — confirm?"
+ask git add -A                            "git add -A — confirm? (can capture sensitive untracked files; prefer specific paths)"
+ask git add .                             "git add . — confirm? (can capture sensitive untracked files; prefer specific paths)"
+
+#---- Hard denies — never legitimate, no override ----#
+deny git push --no-verify                 "Pre-commit hooks exist for a reason — fix the underlying failure rather than skipping hooks"
