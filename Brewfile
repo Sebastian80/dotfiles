@@ -45,6 +45,7 @@ brew "oven-sh/bun/bun"    # JavaScript runtime, bundler, and package manager
 brew "fnm"                # Fast Node.js version manager
 brew "uv"                 # Fast Python package manager
 brew "composer"           # PHP dependency manager
+brew "ldayton/dippy/dippy"  # Smart bash permission hook for Claude Code (PreToolUse)
 
 # Prompt & Shell
 brew "oh-my-posh"   # Prompt theme engine
