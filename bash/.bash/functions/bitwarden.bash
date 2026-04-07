@@ -119,6 +119,7 @@ load_bw_secrets() {
     local gitlab_token=$(command bw get item 8cff5d6b-ba18-484b-add5-b37f00f82acc 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
     if [[ -n "$gitlab_token" && "$gitlab_token" != "null" ]]; then
         export GITLAB_TOKEN="$gitlab_token"
+        export GITLAB_HOST="git.netresearch.de"  # Self-hosted GitLab instance
         # Use umask in subshell to ensure secure permissions from creation (no race window)
         (umask 077; echo "$gitlab_token" >| "/run/user/${UID:-$(id -u)}/bw-gitlab-token")
         [[ "$quiet" == false ]] && echo "   🔑 GITLAB_TOKEN loaded"
