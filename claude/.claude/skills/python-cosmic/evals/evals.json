@@ -1,0 +1,23 @@
+{
+  "skill_name": "cosmic-python",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm starting a new Python project for a warehouse management system. It'll track inventory, handle orders, and manage shipments. Help me set up the project structure following clean architecture patterns.",
+      "expected_output": "Should reference getting-started.md, provide the canonical directory structure, explain the dependency direction, and suggest starting with a walking skeleton for one use case (e.g., create order). Should NOT dump all patterns at once.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I have a Django app where all the business logic is in the views. I want to start cleaning it up. Where do I begin?",
+      "expected_output": "Should reference adoption-guide.md, recommend starting with extracting a service layer, show before/after code examples with Django views, and explain the incremental migration path. Should NOT suggest a full rewrite or introduce events/CQRS immediately.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm building an order processing system. When an order is placed, I need to reserve inventory, charge the customer, and send a confirmation email. How should I architect this so these concerns stay decoupled?",
+      "expected_output": "Should reference events-and-commands.md and aggregates.md. Should explain that Order and Inventory are separate aggregates, recommend domain events (OrderCreated triggers inventory reservation and email), show the command/event distinction, and emphasize one aggregate per transaction. Should NOT suggest modifying both aggregates in the same transaction.",
+      "files": []
+    }
+  ]
+}

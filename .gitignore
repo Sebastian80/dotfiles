@@ -149,7 +149,6 @@ yazi/.config/yazi/*.toml-*
 
 # Claude Code
 claude/.claude/settings.json
-claude/.claude/skills/
 
 # Ghostty
 ghostty/.config/ghostty/*.backup-*
