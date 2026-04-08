@@ -1,0 +1,44 @@
+{
+  "skill_name": "ide-index-mcp",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to understand how MemoReader is used across the codebase. Find all implementations and every place it's referenced.",
+      "expected_output": "Uses ide_find_class + ide_find_implementations + ide_find_references. Reports implementations (SQLiteMemoRepository, InMemoryMemoRepository, etc.) and all reference locations with semantic types.",
+      "files": [],
+      "expectations": [
+        "Used ide_find_class or ide_find_symbol to locate MemoReader (not Grep)",
+        "Used ide_find_implementations to find concrete implementations (not Grep)",
+        "Used ide_find_references to find all usages (not Grep)",
+        "Did NOT use Grep or Bash grep/rg as primary search mechanism",
+        "Found SQLiteMemoRepository and InMemoryMemoRepository as implementations"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Search for all TODO comments in the codebase, find all files named conftest, and check where max_vector_distance appears in config or docs.",
+      "expected_output": "Uses ide_search_text (with context='comments' for TODOs), ide_find_file for conftest, and ide_search_text for max_vector_distance. Does NOT fall back to Grep/Glob.",
+      "files": [],
+      "expectations": [
+        "Used ide_search_text for TODO search (not Grep)",
+        "Used ide_search_text with context='comments' for TODO filtering",
+        "Used ide_find_file to find conftest files (not Glob)",
+        "Used ide_search_text for max_vector_distance search across all file types (not Grep)",
+        "Did NOT fall back to Grep/Glob for any of the three searches"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Show me the structure of SearchService, trace who calls the search method, and find all implementations of the Searcher protocol.",
+      "expected_output": "Uses ide_file_structure for SearchService, ide_call_hierarchy with callers for search method, ide_find_implementations for Searcher (or correctly handles Protocol limitation). Finds SearchService at application/search.py.",
+      "files": [],
+      "expectations": [
+        "Used ide_file_structure to show SearchService structure (not reading whole file)",
+        "Used ide_call_hierarchy with direction=callers for the search method (not Grep)",
+        "Used ide_find_implementations for Searcher protocol (or correctly identified Protocol limitation and fell back to Grep)",
+        "Used ide_find_class or ide_find_symbol to locate SearchService first",
+        "Found SearchService at application/search.py"
+      ]
+    }
+  ]
+}
