@@ -3,53 +3,91 @@
 # Lives at ~/.dippy/config (loaded by Dippy automatically).
 # Per-project overrides go in <project>/.dippy
 #
-# Dippy ships with sensible defaults — see src/dippy/core/allowlists.py.
-# This file only ADDS to the defaults.
+# Strategy: allow everything broadly, only gate destructive/dangerous ops.
+# Broad allows override dippy's built-in handler analysis for common tools.
+# The ask/deny rules below override for anything that can lose data, push to
+# shared systems, or modify credentials.
 #
-# Syntax:
-#   allow <pattern>                  — auto-approve
-#   ask   <pattern> "<msg>"          — prompt user (with optional hint)
-#   deny  <pattern> "<msg>"          — block (msg goes back to the model so it adapts)
-#   deny-redirect <glob> "<msg>"     — block shell redirects writing to matching paths
-#
-# RULE PRECEDENCE: Dippy uses last-match-wins based on file order. Broader
-# allows must come FIRST; specific asks/denies must come AFTER so they
-# override for destructive variants.
+# RULE PRECEDENCE: last-match-wins. Asks/denies override the broad allows.
 
-#---- Allows: non-destructive dev commands ----#
-# Git stash: reversible state-save operations. Destructive drop/clear still prompt below.
-allow git stash
-allow git stash push
-allow git stash pop
-allow git stash apply
-allow git stash show
-allow git stash save
-# Non-destructive git operations. Destructive variants still prompt below.
-allow git add
-allow git commit
-allow git push
-allow git pull
-allow git merge
-allow git switch
-allow git branch
-allow git tag
-allow git reset
-# Formatters, type checkers, test runners — idempotent, read-only, or deterministic
+set default allow
+# WARNING: log-full includes full command text — may contain secrets in args.
+# No built-in rotation; truncate periodically or use logrotate.
+set log ~/.dippy/audit.log
+set log-full
+
+#---- Allows: broad wildcards for routine dev commands ----#
+# Config rules (step 1) override dippy's built-in CLI handlers (step 5),
+# which default to ask for file-modifying operations.
+
+# Version control
+allow git
+allow gh
+allow glab
+# Dev toolchains
+allow node
+allow npx
+allow pnpm
+allow npm
+allow bun
+allow fnm
+allow php
+allow composer
+allow go
+allow cargo
+allow uv
 allow ruff
 allow pytest
 allow pyright
-# Jira CLI: read-only ops + comments + transitions are routine, destructive
-# variants (DELETE method) still prompt via the ask rule below.
+# File operations
+allow touch
+allow mkdir
+allow cp
+allow mv
+allow ln
+allow chmod
+allow chown
+allow rm
+allow install
+# Text processing that modifies files
+allow sed
+allow awk
+allow sort
+allow tee
+# Archives & downloads
+allow tar
+allow unzip
+allow gzip
+allow gunzip
+allow curl
+allow wget
+# Build tools
+allow make
+allow cmake
+# Containers & infra
+allow docker
+allow ddev
+# System tools
+allow brew
+allow stow
+# CLI tools
 allow jira
+allow agent-browser
+allow xargs
+allow find
+allow envsubst
 
 #---- Asks: destructive variants prompt for confirmation ----#
-# These must come AFTER the broader allows above — last-match-wins.
+# These override the broad allows above — last-match-wins.
 ask rm -rf                                "rm -rf — confirm? (consider 'gio trash' / 'trash' for recoverable delete)"
+# find -delete bypasses rm -rf guard (dippy#130)
+ask find * -delete *                      "find -delete — confirm? (recursive deletion, same as rm -rf)"
+ask find * -exec rm *                     "find -exec rm — confirm? (recursive deletion via find)"
 ask git add -A                            "git add -A — confirm? (can capture sensitive untracked files; prefer specific paths)"
 ask git add .                             "git add . — confirm? (can capture sensitive untracked files; prefer specific paths)"
 ask git commit --amend                    "git commit --amend — confirm? (CLAUDE.md prefers new commits over amending)"
 ask git push --force                      "git push --force — confirm? (--force-with-lease is safer if remote may have moved)"
-ask git rebase -i                         "interactive rebase — confirm?"
+ask git rebase -i                         "git rebase -i — confirm? (interactive rebase, rewrites history)"
 ask git stash drop                        "git stash drop — confirm? (permanently discards a stash)"
 ask git stash clear                       "git stash clear — confirm? (permanently discards ALL stashes)"
 ask git reset --hard                      "git reset --hard — confirm? (discards uncommitted changes in the working tree)"
@@ -60,14 +98,100 @@ ask git checkout --                       "git checkout -- — confirm? (discard
 ask git branch -D                         "git branch -D — confirm? (force-deletes a branch, including unmerged)"
 ask git branch -d                         "git branch -d — confirm? (deletes a branch)"
 ask jira * -X DELETE *                    "Destructive Jira DELETE — confirm? (-X DELETE removes issues / comments / attachments / links / sprint memberships)"
+ask glab * delete *                       "glab delete — confirm? (irreversible for repo/release/mr/issue/ssh-key/variable/label)"
+ask glab mr merge                         "glab mr merge — confirm? (merges the MR, may trigger deploys)"
+ask glab mr close                         "glab mr close — confirm?"
+ask glab mr rebase                        "glab mr rebase — confirm? (rewrites history)"
+ask glab issue close                      "glab issue close — confirm?"
+ask glab auth login                       "glab auth login — modifies stored credentials"
+ask glab auth logout                      "glab auth logout — removes stored credentials"
+ask glab api * -X DELETE *                "glab API DELETE — confirm? (destructive REST call)"
+ask glab api * --method DELETE *          "glab API DELETE — confirm? (destructive REST call, alternative flag form)"
+ask glab repo archive                     "glab repo archive — confirm? (makes repo read-only)"
+ask ddev delete                           "ddev delete — confirm? (removes the project, including DB and config)"
+ask ddev clean                            "ddev clean — confirm? (removes ddev caches and stopped containers)"
+ask ddev poweroff                         "ddev poweroff — confirm? (stops ALL ddev projects on the host)"
+ask ddev stop * --remove-data *           "ddev stop --remove-data — confirm? (deletes the project DB and persistent data)"
+ask ddev stop --remove-data               "ddev stop --remove-data — confirm? (deletes the project DB and persistent data)"
+ask ddev snapshot restore                 "ddev snapshot restore — confirm? (overwrites current DB with the snapshot)"
+ask ddev import-db                        "ddev import-db — confirm? (overwrites current DB)"
+ask ddev import-files                     "ddev import-files — confirm? (overwrites pub/media)"
+ask ddev mutagen reset                    "ddev mutagen reset — confirm? (drops sync state, may lose unsynced edits)"
+ask uv self uninstall                     "uv self uninstall — confirm? (removes uv itself)"
+ask uv tool uninstall                     "uv tool uninstall — confirm? (removes a globally installed CLI tool)"
+ask uv cache clean                        "uv cache clean — confirm? (clears the wheel cache, slow next install)"
+ask make clean                            "make clean — confirm? (may delete build artifacts)"
+ask make distclean                        "make distclean — confirm? (deep clean, may remove generated files)"
+ask make uninstall                        "make uninstall — confirm? (removes installed files)"
+ask make install                          "make install — confirm? (may modify system or DB state)"
+ask make deploy                           "make deploy — confirm? (deploys to environment)"
+ask make migrate                          "make migrate — confirm? (modifies database schema)"
+ask make seed                             "make seed — confirm? (writes data to database)"
+ask make reset                            "make reset — confirm? (resets state, may lose data)"
+ask make destroy                          "make destroy — confirm? (destroys resources)"
+ask make purge                            "make purge — confirm? (removes data permanently)"
+ask make behat-install                    "make behat-install — confirm? (drops behat DB, full oro:install ~15min)"
+# Brew destructive ops (allow brew overrides handler safety)
+ask brew upgrade                          "brew upgrade — confirm? (upgrades all packages)"
+ask brew uninstall                        "brew uninstall — confirm? (removes a package)"
+# Permissions
+ask chmod 777                             "chmod 777 — confirm? (world-writable, usually wrong)"
+ask chmod -R                              "chmod -R — confirm? (recursive permission change)"
+# Destructive API calls (two rules each: prefix catches -X right after curl,
+# glob catches -X anywhere in the middle)
+ask curl -X DELETE                        "curl DELETE — confirm? (destructive API call)"
+ask curl * -X DELETE *                    "curl DELETE — confirm? (destructive API call)"
+ask curl -X PUT                           "curl PUT — confirm? (modifying API call)"
+ask curl * -X PUT *                       "curl PUT — confirm? (modifying API call)"
+# Stow
+ask stow -D                               "stow -D — confirm? (unstow/delete symlinks)"
+ask stow --delete                         "stow --delete — confirm? (unstow/delete symlinks)"
+# Process killing
+ask kill                                  "kill — confirm? (terminates a process)"
+ask killall                               "killall — confirm? (terminates processes by name)"
+ask pkill                                 "pkill — confirm? (terminates processes by pattern)"
+ask docker rm                             "docker rm — confirm? (removes containers)"
+ask docker rmi                            "docker rmi — confirm? (removes images)"
+ask docker system prune                   "docker system prune — confirm? (removes unused data: containers, networks, images)"
+ask docker volume rm                      "docker volume rm — confirm? (removes volumes, data loss)"
+ask docker compose down -v                "docker compose down -v — confirm? (removes containers AND volumes, data loss)"
+ask docker compose down --volumes         "docker compose down --volumes — confirm? (removes containers AND volumes, data loss)"
+ask docker compose down * -v *            "docker compose down -v — confirm? (removes containers AND volumes, data loss)"
+ask docker compose down * --volumes *     "docker compose down --volumes — confirm? (removes containers AND volumes, data loss)"
 
 #---- Denies: hard blocks — must come LAST to win last-match-wins ----#
+# Secrets read protection (closes the gap between settings.json Read denies
+# and bash commands like cat/head/grep that bypass the Read tool).
+# Only specific paths — broad patterns like *secret* or *.key* cause too many
+# false positives in command-level matching.
+deny * *.env *                    "Don't access .env files via bash — ask Sebastian"
+deny * *.env.* *                  "Don't access .env files via bash — ask Sebastian"
+deny * ~/.ssh/* *                 "Don't access SSH keys via bash — ask Sebastian"
+deny * ~/.aws/* *                 "Don't access AWS credentials via bash — ask Sebastian"
+deny * ~/.gnupg/* *               "Don't access GPG keyring via bash — ask Sebastian"
 # Tooling conventions (CLAUDE.md says use uv/pnpm)
 deny python3                              "Use 'uv run python' — runs in project venv per CLAUDE.md toolchain rule"
 deny python                               "Use 'uv run python' — runs in project venv per CLAUDE.md toolchain rule"
 deny pip install                          "Use 'uv add' for project deps, 'uv tool install' for global tools"
 deny pip3 install                         "Use 'uv add' for project deps, 'uv tool install' for global tools"
 deny git push --no-verify                 "Pre-commit hooks exist for a reason — fix the underlying failure rather than skipping hooks"
+
+#---- MCP rules ----#
+# Read-only MCP operations
+allow-mcp mcp__*__get_*
+allow-mcp mcp__*__list_*
+allow-mcp mcp__*__search_*
+allow-mcp mcp__*__read_*
+allow-mcp mcp__*__fetch_*
+allow-mcp mcp__*__query_*
+# Destructive MCP operations
+deny-mcp mcp__*__delete_*                 "MCP delete — ask Sebastian"
+deny-mcp mcp__*__remove_*                 "MCP remove — ask Sebastian"
+deny-mcp mcp__*__drop_*                   "MCP drop — ask Sebastian"
+
+#---- Redirect rules ----#
+# Allow file writes broadly; deny-redirects below override for secrets paths.
+allow-redirect **
 
 #---- Deny-redirect: secrets-write protection (sandbox is off, this is the only writeguard) ----#
 deny-redirect **/.env*                    "Never write secrets — ask Sebastian to do it"
