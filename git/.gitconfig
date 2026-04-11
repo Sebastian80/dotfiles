@@ -134,3 +134,6 @@
 	directory = /home/sebastian/workspace/hmkg-6.1/vendor/meyer/oro-default-theme
 	directory = /home/sebastian/workspace/hmkg-6.1/vendor/orolab/cart
 	directory = /home/sebastian/workspace/hmkg-6.1
+[credential "https://git.netresearch.de"]
+	helper = 
+	helper = !/home/linuxbrew/.linuxbrew/bin/glab auth git-credential
