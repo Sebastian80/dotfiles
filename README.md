@@ -7,7 +7,7 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 - **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 8 exports, 10 functions, 3 integrations, 4 completions)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: 32 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
+- **Modern Tooling**: 33 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
 - **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure
@@ -27,12 +27,15 @@ dotfiles/
 │       └── switch-theme
 ├── claude/         # Claude Code AI assistant
 │   └── .claude/
-│       ├── CLAUDE.md       # Global instructions
-│       ├── settings.json   # Permissions, plugins, hooks
-│       ├── rules/          # Modular topic-specific rules
-│       ├── commands/       # Custom slash commands
-│       ├── skills/         # Custom skills (docs-with-mermaid, ide-index-mcp)
-│       └── hooks/          # Event hooks
+│       ├── CLAUDE.md       # Global instructions (critical rules, collaboration)
+│       ├── rules/          # Modular topic-specific rules (git, testing, python, ...)
+│       ├── commands/       # Custom slash commands (pr-draft, pr-review, refactor)
+│       ├── skills/         # Custom skills (cco, dippy-config, docs-with-mermaid,
+│       │                   #   ide-index-mcp, python-cosmic, python-sqlalchemy-core,
+│       │                   #   python-sqlalchemy-cosmic)
+│       ├── hooks/          # Event hooks
+│       └── statusline-omp.sh  # oh-my-posh statusline
+├── dippy/          # Dippy permission hook config (bash parser + steering)
 ├── git/            # Git configuration
 ├── gtk/            # GTK theme configuration
 ├── ghostty/        # Ghostty terminal
@@ -112,7 +115,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -346,7 +349,7 @@ git push
 
 ## Tools Included
 
-All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 32 packages).
+All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 33 packages).
 
 **🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 
@@ -421,10 +424,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow -n -v bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # 4. Deploy packages
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile
