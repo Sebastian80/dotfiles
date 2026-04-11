@@ -380,7 +380,7 @@ fi
 for file in .bashrc .bash_profile .bash_logout .inputrc; do
     if [[ -L "$HOME/$file" ]]; then
         removing "Removing symlink: ~/$file"
-        run_cmd "rm -f ~/.local/$file"
+        run_cmd "rm -f ~/$file"
     fi
 done
 
