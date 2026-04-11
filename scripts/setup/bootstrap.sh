@@ -484,7 +484,7 @@ echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}        
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${BOLD}${CYAN}What was installed:${NC}"
-echo -e "  ${CHECK} GNU Stow and dotfiles packages (18 configs)"
+echo -e "  ${CHECK} GNU Stow and dotfiles packages (${#PACKAGES[@]} configs)"
 if command -v brew &> /dev/null && brew list bat &> /dev/null; then
     echo -e "  ${CHECK} Homebrew packages ($PACKAGE_COUNT tools from Brewfile)"
 fi

@@ -23,6 +23,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Preflight: require curl and unzip
+for bin in curl unzip; do
+    if ! command -v "$bin" &> /dev/null; then
+        warn "$bin is required but not installed"
+        echo "  Install with: sudo apt install -y $bin"
+        exit 1
+    fi
+done
+
 # Font installation directory
 FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
