@@ -2,7 +2,7 @@
 
 Complete guide to scripts and utilities in this dotfiles repository.
 
-**Last Updated:** 2026-03-15
+**Last Updated:** 2026-04-12
 
 ---
 
@@ -24,7 +24,8 @@ dotfiles/
 │   │   ├── install-fonts.sh   # Nerd Fonts installation
 │   │   ├── install-ghostty.sh # Ghostty terminal installation
 │   │   ├── install-node.sh    # Node.js + npm globals
-│   │   └── install-uv-tools.sh # UV Python tools
+│   │   ├── install-uv-tools.sh # UV Python tools
+│   │   └── uninstall.sh       # Remove all dotfiles and installed components
 │   │
 │   ├── maintenance/
 │   │   ├── verify-installation.sh  # Verify dotfiles installation
@@ -145,6 +146,27 @@ cd ~/dotfiles
 
 ---
 
+#### install-ghostty.sh
+**Purpose:** Install the Ghostty terminal emulator on Linux
+
+**What it does:**
+1. Prompts for install method: snap, Ubuntu `.deb` (community-maintained), or build from source
+2. For `.deb`: pulls the latest release from the `mkasberg/ghostty-ubuntu` GitHub releases and installs it via `apt`
+3. For build-from-source: checks/installs build dependencies (zig, etc.) and compiles
+4. Cleans up temp files on exit
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/setup/install-ghostty.sh
+```
+
+**When to use:**
+- Fresh machine where Ghostty isn't available via Homebrew
+- Upgrading Ghostty to a newer community build than what's in the repos
+
+---
+
 #### install-node.sh
 **Purpose:** Install Node.js via fnm and global npm packages
 
@@ -226,7 +248,7 @@ cd ~/dotfiles
 **What it checks:**
 - Prerequisites (git, stow, Homebrew)
 - Repository status
-- All 18 stow packages (bash, bin, btop, claude, eza, fzf, ghostty, git, glow, gtk, htop, lazydocker, lazygit, micro, oh-my-posh, ripgrep, tmux, yazi)
+- All 19 stow packages (bash, bin, btop, claude, dippy, eza, fzf, ghostty, git, glow, gtk, htop, lazydocker, lazygit, micro, oh-my-posh, ripgrep, tmux, yazi)
 - 22 critical symlinks (includes ~/bin utilities and tool configs)
 - Broken symlinks
 - Homebrew packages
@@ -352,7 +374,7 @@ nano install-something.sh
 chmod +x install-something.sh
 ```
 
-2. Document in PACKAGES.md
+2. Document it in this file (SCRIPTS.md)
 
 3. Run explicitly:
 ```bash
@@ -389,7 +411,7 @@ make bin          # Install only bin/ package
 **Relevant targets:**
 ```makefile
 # PACKAGES variable (defined once, used by install/uninstall/update):
-PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+PACKAGES := bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 ```
 
 ---
@@ -517,8 +539,7 @@ dotfiles/
 ├── scripts/
 │   ├── setup/              # Moved: Installation scripts
 │   ├── maintenance/        # Moved: Verification scripts
-│   └── utils/
-│       └── legacy-ghostty/ # Moved: Old ghostty scripts
+│   └── utils/              # Moved: Helper scripts (manual-backup.sh)
 ```
 
 **Benefits:**
@@ -550,6 +571,6 @@ dotfiles/
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-03-15
+**Document Version:** 1.1
+**Last Updated:** 2026-04-12
 **Maintained by:** Sebastian
