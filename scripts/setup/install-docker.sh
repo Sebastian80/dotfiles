@@ -89,7 +89,7 @@ fi
 
 # Step 7: Add current user to docker group
 step "Adding user '$USER' to docker group..."
-if ! groups | grep -q docker; then
+if ! groups | grep -qw docker; then
     sudo usermod -aG docker "$USER"
     info "✓ User added to docker group"
     warn "You need to LOG OUT and LOG BACK IN for group changes to take effect!"

@@ -4,6 +4,8 @@
 # Usage: ./switch-theme.sh [theme-name]
 # Example: ./switch-theme.sh catppuccin
 
+set -e
+
 if [ -z "$1" ]; then
     echo "Oh My Posh Theme Switcher"
     echo "========================="
@@ -56,6 +58,13 @@ cp "$PROMPT_FILE" "$PROMPT_FILE.backup-$(date +%Y%m%d-%H%M%S)"
 
 # Replace the oh-my-posh init line
 sed -i "s|eval \"\$(oh-my-posh init bash --config .*)\"|eval \"\$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/${THEME}.omp.json)\"|g" "$PROMPT_FILE"
+
+# Verify the substitution actually matched — sed -i exits 0 even on zero replacements
+if ! grep -q "themes/${THEME}.omp.json" "$PROMPT_FILE"; then
+    echo "✗ sed pattern did not match; $PROMPT_FILE is unchanged"
+    echo "  Check that the file contains a line like: eval \"\$(oh-my-posh init bash --config ...)\""
+    exit 1
+fi
 
 echo ""
 echo "✓ Theme switched to: ${THEME}"

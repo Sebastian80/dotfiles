@@ -48,7 +48,7 @@ info "fnm found: $(fnm --version)"
 # Step 1: Install Node versions
 step "Installing Node.js versions..."
 for version in "${NODE_VERSIONS[@]}"; do
-    if fnm list | grep -q "v${version}"; then
+    if fnm list | grep -qE "v${version}\."; then
         info "Node ${version} already installed"
     else
         info "Installing Node ${version}..."
