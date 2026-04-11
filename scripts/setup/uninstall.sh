@@ -231,7 +231,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " stowed_dotfiles " ]]; then
 
     if [[ -d "$DOTFILES_DIR" ]]; then
         cd "$DOTFILES_DIR"
-        PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
+        PACKAGES=(bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
 
         for package in "${PACKAGES[@]}"; do
             if [[ -d "$package" ]]; then
