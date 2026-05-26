@@ -130,13 +130,15 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 | `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
 | `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
 | Tool returns empty for a class/file you can see on disk in `vendor/`/library | Folder is in the IDE's Excluded list (Settings → Directories → right column). The `scope: project_and_libraries` parameter doesn't override this — exclusion wins at the index level. Either remove the exclusion (re-indexes the folder), or fall back to `rg -uu <path>` for that subtree. Verify by running `ide_find_class` on a class you know exists in the folder. |
-| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Framework navigation only exists when that framework plugin's per-project support is enabled. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
+| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Index tools mirror the IDE's Go to Declaration; if Ctrl+B is dead in the GUI (common in Oro even with Symfony support on), MCP can't either. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
 
 ## Framework DI / YAML navigation (Symfony, etc.)
 
-The index tools resolve via standard **plugin-aware** PSI APIs (`ReferencesSearch`, `PsiReference.resolve()`), so they follow a framework's references **only when that framework plugin is actively contributing them**. Symfony service-YAML navigation (service-id ↔ class, `@service` arguments, `decorates:`) requires the **Symfony plugin's per-project support to be enabled** (Settings → Languages & Frameworks → PHP → Symfony → "Enable Plugin for this Project"; persisted as `pluginEnabled` in `.idea/symfony2.xml`). Oro projects typically leave it **off** (they rely on the Oro plugin), so these links are invisible to the index tools even though the tools themselves are not at fault.
+**Rule of thumb: the index tools mirror the IDE's own semantic navigation.** They resolve via standard plugin-aware PSI APIs (`ReferencesSearch`, `PsiReference.resolve()`), so `ide_find_definition`/`ide_find_references` succeed exactly where the IDE's **Go to Declaration (Ctrl/Cmd+B)** and **Find Usages** do — and fail where those fail. To predict whether a navigation works via MCP, check it in the GUI first.
 
-**Symptoms when the framework plugin is off:**
+Symfony service-YAML navigation (service-id ↔ class, `@service` arguments, `decorates:`) only exists when the **Symfony plugin actively contributes references** for the project (Settings → Languages & Frameworks → PHP → Symfony; `pluginEnabled` in `.idea/symfony2.xml`). In **Oro projects this typically does not work even with Symfony support enabled and the project reopened** — the plugin contributes no class/service references (Oro uses its own layout and the Oro plugin), and the GUI's Ctrl+B is dead on these YAML values too. When the GUI can't navigate, neither can the MCP tools — that is not an MCP defect.
+
+**Symptoms:**
 - `ide_find_definition` on a `class:` FQN or `@service.id` in YAML returns the enclosing YAML node (`symbolName: "class"`/`"arguments"`), not the PHP class/service.
 - `ide_find_references` on a service class never lists its YAML registration.
 
