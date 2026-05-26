@@ -257,7 +257,11 @@ bw() {
             echo "🔓 Unlocking Bitwarden vault..."
             # Use declare -g to make it global (visible to parent shell)
             declare -g BW_SESSION=$(command bw unlock --raw)
-            if [[ -n "$BW_SESSION" ]]; then
+            # Verify the session actually unlocks the vault. `bw unlock --raw` has shipped
+            # broken in the past (e.g. CLI 2026.4.1 with unlock-via-sdk) — printing a valid-
+            # looking 88-char token that no subsequent command accepts. Without this check
+            # we'd cheerfully report success and only discover the lie on first secret lookup.
+            if [[ -n "$BW_SESSION" ]] && BW_SESSION="$BW_SESSION" command bw unlock --check &>/dev/null; then
                 export BW_SESSION
                 # Store session in tmpfs (auto-cleared on logout/shutdown/reboot)
                 # Use umask in subshell to ensure secure permissions from creation (no race window)
@@ -271,7 +275,13 @@ bw() {
                 load_bw_secrets
             else
                 echo ""
-                echo "❌ Failed to unlock Bitwarden"
+                if [[ -z "$BW_SESSION" ]]; then
+                    echo "❌ Failed to unlock Bitwarden (no session returned)"
+                else
+                    echo "❌ Bitwarden returned a session but the vault is still locked."
+                    echo "   Likely a bw CLI regression. Try: brew upgrade bitwarden-cli"
+                fi
+                unset BW_SESSION
                 return 1
             fi
             ;;
