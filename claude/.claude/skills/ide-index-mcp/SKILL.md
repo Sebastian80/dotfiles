@@ -130,19 +130,19 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 | `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
 | `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
 | Tool returns empty for a class/file you can see on disk in `vendor/`/library | Folder is in the IDE's Excluded list (Settings → Directories → right column). The `scope: project_and_libraries` parameter doesn't override this — exclusion wins at the index level. Either remove the exclusion (re-indexes the folder), or fall back to `rg -uu <path>` for that subtree. Verify by running `ide_find_class` on a class you know exists in the folder. |
-| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Index tools mirror the IDE's Go to Declaration; if Ctrl+B is dead in the GUI (common in Oro even with Symfony support on), MCP can't either. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
+| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known MCP gap: the tools resolve only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration. Ctrl+B navigates these in the GUI but the MCP tools return the YAML node. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
 
 ## Framework DI / YAML navigation (Symfony, etc.)
 
-**Rule of thumb: the index tools mirror the IDE's own semantic navigation.** They resolve via standard plugin-aware PSI APIs (`ReferencesSearch`, `PsiReference.resolve()`), so `ide_find_definition`/`ide_find_references` succeed exactly where the IDE's **Go to Declaration (Ctrl/Cmd+B)** and **Find Usages** do — and fail where those fail. To predict whether a navigation works via MCP, check it in the GUI first.
+**The MCP navigation tools follow only a symbol's _primary_ reference, not the IDE's full Go-to-Declaration resolution.** `ide_find_definition`/`ide_find_references` resolve via the singular `PsiElement.getReference()` (walked up the parent chain) and otherwise fall back to the nearest named element — they never consult `getReferences()` / reference providers / `TargetElementUtil`, which is the path PhpStorm's **Ctrl/Cmd+B** uses. So references contributed by a `PsiReferenceContributor` are invisible to the MCP tools **even when the IDE navigates them fine**.
 
-Symfony service-YAML navigation (service-id ↔ class, `@service` arguments, `decorates:`) only exists when the **Symfony plugin actively contributes references** for the project (Settings → Languages & Frameworks → PHP → Symfony; `pluginEnabled` in `.idea/symfony2.xml`). In **Oro projects this typically does not work even with Symfony support enabled and the project reopened** — the plugin contributes no class/service references (Oro uses its own layout and the Oro plugin), and the GUI's Ctrl+B is dead on these YAML values too. When the GUI can't navigate, neither can the MCP tools — that is not an MCP defect.
+Symfony's service-YAML ↔ PHP navigation is contributed exactly that way. With the Symfony plugin active (`pluginEnabled` in `.idea/symfony2.xml`), Ctrl+B on a service-id-as-FQN key, a `class:` value, or an `@service` argument jumps to the PHP class in the GUI — but `ide_find_definition` at the same position returns the **YAML node**, and `ide_find_references` on the class omits the YAML registration. This is a real MCP gap, **not** a disabled/missing plugin — confirm by checking that Ctrl+B works in the GUI while the MCP call returns the YAML node. (Verified on PhpStorm 2026.1 + Symfony plugin against an Oro project.)
 
 **Symptoms:**
-- `ide_find_definition` on a `class:` FQN or `@service.id` in YAML returns the enclosing YAML node (`symbolName: "class"`/`"arguments"`), not the PHP class/service.
+- `ide_find_definition` on a class FQN / `@service.id` in service YAML returns the YAML node itself (`symbolName` = the FQN, or the key like `"class"`/`"arguments"`; `astPath` rooted at `services`), not the PHP class.
 - `ide_find_references` on a service class never lists its YAML registration.
 
-**Workaround (plugin-independent, always works):** `ide_search_text` with `regex` on the dotted service id or class FQN/short name, `filePattern: *.yml`. The `contextType` field separates the **definition** (`service.id:` key → `CODE`) from **`@`-references** (`STRING_LITERAL`).
+**Workaround (always works):** `ide_search_text` with `regex` on the dotted service id or class FQN/short name, `filePattern: *.yml`. The `contextType` field separates the **definition** (`service.id:`/FQN key → `CODE`) from **`@`-references** (`STRING_LITERAL`).
 
 ## Detailed Tool Parameters
 
