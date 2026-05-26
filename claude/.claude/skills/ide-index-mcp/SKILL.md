@@ -130,7 +130,7 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 | `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
 | `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
 | Tool returns empty for a class/file you can see on disk in `vendor/`/library | Folder is in the IDE's Excluded list (Settings → Directories → right column). The `scope: project_and_libraries` parameter doesn't override this — exclusion wins at the index level. Either remove the exclusion (re-indexes the folder), or fall back to `rg -uu <path>` for that subtree. Verify by running `ide_find_class` on a class you know exists in the folder. |
-| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known MCP gap: the tools resolve only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration. Ctrl+B navigates these in the GUI but the MCP tools return the YAML node. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
+| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known index-plugin gap (resolves only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration). Use the **JetBrains MCP Server's `locate_symfony_service`** instead, or `ide_search_text`. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
 
 ## Framework DI / YAML navigation (Symfony, etc.)
 
@@ -142,7 +142,9 @@ Symfony's service-YAML ↔ PHP navigation is contributed exactly that way. With 
 - `ide_find_definition` on a class FQN / `@service.id` in service YAML returns the YAML node itself (`symbolName` = the FQN, or the key like `"class"`/`"arguments"`; `astPath` rooted at `services`), not the PHP class.
 - `ide_find_references` on a service class never lists its YAML registration.
 
-**Workaround (always works):** `ide_search_text` with `regex` on the dotted service id or class FQN/short name, `filePattern: *.yml`. The `contextType` field separates the **definition** (`service.id:`/FQN key → `CODE`) from **`@`-references** (`STRING_LITERAL`).
+**Best fix — use the JetBrains MCP Server (separate plugin) for Symfony.** It ships Symfony-aware MCP tools the index plugin lacks. Enable Settings → PHP → Symfony → "Enable MCP Tools", connect the JetBrains MCP Server to the agent (`claude mcp add --transport http jetbrains-mcp http://127.0.0.1:<port>/stream`; the port shows in Settings → Tools → MCP Server), then use **`locate_symfony_service`** — it resolves DI **bidirectionally** (service id → definition, *and* class FQN → definition, incl. class/`decorates`/`@`-args) for both custom and vendor services. Verified on Oro (`oro_rfp.mailer.processor`, `meyer_rfp.*`, and class-FQN lookups all resolved). Other Symfony tools there: `list_symfony_routes_url_controllers`, `list_symfony_commands`, `list_symfony_forms`, `generate_symfony_service_definition`, `list_doctrine_entities`, `list_twig_*`. Note: identifier-based `locate_symfony_service` works; *position*-based resolution on YAML still returns nothing even via that server's `get_symbol_info`.
+
+**Plugin-independent fallback (no extra server):** `ide_search_text` with `regex` on the dotted service id or class FQN/short name, `filePattern: *.yml`. The `contextType` field separates the **definition** (`service.id:`/FQN key → `CODE`) from **`@`-references** (`STRING_LITERAL`).
 
 ## Detailed Tool Parameters
 
