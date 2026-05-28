@@ -2,7 +2,7 @@
 
 ## Task tracking
 
-- Use the task tools (TaskCreate, TaskUpdate, TaskList, TaskGet) to track your work
+- Use the task tools (TaskCreate, TaskUpdate, TaskList, TaskGet) for multi-step work (>3 steps) or anything with parallel/independent tasks. Trivial edits, single-file changes, and quick shell commands don't need tracking.
 - NEVER mark tasks as completed until the work is actually done and verified
 - NEVER delete tasks without Sebastian's explicit approval
 
