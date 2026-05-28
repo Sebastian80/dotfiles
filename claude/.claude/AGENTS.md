@@ -66,10 +66,6 @@ For GitLab repos use `/-/merge_requests/N`, `/-/issues/N`, `/-/commit/HASH`.
 
 Exception: Jira comments and descriptions use wiki markup `[text|url]` (see `rules/jira-cli.md`).
 
-## Generated documentation location
-
-The "don't create documentation files unless explicitly requested" rule applies by default. *When* documentation, reports, analyses, or scratch artifacts ARE explicitly requested (or produced by skills that need to persist their output), place them in `claudedocs/` at the project root — one known folder instead of scattering across the tree. Existing project conventions override (some projects use `docs/`, `notes/`, etc.).
-
 ## Session retro
 
 At the end of a non-trivial session — before context is lost — list what was actually learned this session. For each item, name where it belongs:
