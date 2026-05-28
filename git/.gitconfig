@@ -1,6 +1,7 @@
 [user]
 	email = sebastian.ertner@netresearch.de
 	name = Sebastian
+	signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAUf07XKqc3cfhZIHMwLMTdjiJOS+ZwZHHB0i0xNMgmy SER SSH
 
 # ============================================
 # Core Settings
@@ -138,3 +139,7 @@
 [credential "https://git.netresearch.de"]
 	helper = 
 	helper = !/home/linuxbrew/.linuxbrew/bin/glab auth git-credential
+[gpg]
+	format = ssh
+[tag]
+	gpgsign = true
