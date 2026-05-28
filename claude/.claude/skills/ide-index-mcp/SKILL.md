@@ -35,9 +35,9 @@ The IDE understands your code structurally. Grep sees text. When you need to fin
 ### Refactoring
 | Tool | What it does | Key params |
 |------|-------------|------------|
-| `ide_refactor_rename` | Rename symbol + update all references atomically | `file`, `line`, `column`, `newName` |
+| `ide_refactor_rename` | Rename a symbol + update all references atomically, OR rename the file itself | symbol: `file`, `line`, `column`, `newName` — file: `file`, `newName` (omit line/column) |
 | `ide_move_file` | Move a file; IDE applies namespace/import updates where a semantic backend exists (PHP PSR-4 aware) | `file`, `destination` |
-| `ide_refactor_safe_delete` | Delete a symbol/file after checking for usages (Java/Kotlin only) | `file`, `line`, `column` |
+| `ide_optimize_imports` | Remove unused imports + organize the rest per project style (does NOT reformat) | `file` |
 | `ide_reformat_code` | Reformat per project style (.editorconfig, IDE settings) | `file` |
 
 ### Intelligence
@@ -77,7 +77,7 @@ After creating or modifying files outside the IDE (via Write/Edit), call `ide_sy
 2. **File paths are relative** to project root — never absolute
 3. **Column must point to the first character of the symbol name** — not keywords (`def`, `class`, `function`), whitespace, or punctuation. A wrong column silently resolves to the wrong symbol.
 4. **project_path** — only needed for multi-project workspaces, omit otherwise
-5. **Default `scope: project_and_libraries`** for every tool that accepts a `scope` parameter (`ide_find_class`, `ide_find_file`, `ide_find_symbol`, `ide_find_references`, `ide_find_implementations`, `ide_type_hierarchy`, `ide_call_hierarchy`). The MCP server defaults to `project_files`, which excludes `vendor/`, `node_modules/`, and any other library path — silently returning empty/partial results in dependency-heavy projects (PHP/Symfony, Node, etc.). Only narrow to `project_files` when you specifically want to exclude libraries; use `project_production_files` / `project_test_files` for test-aware filtering.
+5. **Default `scope: project_and_libraries`** for every tool that accepts a `scope` parameter (`ide_find_class`, `ide_find_file`, `ide_find_symbol`, `ide_find_references`, `ide_find_implementations`, `ide_type_hierarchy`, `ide_call_hierarchy`). The MCP server defaults to `project_files`, which covers only what the IDE classifies as project source roots. Whether that includes `vendor/` / `node_modules/` is **project-dependent**: when they're marked as External Libraries or Excluded (common in Symfony/Node setups) `project_files` silently omits them; when they're configured as content/source roots — as in Magento, which indexes `vendor/` as source — they're included. Since you usually can't tell which applies, default to `project_and_libraries` (a superset) so dependency code is never silently missed. Only narrow to `project_files` when you specifically want to exclude libraries; use `project_production_files` / `project_test_files` for test-aware filtering.
 6. **`language`+`symbol` form is supported for PHP** on five tools: `ide_find_references`, `ide_find_definition`, `ide_find_implementations`, `ide_find_super_methods`, `ide_call_hierarchy`. In PhpStorm the only accepted `language` is `PHP`; pass a fully-qualified `symbol` instead of `file`+`line`+`column` — e.g. `\App\Service\UserService::find()`, `::$property` for properties, `::CASE` for enum cases (see [tools-reference.md](references/tools-reference.md) for full PHP symbol syntax). **`ide_refactor_rename` does NOT accept symbol mode** — it needs `file`+`line`+`column`. Name/query tools (`ide_find_symbol`, `ide_find_class`, `ide_type_hierarchy` with `className`) work across languages including PHP.
 
 To get exact positions, use `ide_find_class` or `ide_file_structure` first, then place the column on the symbol name's first character.
@@ -99,11 +99,14 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 3. `ide_find_file` — files by name
 4. `ide_search_text` — word occurrences across project (`regex: true` for patterns)
 
+**CamelCase caveat:** matching is reliable for **capital-initial** queries (`CSRM` → `CarrierServiceResponseMapper`), but mixed-case multi-segment abbreviations (`CarSvcRespMap`) silently return zero even when a class matches. When a CamelCase guess comes back empty, retry with just the capital initials or a plain substring before assuming the class doesn't exist.
+
 ### Refactoring
-1. `ide_refactor_rename` — rename symbol + all references atomically
+1. `ide_refactor_rename` — rename a symbol + all references atomically (`file`+`line`+`column`+`newName`). Omit `line`/`column` to rename the **file** itself (updates references; works for any file type).
 2. After rename, **verify with Grep** for the old name — IDE rename can miss some call sites depending on language. Fix stragglers with Edit.
 3. `ide_move_file` — relocate a file; IDE updates namespace/imports where a semantic backend exists (PHP PSR-4 aware)
-4. `ide_reformat_code` — apply project code style
+4. `ide_optimize_imports` — strip unused imports + organize the rest (no reformatting)
+5. `ide_reformat_code` — apply project code style
 
 ### Checking for problems
 1. `ide_diagnostics` — errors, warnings, quick fixes
@@ -130,7 +133,7 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 | `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
 | `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
 | Tool returns empty for a class/file you can see on disk in `vendor/`/library | Folder is in the IDE's Excluded list (Settings → Directories → right column). The `scope: project_and_libraries` parameter doesn't override this — exclusion wins at the index level. Either remove the exclusion (re-indexes the folder), or fall back to `rg -uu <path>` for that subtree. Verify by running `ide_find_class` on a class you know exists in the folder. |
-| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known index-plugin gap (resolves only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration). Use the **JetBrains MCP Server's `locate_symfony_service`** instead, or `ide_search_text`. See [Framework DI / YAML navigation](#framework-di--yaml-navigation). |
+| `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known index-plugin gap (resolves only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration). Use the **JetBrains MCP Server's `locate_symfony_service`** instead, or `ide_search_text`. See [Framework DI / YAML navigation](#framework-di--yaml-navigation-symfony-etc). |
 
 ## Framework DI / YAML navigation (Symfony, etc.)
 
