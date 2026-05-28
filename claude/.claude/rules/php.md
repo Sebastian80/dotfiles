@@ -1,6 +1,8 @@
 ---
-alwaysApply: false
-paths: **/*.php, composer.json, composer.lock
+paths:
+  - "**/*.php"
+  - "composer.json"
+  - "composer.lock"
 ---
 
 # PHP
