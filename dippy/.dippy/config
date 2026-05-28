@@ -188,6 +188,11 @@ allow-mcp mcp__*__query_*
 deny-mcp mcp__*__delete_*                 "MCP delete — ask Sebastian"
 deny-mcp mcp__*__remove_*                 "MCP remove — ask Sebastian"
 deny-mcp mcp__*__drop_*                   "MCP drop — ask Sebastian"
+# PhpStorm IDE tools — allow entire namespaces (local-only, IDE Undo + git track changes).
+# Placed AFTER the broad deny-mcp rules so last-match-wins overrides them
+# for tools like remove_breakpoint, stop_debug_session, etc.
+allow-mcp mcp__phpstorm-index__*
+allow-mcp mcp__phpstorm-debugger__*
 
 #---- Redirect rules ----#
 # Allow file writes broadly; deny-redirects below override for secrets paths.
