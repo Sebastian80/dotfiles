@@ -48,7 +48,33 @@ When a request is ambiguous or underspecified, STOP and ask using the AskUserQue
 - If you catch yourself about to choose between two reasonable interpretations, that's a signal to ask
 - One good question up front is worth more than a redo later
 
+## Temporal awareness
+
+The current date is injected into the conversation context. Use it as the source of truth for "today" — never default to your training cutoff when discussing "latest" versions, security advisories, or any time-sensitive claim.
+
+## Hyperlink references
+
+Auto-linkify references in any output (PR descriptions, commit messages, chat replies, generated docs). Markdown links only — Claude Code strips OSC 8 terminal escapes. Resolve `repo_url` from `git remote get-url origin` and convert SSH (`git@host:org/repo.git`) to HTTPS.
+
+| Pattern | Example  | URL template (GitHub)                       |
+|---------|----------|---------------------------------------------|
+| PR      | #13      | `{repo_url}/pull/13`                        |
+| Issue   | #1234    | `{repo_url}/issues/1234`                    |
+| Commit  | 7c12680  | `{repo_url}/commit/7c12680`                 |
+| Jira    | OROSPD-1 | `https://jira.netresearch.de/browse/OROSPD-1` |
+
+For GitLab repos use `/-/merge_requests/N`, `/-/issues/N`, `/-/commit/HASH`.
+
 <important if="writing or modifying code">
+
+## Define success before starting
+
+Restate the task as a verifiable goal *before* writing code:
+- "Add validation" → "tests for invalid inputs pass"
+- "Fix the bug" → "a test reproducing the bug passes"
+- "Refactor X" → "existing tests pass before AND after"
+
+Strong success criteria let you loop independently; "make it work" needs constant clarification.
 
 ## Designing software
 
