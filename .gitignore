@@ -150,6 +150,9 @@ yazi/.config/yazi/*.toml-*
 # Claude Code
 claude/.claude/settings.json
 
+# htop runtime state
+htop/.config/htop/htop_history
+
 # Ghostty
 ghostty/.config/ghostty/*.backup-*
 
