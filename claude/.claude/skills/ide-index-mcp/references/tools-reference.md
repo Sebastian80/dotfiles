@@ -255,19 +255,20 @@ Analyze a file for errors, warnings, and available quick fixes/intentions.
 ## Refactoring Tools
 
 ### ide_refactor_rename
-Rename a symbol and update ALL references (semantic rename, not find-replace). Works across ALL languages.
+Rename a symbol and update ALL references (semantic rename, not find-replace). Works across ALL languages. **Does NOT accept `language`+`symbol` mode** — unlike the navigation tools, rename is always position-based or file-based.
 
-**Target (mutually exclusive):** `file`+`line`+`column` OR `language`+`symbol`
+**Two modes:**
+- **Symbol rename:** `file`+`line`+`column`+`newName` — rename the symbol at that position.
+- **File rename:** `file`+`newName` (omit `line`/`column`) — rename the file itself; updates references. Works for any file type, including binary (images, resources).
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `file` | string | conditional | Relative file path. Required for position-based lookup. |
-| `line` | integer | conditional | 1-based line. Required for position-based lookup. |
-| `column` | integer | conditional | 1-based column. Required for position-based lookup. |
-| `language` | string | conditional | Symbol language (e.g., `"Java"`). Required for symbol-based lookup. |
-| `symbol` | string | conditional | Fully qualified symbol reference. Required for symbol-based lookup. |
-| `newName` | string | yes | New name for the symbol |
-| `overrideStrategy` | enum | no | `rename_base` (default), `rename_only_current`, `ask` |
+| `file` | string | yes | Relative file path |
+| `line` | integer | conditional | 1-based line. Required for symbol rename; omit for file rename. |
+| `column` | integer | conditional | 1-based column. Required for symbol rename; omit for file rename. |
+| `newName` | string | yes | New name for the symbol or file (include extension for file rename) |
+| `overrideStrategy` | enum | no | When renaming an overriding method: `rename_base` (default), `rename_only_current`, `ask` |
+| `relatedRenamingStrategy` | enum | no | Auto-rename of related symbols (accessors, test classes, same-named props): `all` (default), `none`, `accessors_and_tests`, `ask` |
 | `project_path` | string | no | Project root path |
 
 **Returns**: `{ success, affectedFiles: [paths], changesCount, message }`
@@ -286,8 +287,8 @@ Move a file to a new directory. Applies language-aware reference, import, and pa
 **Returns**: `{ success, affectedFiles: [paths], changesCount, message }`
 **Supports IDE undo** (Ctrl+Z).
 
-### ide_refactor_safe_delete (Java/Kotlin only)
-Delete a symbol or file, checking for usages first.
+### ide_refactor_safe_delete (Java/Kotlin only — NOT exposed in PhpStorm)
+Delete a symbol or file, checking for usages first. The server only registers this tool when the Java plugin is present, so it is unavailable in PhpStorm/PHP setups — do not attempt to call it there.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -301,6 +302,16 @@ Delete a symbol or file, checking for usages first.
 **Returns (success)**: `{ success, affectedFiles, changesCount, message }`
 **Returns (blocked)**: `{ canDelete: false, elementName, usageCount, blockingUsages: [...], message }`
 **Only available in**: IntelliJ IDEA, Android Studio (requires Java plugin).
+
+### ide_optimize_imports
+Remove unused imports and organize the remaining ones per project code style. Equivalent to Ctrl+Alt+O / Cmd+Opt+O. Does NOT reformat code. Supports IDE undo (Ctrl+Z).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file` | string | yes | Relative file path |
+| `project_path` | string | no | Project root path |
+
+**Returns**: `{ success, affectedFiles, message }`
 
 ### ide_reformat_code (disabled by default)
 Reformat code per project style (.editorconfig, IDE settings). Equivalent to Ctrl+Alt+L / Cmd+Opt+L.
