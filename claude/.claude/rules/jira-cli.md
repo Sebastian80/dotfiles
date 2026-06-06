@@ -15,3 +15,5 @@
 - `jira transitions KEY --format json`: `.data[].to` is a plain string (the state name), NOT an object — don't parse `.to.name`.
 - There is NO attachment **download** endpoint (only list/upload/delete). To read a screenshot's content, ask the user to describe it or paste it — don't curl the attachment URL (needs credentials Claude must not read).
 - Multi-step transition pathfinding can report "No path" even when stepwise hops exist. Transition one hop at a time: `--target <next-state> --dryRun --maxSteps 1`, then execute, then re-list transitions.
+- Versions: create via `jira version --project KEY --name "..." -X POST`; update via `jira version/{id} -X PATCH`, which supports ONLY `--name`/`--description`/`--released`. There is NO release-date parameter — `--releaseDate` is silently ignored, `--release_date` errors, `-X PUT` is Method Not Allowed. Release dates need the Jira UI.
+- The Netresearch instance has NO *follows / is followed by* link type (check `jira linktypes`). Release-ticket chaining uses `Relation`; dependencies use `Blockade` (blocks / is blocked by).
