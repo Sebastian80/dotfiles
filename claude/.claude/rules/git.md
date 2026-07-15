@@ -36,3 +36,19 @@
 - Feature: `feature/descriptive-name`
 - Bugfix: `bugfix/descriptive-name`
 - Hotfix: `hotfix/descriptive-name`
+
+## MR / PR descriptions
+
+- Teams squash MRs: GitLab takes the MR description as the squash-commit body. Write it like a commit body.
+- 3–5 sentences covering WHAT changed and WHY. A reviewer must grasp the MR in 30 seconds.
+- NEVER include: file-by-file change lists, implementation documentation, debugging protocols, UAT/test evidence, pipeline IDs, screenshots of passing tests.
+- Where that content belongs instead:
+  - architecture / implementation details → `docs/` in the repo (or CHANGELOG)
+  - test results, UAT evidence → Jira ticket comment
+  - debugging history → MR comment or ticket comment, never the description
+- A 1–2 line "How to test" hint is fine when reviewers need it.
+- Short declarative sentences — a 5-sentence wall of clause-heavy prose violates the spirit. If it can't be skimmed in 30 seconds, cut it.
+- Cross-MR coordination notes (conflicts, ordering) → MR comment, not the description.
+- Title: imperative, self-contained, ≤72 chars (it becomes the squash-commit subject).
+- Add a "Review focus:" line naming the one thing reviewers should scrutinize — strongest empirically proven lever for merge speed/quality.
+- Format: four bold one-liners — **Why** / **What** / **Review focus** / **Test** — with inline code for identifiers/commands. No headings, no walls of prose.
