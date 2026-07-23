@@ -39,6 +39,56 @@
         "Used ide_find_class or ide_find_symbol to locate SearchService first",
         "Found SearchService at application/search.py"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "rename the method getPimField on the DataProviderDecorator class to getPimAttribute — every caller has to be updated, and make sure nothing still references the old name afterwards",
+      "expected_output": "Locates the exact declaration position first (ide_find_class / ide_file_structure), runs ide_refactor_rename with file+line+column+newName (NOT symbol mode — rename does not support it), then verifies with Grep that no occurrence of getPimField remains and fixes stragglers with Edit.",
+      "files": [],
+      "expectations": [
+        "Located the declaration position via ide_file_structure or ide_find_class before renaming (column on the method name)",
+        "Used ide_refactor_rename with file+line+column (did not attempt language+symbol mode)",
+        "Did NOT use sed/Bash for the rename",
+        "Verified after the rename by grepping for the old name getPimField",
+        "Fixed any leftover occurrences with Edit rather than rerunning the rename"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I have hmkg-61 open in phpstorm. open /home/sebastian/workspace/hmkg-62.docker.local as well and tell me which class implements PriceProviderInterface in each of the two projects",
+      "expected_output": "Checks ide_project_status first, opens the second project via ide_open_project (absolute path, waits for indexing), then runs ide_find_implementations twice — once per project — passing project_path on every call since multiple projects are now open.",
+      "files": [],
+      "expectations": [
+        "Called ide_project_status (or equivalent) to see open projects before acting",
+        "Used ide_open_project with the absolute path to open the second project",
+        "Passed project_path on every subsequent tool call once two projects were open",
+        "Used ide_find_implementations (not Grep) in both projects",
+        "Did not ask the user to open the project manually in the IDE"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "where is the service oro_pricing.provider.combined_price_list defined and which PHP class is behind it? it's registered somewhere in a services.yml",
+      "expected_output": "Does NOT rely on ide_find_definition on the YAML position (known provider-reference gap). Uses ide_search_text with the dotted service id and filePattern *.yml to find the definition block (or the JetBrains MCP Server's locate_symfony_service when connected), then resolves the class from the class: value.",
+      "files": [],
+      "expectations": [
+        "Did not treat ide_find_definition returning the YAML node as the final answer",
+        "Used ide_search_text with the service id and a *.yml filePattern (or locate_symfony_service on the jetbrains-mcp server)",
+        "Resolved and reported the PHP class from the service definition block",
+        "Consulted the symfony-di reference behavior instead of concluding the Symfony plugin is broken"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I just ran a codemod script outside the IDE over the whole src/ tree that renamed applyDiscount to applyRebate. now find every remaining usage of applyDiscount — vendor code included",
+      "expected_output": "Calls ide_sync_files first (external changes → stale index), then ide_find_references / ide_search_text with scope project_and_libraries so vendor/ is not silently skipped.",
+      "files": [],
+      "expectations": [
+        "Called ide_sync_files before searching (external modifications mentioned)",
+        "Used ide_find_references or ide_search_text (not Grep) for the search",
+        "Used scope project_and_libraries (not the project_files default) to include vendor code",
+        "Mentioned rg -uu as fallback only if a vendor subtree is IDE-excluded"
+      ]
     }
   ]
 }
