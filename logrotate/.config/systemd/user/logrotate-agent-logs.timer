@@ -1,0 +1,9 @@
+[Unit]
+Description=Weekly rotation of agent logs
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
