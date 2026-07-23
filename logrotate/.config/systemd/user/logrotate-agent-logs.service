@@ -1,0 +1,6 @@
+[Unit]
+Description=Rotate agent logs (dippy audit, Claude Code hook approvals)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/logrotate --state %h/.local/state/logrotate-agent-logs.state %h/.config/logrotate/agent-logs.conf
