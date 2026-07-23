@@ -2,6 +2,16 @@
 
 Complete parameter reference for all IDE MCP tools. All tools use JSON-RPC via MCP protocol.
 
+## Contents
+
+- [Common Parameters](#common-parameters) · [Response Format](#response-format)
+- [Navigation Tools](#navigation-tools) — `ide_find_references`, `ide_find_definition`, `ide_find_class`, `ide_find_file`, `ide_search_text`, `ide_find_implementations`, `ide_find_symbol`, `ide_find_super_methods`, `ide_type_hierarchy`, `ide_call_hierarchy`, `ide_file_structure`, `ide_read_file`
+- [Intelligence Tools](#intelligence-tools) — `ide_diagnostics`
+- [Refactoring Tools](#refactoring-tools) — `ide_refactor_rename`, `ide_move_file`, `ide_refactor_safe_delete`, `ide_optimize_imports`, `ide_reformat_code`
+- [Project Tools](#project-tools) — `ide_index_status`, `ide_sync_files`, `ide_build_project`
+- [Editor Tools](#editor-tools) — `ide_get_active_file`, `ide_open_file`
+- [Project Lifecycle & Multi-Project Tools](#project-lifecycle--multi-project-tools) — `ide_project_status`, `ide_open_project`, `ide_close_project`, `ide_enroll_all_projects`, `ide_get_project_modes`, `ide_set_project_mode`, `ide_set_all_project_modes`, `ide_release_project`, `ide_release_all_projects`, `ide_set_power_save_mode`, `ide_lifecycle_log`, `ide_set_lifecycle_log_file`, `ide_reload_project`, `ide_install_plugin`, `ide_restart`
+
 ## Common Parameters
 
 | Parameter | Type | Description |
