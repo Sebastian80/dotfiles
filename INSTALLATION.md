@@ -115,6 +115,19 @@ stow bash    # Just bash config
 stow git     # Just git config
 ```
 
+### Claude Code settings (not tracked)
+
+`claude/.claude/settings.json` is gitignored because Claude Code rewrites it
+at runtime. On a fresh machine, seed it from the tracked reference before the
+first `claude` start:
+
+```bash
+cp ~/dotfiles/claude/.claude/settings.reference.json ~/dotfiles/claude/.claude/settings.json
+```
+
+When you deliberately change settings (env vars, hooks, permissions,
+marketplaces), mirror the change into `settings.reference.json` and commit it.
+
 ---
 
 ## Step 4: Verify Installation

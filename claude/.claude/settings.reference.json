@@ -1,0 +1,199 @@
+{
+  "cleanupPeriodDays": 30,
+  "env": {
+    "BASH_ENV": "/home/sebastian/.bash/path.bash",
+    "BASH_DEFAULT_TIMEOUT_MS": "60000",
+    "BASH_MAX_TIMEOUT_MS": "600000",
+    "MCP_TIMEOUT": "60000",
+    "MAX_MCP_OUTPUT_TOKENS": "50000",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+    "ENABLE_TOOL_SEARCH": "true",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS": "10",
+    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "2",
+    "CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION": "200",
+    "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION": "50"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Skill",
+      "Edit",
+      "Write",
+      "Bash(ddev:*)",
+      "Bash(ddev *)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(*.env)",
+      "Read(*credentials*)",
+      "Read(*secret*)",
+      "Read(*.pem)",
+      "Read(*.key)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.env.jira)",
+      "Edit(.env*)",
+      "Edit(*.env)",
+      "Edit(*credentials*)",
+      "Edit(*secret*)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf / *)",
+      "Bash(rm -rf /home)",
+      "Bash(rm -rf /home/)",
+      "Bash(rm -rf /home *)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf ~/)",
+      "Bash(rm -rf ~ *)",
+      "Bash(rm -rf $HOME)",
+      "Bash(rm -rf $HOME/)",
+      "Bash(rm -rf $HOME *)",
+      "Bash(mkfs*)",
+      "Bash(fdisk*)",
+      "Bash(parted*)",
+      "Bash(dd)",
+      "Bash(dd *)",
+      "Bash(sudo*)",
+      "Bash(su)",
+      "Bash(su *)",
+      "Bash(doas)",
+      "Bash(doas *)",
+      "Bash(sh -c *)",
+      "Bash(bash -c *)",
+      "Bash(zsh -c *)",
+      "Bash(eval *)",
+      "Bash(exec *)"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "claude-fable-5[1m]",
+  "skillOverrides": {
+    "docs-with-mermaid": "off",
+    "cco": "off"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dippy"
+          },
+          {
+            "type": "command",
+            "command": "bash /home/sebastian/.claude/hooks/ide-first.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dippy"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send -t 5000 'Claude Code' 'Task completed' 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/bin/bash /home/sebastian/.claude/statusline-omp.sh"
+  },
+  "enabledPlugins": {
+    "agent-browser@agent-browser": true,
+    "code-simplifier@claude-plugins-official": false,
+    "claude-md-management@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false,
+    "superpowers@superpowers-dev": true,
+    "codex@openai-codex": true,
+    "agent-harness@netresearch-claude-code-marketplace": false,
+    "agent-rules@netresearch-claude-code-marketplace": false,
+    "context7@netresearch-claude-code-marketplace": false,
+    "data-tools@netresearch-claude-code-marketplace": false,
+    "docker-development@netresearch-claude-code-marketplace": false,
+    "enterprise-readiness@netresearch-claude-code-marketplace": false,
+    "file-search@netresearch-claude-code-marketplace": false,
+    "git-workflow@netresearch-claude-code-marketplace": true,
+    "github-project@netresearch-claude-code-marketplace": false,
+    "php-modernization@netresearch-claude-code-marketplace": false,
+    "security-audit@netresearch-claude-code-marketplace": true,
+    "german-technical-writing@netresearch-claude-code-marketplace": true,
+    "netresearch-branding@netresearch-claude-code-marketplace": false,
+    "jira-integration@netresearch-claude-code-marketplace": true,
+    "ecom-hmkg@netresearch-marketplace": false
+  },
+  "extraKnownMarketplaces": {
+    "superpowers-dev": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers"
+      },
+      "autoUpdate": true
+    },
+    "agent-browser": {
+      "source": {
+        "source": "github",
+        "repo": "Sebastian80/agent-browser",
+        "ref": "feature/show-clicks"
+      },
+      "autoUpdate": true
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      },
+      "autoUpdate": true
+    },
+    "netresearch-claude-code-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "netresearch/claude-code-marketplace"
+      }
+    },
+    "netresearch-marketplace": {
+      "source": {
+        "source": "git",
+        "url": "git@git.netresearch.de:coding-ai/marketplace.git"
+      }
+    }
+  },
+  "language": "english",
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
+  "autoUpdatesChannel": "latest",
+  "plansDirectory": ".claude/plan",
+  "tui": "fullscreen",
+  "preferredNotifChannel": "terminal_bell",
+  "teammateMode": "in-process",
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "ddev start, stop, status, list, describe, exec, ssh, restart, logs, mysql, snapshot, xdebug — local DDEV dev stack, no production impact"
+    ]
+  }
+}
