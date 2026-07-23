@@ -59,7 +59,11 @@ The IDE understands your code structurally. Grep sees text. When you need to fin
 
 ### Project Lifecycle & Multi-Project
 
-One MCP server per IDE **instance**; all projects open in that instance are served over the same port and routed via `project_path`. Lifecycle management auto-sleeps and wakes projects to keep many of them open cheaply.
+One MCP server per IDE **process**; all projects open in that process are served over the same port and routed via `project_path`. Lifecycle management auto-sleeps and wakes projects to keep many of them open cheaply.
+
+**Ports are fixed per IDE product, never per project or window** (index: PhpStorm 29175, IntelliJ 29170, PyCharm 29172, WebStorm 29173; debugger: same scheme at 29190+, PhpStorm 29195). A second process of the SAME product fails with "Port already in use" — it needs a manual port change (Settings → Tools → Index MCP Server) plus its own MCP registration under a different name; the supported model is one process with several project windows, not several processes. Different IDE products coexist without conflict.
+
+**Git worktrees:** `project_path` resolves only against open projects (exact root → module content root → subdirectory). A worktree path that isn't opened in the IDE returns PROJECT_NOT_FOUND — open the worktree as its own project, or pass the indexed main checkout's path.
 
 | Tool | What it does | Key params |
 |------|-------------|------------|
