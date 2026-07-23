@@ -79,7 +79,12 @@ allow envsubst
 
 #---- Asks: destructive variants prompt for confirmation ----#
 # These override the broad allows above — last-match-wins.
-ask rm -rf                                "rm -rf — confirm? (consider 'gio trash' / 'trash' for recoverable delete)"
+ask rm -[rR]*                             "recursive rm — confirm? (consider 'gio trash' / 'trash' for recoverable delete)"
+ask rm -f[rR]*                            "recursive rm — confirm? (consider 'gio trash' / 'trash' for recoverable delete)"
+ask rm --recursive                        "recursive rm — confirm? (consider 'gio trash' / 'trash' for recoverable delete)"
+ask rm * -[rR]* *                         "recursive rm (flag after paths) — confirm?"
+ask rm * -f[rR]* *                        "recursive rm (flag after paths) — confirm?"
+ask rm * --recursive *                    "recursive rm (flag after paths) — confirm?"
 # find -delete bypasses rm -rf guard (dippy#130)
 ask find * -delete *                      "find -delete — confirm? (recursive deletion, same as rm -rf)"
 ask find * -exec rm *                     "find -exec rm — confirm? (recursive deletion via find)"
@@ -87,16 +92,24 @@ ask git add -A                            "git add -A — confirm? (can capture 
 ask git add .                             "git add . — confirm? (can capture sensitive untracked files; prefer specific paths)"
 ask git commit --amend                    "git commit --amend — confirm? (CLAUDE.md prefers new commits over amending)"
 ask git push --force                      "git push --force — confirm? (--force-with-lease is safer if remote may have moved)"
+ask git push -f                           "git push -f — confirm? (--force-with-lease is safer if remote may have moved)"
+ask git push * --force *                  "git push --force — confirm? (--force-with-lease is safer if remote may have moved)"
+ask git push * -f *                       "git push -f — confirm? (--force-with-lease is safer if remote may have moved)"
 ask git rebase -i                         "git rebase -i — confirm? (interactive rebase, rewrites history)"
 ask git stash drop                        "git stash drop — confirm? (permanently discards a stash)"
 ask git stash clear                       "git stash clear — confirm? (permanently discards ALL stashes)"
 ask git reset --hard                      "git reset --hard — confirm? (discards uncommitted changes in the working tree)"
-ask git clean -f                          "git clean -f — confirm? (deletes untracked files)"
-ask git clean -fd                         "git clean -fd — confirm? (deletes untracked files AND directories)"
-ask git clean -fx                         "git clean -fx — confirm? (deletes untracked AND ignored files)"
+ask git clean -f*                         "git clean — confirm? (deletes untracked files)"
+ask git clean -d*                         "git clean — confirm? (deletes untracked directories)"
+ask git clean -x*                         "git clean — confirm? (deletes untracked AND ignored files)"
+ask git clean -X*                         "git clean — confirm? (deletes ignored files)"
+ask git clean --force                     "git clean --force — confirm? (deletes untracked files)"
+ask git clean * -[fdxX]* *                "git clean — confirm? (destructive flag)"
 ask git checkout --                       "git checkout -- — confirm? (discards local changes to the listed files)"
+ask git restore                           "git restore — confirm? (discards local changes; --staged only unstages)"
 ask git branch -D                         "git branch -D — confirm? (force-deletes a branch, including unmerged)"
 ask git branch -d                         "git branch -d — confirm? (deletes a branch)"
+ask git branch --delete                   "git branch --delete — confirm? (deletes a branch)"
 ask jira * -X DELETE *                    "Destructive Jira DELETE — confirm? (-X DELETE removes issues / comments / attachments / links / sprint memberships)"
 ask glab * delete *                       "glab delete — confirm? (irreversible for repo/release/mr/issue/ssh-key/variable/label)"
 ask glab mr merge                         "glab mr merge — confirm? (merges the MR, may trigger deploys)"
@@ -137,6 +150,7 @@ ask brew uninstall                        "brew uninstall — confirm? (removes 
 # Permissions
 ask chmod 777                             "chmod 777 — confirm? (world-writable, usually wrong)"
 ask chmod -R                              "chmod -R — confirm? (recursive permission change)"
+ask chmod --recursive                     "chmod --recursive — confirm? (recursive permission change)"
 # Destructive API calls (two rules each: prefix catches -X right after curl,
 # glob catches -X anywhere in the middle)
 ask curl -X DELETE                        "curl DELETE — confirm? (destructive API call)"

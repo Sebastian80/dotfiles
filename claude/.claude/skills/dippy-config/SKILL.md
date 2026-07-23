@@ -268,6 +268,7 @@ Now `~/bin/mycli list` matches the `allow mycli list` rule.
 | Multi-line patterns | Dippy parses one rule per line | Split into separate lines |
 | Using `*` for path-like patterns | `*` doesn't recurse into subdirectories | Use `**` for recursive paths in `deny-redirect` |
 | Forgetting that `allow` defaults to **prefix** match | `allow git` matches `git push --force` too | Use `allow git status` for narrow allows, then `ask git push --force` to override |
+| Asking on ONE spelling of a destructive op | Broad allows swallow every other spelling — `ask rm -rf` misses `rm -fr`, `rm -r -f`; `ask git push --force` misses `git push -f` and `git push origin --force` (audit 2026-07-23 found 6 such live gaps) | Cover permutations: short+long flag, glob classes (`rm -[rR]*`, `rm -f[rR]*`), and a `cmd * -flag *` variant for flags after paths; test each permutation in the matrix |
 
 ## Debugging an existing decision
 
