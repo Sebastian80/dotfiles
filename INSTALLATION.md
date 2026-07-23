@@ -532,6 +532,11 @@ After completing installation:
    cd ~/dotfiles
    brew bundle install --file=~/dotfiles/Brewfile
    ```
+   Homebrew 6+ refuses formulae from untrusted third-party taps. Trust them
+   once or installs/upgrades fail silently in scripts:
+   ```bash
+   brew trust ldayton/dippy
+   ```
 
 6. **Install Node.js and npm globals**:
    ```bash
