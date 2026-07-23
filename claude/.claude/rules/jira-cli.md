@@ -18,6 +18,7 @@ All Jira operations go through the `jira:jira-communication` skill (netresearch 
 
 ## Conventions
 
-- **After creating a ticket, ALWAYS add it to the project's active sprint** (`jira-sprint.py`). Skip only if the user says "backlog" or the project has no active sprint.
+- **Before ANY write to a ticket, fetch it and check the summary matches the intent** — a key quoted back by the user may echo your own earlier error (a delete-guard evidence comment once landed on the PIM-import ticket HMKG-2322 instead of HMKG-2272 this way).
+- **After creating a ticket, ALWAYS add it to the project's active sprint.** The NR skill has no sprint-add command; the working recipe: `jira-sprint.py current 119` (eCom board) for the active sprint id, then `jira-issue.py update KEY --fields-json '{"customfield_10480": <sprintId>}'`. Skip only if the user says "backlog" or the project has no active sprint.
 - When an MR exists for a ticket, attach it as a WEBLINK (`jira-weblink.py`, title `MR !N: <mr title>`), not only as a comment — comments scroll away, weblinks stay in the sidebar. Pattern: weblink for the MR + comment for evidence (test results, review verdicts).
 - After any write operation, re-fetch to verify the content landed — Jira DC has a history of silent no-ops.
