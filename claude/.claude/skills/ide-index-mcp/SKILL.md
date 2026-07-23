@@ -1,6 +1,6 @@
 ---
 name: ide-index-mcp
-description: "MANDATORY for all code navigation and refactoring. You MUST invoke this skill whenever: finding where a function/method/class is called or used ('find usages of X', 'who calls X', 'where is X used'), going to a definition ('where is X defined', 'take me to X', 'show me the source of X'), renaming any symbol, finding implementations of an interface or abstract class, tracing call hierarchies ('what calls X', 'what does X call'), checking file structure or class methods ('what methods does X have'), checking for errors/warnings/diagnostics in a file, finding classes or symbols by name, understanding type/inheritance hierarchies, syncing IDE after external file changes, or reformatting code. This applies even for seemingly simple tasks — do NOT skip this skill and use Grep/Glob instead. If a user mentions any class name, method name, or symbol and wants to navigate to it, find its usages, rename it, or understand its relationships, this skill MUST be consulted first."
+description: "MANDATORY for all code navigation and refactoring. You MUST invoke this skill whenever: finding where a function/method/class is called or used ('find usages of X', 'who calls X', 'where is X used'), going to a definition ('where is X defined', 'take me to X', 'show me the source of X'), renaming any symbol, finding implementations of an interface or abstract class, tracing call hierarchies ('what calls X', 'what does X call'), checking file structure or class methods ('what methods does X have'), checking for errors/warnings/diagnostics in a file, finding classes or symbols by name, understanding type/inheritance hierarchies, syncing IDE after external file changes, reformatting code, or managing IDE projects (multi-project work, sleep/wake, Power Save). This applies even for seemingly simple tasks — do NOT skip this skill and use Grep/Glob instead. If a user mentions any class name, method name, or symbol and wants to navigate to it, find its usages, rename it, or understand its relationships, this skill MUST be consulted first."
 argument-hint: [task description or symbol to investigate]
 model: haiku
 ---
@@ -57,6 +57,38 @@ The IDE understands your code structurally. Grep sees text. When you need to fin
 | `ide_get_active_file` | Get currently open file(s) with cursor position | (none required) |
 | `ide_read_file` | Read file content — use for library/vendored sources only | `file` or `qualifiedName` |
 
+### Project Lifecycle & Multi-Project
+
+One MCP server per IDE **instance**; all projects open in that instance are served over the same port and routed via `project_path`. Lifecycle management auto-sleeps and wakes projects to keep many of them open cheaply.
+
+| Tool | What it does | Key params |
+|------|-------------|------------|
+| `ide_project_status` | One table of every open + managed project with its mode — **start here for any multi-project question** | (none required) |
+| `ide_open_project` | Open a project by absolute path, **blocks until indexed** (default timeout 600 s) | `path`, `timeoutSeconds` |
+| `ide_close_project` | Close a project window (non-blocking); refuses to close the last open project | `project_path` |
+| `ide_enroll_all_projects` | Enroll all open projects in lifecycle management (already-managed skipped) | (none required) |
+| `ide_get_project_modes` | List managed projects with current mode | (none required) |
+| `ide_set_project_mode` | Set one project's mode: `active` / `background` / `dormant` / `closed` | `mode`, `project_path` |
+| `ide_set_all_project_modes` | Set mode for all managed open projects (`closed` not allowed here) | `mode` |
+| `ide_release_project` | Unenroll one project from lifecycle management (accepts `path` for closed ones) | `path` or `project_path` |
+| `ide_release_all_projects` | Unenroll everything, disable Power Save | (none required) |
+| `ide_set_power_save_mode` | IDE-wide Power Save on/off (inspections off, index + MCP stay functional) | `enabled` |
+| `ide_lifecycle_log` | Last ≤500 lifecycle events (open/close/transition/enroll/release/wake + trigger) — diagnose unexpected sleeps/closes | `limit`, `project` |
+| `ide_set_lifecycle_log_file` | Toggle writing lifecycle events to a tail-able log file (ring buffer always on) | `enabled` |
+| `ide_reload_project` | Force-reload linked **Maven/Gradle** build models (JVM projects only — no-op for pure PHP) | (none required) |
+| `ide_restart` | Restart the IDE — **kills this MCP server; must be the final call** | (none required) |
+| `ide_install_plugin` | Install a plugin zip (defaults to the project's `build/distributions/*.zip`); needs `ide_restart` after | `path` |
+
+**Lifecycle modes** (managed projects move automatically): `active` (full IDE, Power Save off) → `background` (Power Save on, index + MCP fully functional — the default while MCP works) → `dormant` (editors closed, PSI cache freed; after ~2 min MCP inactivity) → `closed` (fully unloaded; after ~10 min inactivity). Any MCP call **auto-wakes** the project — a call against a `closed` managed project auto-reopens it with a 5–15 s delay, so a slow first response after idle time is normal, not an error.
+
+**Multi-project workflow:**
+1. `ide_project_status` first — see what's open, managed, and in which mode.
+2. With more than one project open, pass `project_path` (absolute project root) on **every** call — omitting it returns an error listing the candidates. For workspace projects use the sub-project path.
+3. Enrollment is automatic on the first real semantic call per project; `ide_enroll_all_projects` only needed to opt in projects you haven't touched yet.
+4. Don't micro-manage modes — the lifecycle handles sleep/wake. Set modes explicitly only to pre-warm (`background`) before a batch, or to free memory now (`dormant`/`closed`).
+5. `ide_open_project` on a never-before-opened project can hang on the modal "Trust project?" dialog only a human can answer — if it times out, ask the user.
+6. If a project closed or slept unexpectedly, read `ide_lifecycle_log` before assuming a bug.
+
 ## When to use built-in tools instead
 
 - **Regex pattern matching** → `ide_search_text` with `regex: true` + optional `filePattern` (in-project regex no longer needs `Grep`; routes through IntelliJ Find in Files)
@@ -78,7 +110,7 @@ After creating or modifying files outside the IDE (via Write/Edit), call `ide_sy
 1. **Line and column are 1-based** (first line = 1, first column = 1)
 2. **File paths are relative** to project root — never absolute
 3. **Column must point to the first character of the symbol name** — not keywords (`def`, `class`, `function`), whitespace, or punctuation. A wrong column silently resolves to the wrong symbol.
-4. **project_path** — only needed for multi-project workspaces, omit otherwise
+4. **project_path** — required on every call when multiple projects are open in the IDE instance (absolute project root; sub-project path for workspace projects); omit with a single project
 5. **Default `scope: project_and_libraries`** for every tool that accepts a `scope` parameter (`ide_find_class`, `ide_find_file`, `ide_find_symbol`, `ide_find_references`, `ide_find_implementations`, `ide_type_hierarchy`, `ide_call_hierarchy`). The MCP server defaults to `project_files`, which covers only what the IDE classifies as project source roots. Whether that includes `vendor/` / `node_modules/` is **project-dependent**: when they're marked as External Libraries or Excluded (common in Symfony/Node setups) `project_files` silently omits them; when they're configured as content/source roots — as in Magento, which indexes `vendor/` as source — they're included. Since you usually can't tell which applies, default to `project_and_libraries` (a superset) so dependency code is never silently missed. Only narrow to `project_files` when you specifically want to exclude libraries; use `project_production_files` / `project_test_files` for test-aware filtering.
 6. **`language`+`symbol` form is supported for PHP** on five tools: `ide_find_references`, `ide_find_definition`, `ide_find_implementations`, `ide_find_super_methods`, `ide_call_hierarchy`. In PhpStorm the only accepted `language` is `PHP`; pass a fully-qualified `symbol` instead of `file`+`line`+`column` — e.g. `\App\Service\UserService::find()`, `::$property` for properties, `::CASE` for enum cases (see [tools-reference.md](references/tools-reference.md) for full PHP symbol syntax). **`ide_refactor_rename` does NOT accept symbol mode** — it needs `file`+`line`+`column`. Name/query tools (`ide_find_symbol`, `ide_find_class`, `ide_type_hierarchy` with `className`) work across languages including PHP.
 
