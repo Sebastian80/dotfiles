@@ -157,8 +157,7 @@
     "agent-browser": {
       "source": {
         "source": "github",
-        "repo": "Sebastian80/agent-browser",
-        "ref": "feature/show-clicks"
+        "repo": "vercel-labs/agent-browser"
       },
       "autoUpdate": true
     },
