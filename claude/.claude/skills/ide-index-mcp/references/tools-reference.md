@@ -389,3 +389,135 @@ Open a file in the editor with optional navigation.
 | `project_path` | string | no | Project root path |
 
 **Returns**: `{ file, opened, message }`
+
+---
+
+## Project Lifecycle & Multi-Project Tools
+
+One MCP server per IDE instance serves all projects open in that instance; `project_path` (absolute project root, sub-project path for workspace projects) routes each call and is required on every tool whenever more than one project is open. Lifecycle management moves **managed** projects automatically between modes:
+
+- `active` — full IntelliJ capabilities, Power Save off. For active editing/review.
+- `background` — Power Save on; index and MCP fully functional, inspections/highlighting off. Default while MCP works; entered automatically on window focus loss.
+- `dormant` — Power Save on, editors closed, PSI caches dropped, index still loaded. Entered after ~2 min MCP inactivity; any MCP call auto-wakes to `background`.
+- `closed` — project fully closed, memory freed. Entered after ~10 min MCP inactivity; auto-reopens on the next MCP call (5–15 s delay).
+
+Enrollment happens automatically on a project's first real semantic tool call (find references, diagnostics, refactoring, …) — not on open/close.
+
+### ide_project_status
+Combined snapshot of every open and managed project.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+**Returns**: `{ projects: [{name, path, open, managed, mode?}], summary: {total, open, managed, open_not_managed, managed_closed} }`
+
+### ide_open_project
+Open a project by filesystem path and block until indexing completes, so follow-up calls succeed immediately. Already-open projects return immediately. Does NOT enroll the project in lifecycle management. Requires at least one project already open (JSON-RPC context).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | yes | Absolute path of the project directory to open |
+| `timeoutSeconds` | integer | no | Max wait for open + indexing (default 600) |
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+**Caveat**: a project the IDE has never seen may raise the modal "Trust project?" dialog, which only a human can answer — the call then fails at `timeoutSeconds`.
+
+### ide_close_project
+Close an open project window (non-blocking — returns once the close is scheduled). Refuses to close the **last** open project (the server needs one open project to serve requests).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Required when multiple projects are open |
+
+### ide_enroll_all_projects
+Enroll all currently open projects in lifecycle management. Already-managed projects are skipped; closed projects must be opened first.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_get_project_modes
+List all managed projects with path, name, and current mode. All managed projects are always returned regardless of `project_path`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_set_project_mode
+Set the lifecycle mode for one managed project.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `mode` | enum | yes | `active`, `background`, `dormant`, or `closed` |
+| `project_path` | string | no | Required when multiple projects are open |
+
+### ide_set_all_project_modes
+Set the mode for every managed **open** project at once. `closed` is not supported here (use `ide_set_project_mode` per project); closed projects are skipped. The mode applies to all managed open projects regardless of which `project_path` is passed as routing hint.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `mode` | enum | yes | `active`, `background`, or `dormant` |
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_release_project
+Unenroll a project from lifecycle management: Power Save disabled, timers cancelled, no more auto-sleep/close. Open projects stay open.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | no | Path of a **closed** managed project to release; omit to release the routed (open) project |
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_release_all_projects
+Release every managed project (including currently-closed ones); Power Save disabled afterwards.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_set_power_save_mode
+Enable/disable Power Save Mode **IDE-wide** (all open projects). Suspends background inspections, on-the-fly analysis, auto-import suggestions; index and all code-intelligence operations stay fully functional.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `enabled` | boolean | yes | true = enable Power Save |
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_lifecycle_log
+Recent lifecycle events for ALL IntelliJ projects (not just managed), newest first, from a 500-event ring buffer. Event types: `open`, `closed`, `transition`, `enroll`, `release`, `wake`. Triggers: `focus_gained`, `focus_lost`, `timer:focus`, `timer:inactivity`, `timer:close`, `mcp_call`, `auto_open`, `user`. The response includes `log_file` — readable via `cat`/`tail -f` even with no project open.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `limit` | integer | no | Events to return, newest first (default 50, max 500) |
+| `project` | string | no | Substring filter on project path |
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_set_lifecycle_log_file
+Toggle appending lifecycle events to the persistent log file (next to `idea.log`). The in-memory ring buffer is always active regardless. File output also auto-enables when IntelliJ's debug logger is active for `#com.github.hechtcarmel.jetbrainsindexmcpplugin.lifecycle`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `enabled` | boolean | yes | true = write events to the log file |
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_reload_project
+Force-reload the project's linked **Maven/Gradle** build model (like "Reload All Maven/Gradle Projects"). Only reloads build systems actually linked in IntelliJ; scheduled asynchronously — allow 10–30 s on large projects before `ide_build_project`/`ide_diagnostics`. Irrelevant for pure PHP projects.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Routing hint when multiple projects are open |
+
+### ide_install_plugin
+Install a plugin zip into the IDE, replacing any existing version. With `path` omitted, auto-detects the newest `build/distributions/*.zip` in the active project (plugin-development workflow). Requires an IDE restart to take effect.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | no | Absolute path to the plugin zip (default: auto-detect) |
+| `project_path` | string | no | Required when multiple projects are open and `path` omitted |
+
+### ide_restart
+Restart the IDE. **Terminates the MCP server — the connection drops with no response.** Must be the final call; typical sequence: `ide_install_plugin` → `ide_restart`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_path` | string | no | Routing hint when multiple projects are open |
