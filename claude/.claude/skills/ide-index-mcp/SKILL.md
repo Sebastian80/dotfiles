@@ -138,11 +138,12 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 **CamelCase caveat:** matching is reliable for **capital-initial** queries (`CSRM` → `CarrierServiceResponseMapper`), but mixed-case multi-segment abbreviations (`CarSvcRespMap`) silently return zero even when a class matches. When a CamelCase guess comes back empty, retry with just the capital initials or a plain substring before assuming the class doesn't exist.
 
 ### Refactoring
-1. `ide_refactor_rename` — rename a symbol + all references atomically (`file`+`line`+`column`+`newName`). Omit `line`/`column` to rename the **file** itself (updates references; works for any file type).
-2. After rename, **verify with Grep** for the old name — IDE rename can miss some call sites depending on language. Fix stragglers with Edit.
-3. `ide_move_file` — relocate a file; IDE updates namespace/imports where a semantic backend exists (PHP PSR-4 aware)
-4. `ide_optimize_imports` — strip unused imports + organize the rest (no reformatting)
-5. `ide_reformat_code` — apply project code style
+1. Before renaming, run `ide_search_text` on the old name — semantic references miss call sites in dynamic dispatch (`__call` decorators) and string expressions in config/templates (e.g. Oro `layout.yml` `'=data[...].method(...)'` — functional call sites a rename silently breaks). The text sweep tells you up front which stragglers need manual Edit.
+2. `ide_refactor_rename` — rename a symbol + all references atomically (`file`+`line`+`column`+`newName`). Omit `line`/`column` to rename the **file** itself (updates references; works for any file type).
+3. After rename, **verify with `ide_search_text`/Grep** for the old name — expect 0 matches. Fix stragglers with Edit, then `ide_sync_files`.
+4. `ide_move_file` — relocate a file; IDE updates namespace/imports where a semantic backend exists (PHP PSR-4 aware)
+5. `ide_optimize_imports` — strip unused imports + organize the rest (no reformatting)
+6. `ide_reformat_code` — apply project code style
 
 ### Checking for problems
 1. `ide_diagnostics` — errors, warnings, quick fixes
@@ -168,6 +169,8 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 | `ide_call_hierarchy` returns element but zero callers | Known limitation for some language constructs. Fall back to Grep. |
 | `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
 | `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
+| `ide_find_references` times out | Huge reference fan-out (e.g. a core vendor class used platform-wide). Narrow to `scope: project_files` for the first-party answer, or switch to `ide_search_text` with a `filePattern` mask. |
+| Freshly opened project returns empty for EVERYTHING despite `ide_index_status` ready | The project has no configured content/source roots (never set up in this IDE — common for ad-hoc opened repos). The index has nothing to serve; fall back to `rg` on disk, or configure source roots in the IDE. |
 | Tool returns empty for a class/file you can see on disk in `vendor/`/library | Folder is in the IDE's Excluded list (Settings → Directories → right column). The `scope: project_and_libraries` parameter doesn't override this — exclusion wins at the index level. Either remove the exclusion (re-indexes the folder), or fall back to `rg -uu <path>` for that subtree. Verify by running `ide_find_class` on a class you know exists in the folder. |
 | `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known index-plugin gap (resolves only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration). Use the **JetBrains MCP Server's `locate_symfony_service`** instead, or `ide_search_text`. See [Framework DI / YAML navigation](#framework-di--yaml-navigation-symfony-etc). |
 

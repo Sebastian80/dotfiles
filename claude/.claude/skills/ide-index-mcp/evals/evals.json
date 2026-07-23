@@ -85,9 +85,9 @@
       "files": [],
       "expectations": [
         "Called ide_sync_files before searching (external modifications mentioned)",
-        "Used ide_find_references or ide_search_text (not Grep) for the search",
-        "Used scope project_and_libraries (not the project_files default) to include vendor code",
-        "Mentioned rg -uu as fallback only if a vendor subtree is IDE-excluded"
+        "Used ide_find_references or ide_search_text (not Grep) as primary search",
+        "Covered vendor code deliberately: scope project_and_libraries on find_* tools where a symbol anchor exists, and rg -uu for index-excluded vendor subtrees (ide_search_text has NO scope parameter)",
+        "Distinguished exact-symbol matches from substring false positives (word-boundary discipline)"
       ]
     }
   ]
