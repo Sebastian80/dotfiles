@@ -15,4 +15,5 @@ All tools are installed via Homebrew (`/home/linuxbrew/.linuxbrew/bin/`), except
 - **Git hosting**: `gh` for GitHub, `glab` for GitLab (git.netresearch.de)
 - **Docker**: `docker compose` (v2 syntax, no hyphen). Check if containers are running before exec'ing into them.
 - **JSON**: `jq` is available for JSON processing in shell pipelines.
+- **Locale**: prefix awk/sort/printf pipelines that parse or emit decimal numbers with `LC_ALL=C` — the German locale turns `%.2f` into comma decimals and silently breaks joins/greps on dot-decimal data.
 - **Code search**: `ast-grep` for structural/AST-based code search (use via ast-grep skill).
