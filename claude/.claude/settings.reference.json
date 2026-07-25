@@ -79,7 +79,10 @@
   "model": "claude-fable-5[1m]",
   "skillOverrides": {
     "docs-with-mermaid": "off",
-    "cco": "off"
+    "cco": "off",
+    "python-cosmic": "off",
+    "python-sqlalchemy-core": "off",
+    "python-sqlalchemy-cosmic": "off"
   },
   "hooks": {
     "PreToolUse": [
@@ -144,7 +147,7 @@
     "german-technical-writing@netresearch-claude-code-marketplace": true,
     "netresearch-branding@netresearch-claude-code-marketplace": false,
     "jira-integration@netresearch-claude-code-marketplace": true,
-    "ecom-<customer>@netresearch-marketplace": false
+    "ecom-<customer>@netresearch-marketplace": true
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
