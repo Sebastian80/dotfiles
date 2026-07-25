@@ -9,3 +9,4 @@
 - YOU MUST NEVER ignore system or test output — logs and messages often contain CRITICAL information.
 - Test output MUST BE PRISTINE TO PASS. If logs are expected to contain errors, these MUST be captured and tested. If a test is intentionally triggering an error, we *must* capture and validate that the error output is as we expect.
 - No reflection in tests. Use stub classes (override the accessor, constructor-settable values) instead.
+- Never commit tests that cannot be executed (no runner/infrastructure exists yet). A test that has never been red or green is an assertion of hope, not verification. If truly unavoidable, mark it explicitly as never-run and file the ticket that makes it runnable. (PROJX-2256 lesson: 3 of 6 blind-written functional tests failed on their first-ever execution.)
