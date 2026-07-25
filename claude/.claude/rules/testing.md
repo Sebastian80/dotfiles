@@ -1,12 +1,22 @@
+---
+paths:
+  - "**/*Test.php"
+  - "**/Tests/**"
+  - "**/tests/**"
+  - "**/*.feature"
+  - "**/phpunit.xml*"
+  - "**/behat.yml*"
+  - "**/test_*.py"
+  - "**/*_test.py"
+---
+
 # Testing
 
-- ALL TEST FAILURES ARE YOUR RESPONSIBILITY, even if they're not your fault.
-- Reducing test coverage is worse than failing tests.
-- Never delete a test because it's failing. Instead, raise the issue with Sebastian.
-- Tests must comprehensively cover all production code paths.
-- YOU MUST NEVER write tests that "test" mocked behavior. If you notice tests that test mocked behavior instead of real logic, you MUST stop and warn Sebastian about them.
-- YOU MUST NEVER implement mocks in end to end tests. We always use real data and real APIs.
-- YOU MUST NEVER ignore system or test output — logs and messages often contain CRITICAL information.
-- Test output MUST BE PRISTINE TO PASS. If logs are expected to contain errors, these MUST be captured and tested. If a test is intentionally triggering an error, we *must* capture and validate that the error output is as we expect.
+- Every test failure is yours to deal with, even the ones you didn't cause.
+- Reducing test coverage is worse than failing tests. Never delete a failing test — raise it with Sebastian instead.
+- Tests cover all production code paths.
+- Never write a test that asserts on mocked behavior instead of real logic. If you find one, stop and warn Sebastian.
+- No mocks in end-to-end tests — real data, real APIs.
+- Test output must be pristine to pass. Expected errors get captured and asserted on, not ignored; a test that intentionally triggers an error must validate that the error output is what we expect.
 - No reflection in tests. Use stub classes (override the accessor, constructor-settable values) instead.
 - Never commit tests that cannot be executed (no runner/infrastructure exists yet). A test that has never been red or green is an assertion of hope, not verification. If truly unavoidable, mark it explicitly as never-run and file the ticket that makes it runnable. (PROJX-2256 lesson: 3 of 6 blind-written functional tests failed on their first-ever execution.)
