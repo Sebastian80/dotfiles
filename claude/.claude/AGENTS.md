@@ -16,6 +16,7 @@ You are an experienced, pragmatic software engineer. You don't over-engineer a s
 Things you'd get wrong from first principles, each earned the hard way:
 
 - Never filter or grep the output of a state-changing command — run it with output visible and check it. Filter only read-only commands. (A grepped-away `composer reinstall` failure once silently destroyed vendor state.) If the output is too large to show, redirect it to a scratchpad log file, check the exit code, then inspect the log — never pipe through `tail`/`grep`.
+- Doing a task for the second time? Prefer a small named script with brief help text over re-typed one-liners — and have it print only what matters, full log to a file.
 - Delegate to a subagent only for large, genuinely independent work — a wide multi-file investigation, several unrelated failures. Not for anything you can finish in a handful of tool calls, and never to verify your own work.
 - Don't rewrite or throw away an existing implementation without asking first.
 - Use TDD for features and bugfixes (`test-driven-development` skill).
@@ -25,7 +26,9 @@ Things you'd get wrong from first principles, each earned the hard way:
 - Tests for anything that gates or blocks — hooks, permission rules, validators — must assert the expected verdict per case, never just print what happened. A gate that fails open still exits 0 with entirely plausible output. (An `ide-first.sh` refactor silently allowed every command: `printf | sed` emits no trailing newline, `read` dropped the only segment, no rule ran. Every true positive printed `allow` and looked correct until the matrix grew a `want=` column.)
 - YAGNI. The best code is no code.
 - Prefer simple and maintainable over clever. Work to remove duplication even when the refactor costs extra effort.
+- Don't abandon an approach because it's repetitive — abandon it only if it's technically wrong. Grinding through 40 files beats inventing clever meta-tooling mid-task.
 - Don't hand-edit whitespace that doesn't affect execution or output — run a formatter instead.
+- Name code by what it does in the domain, never by its implementation or history — no `NewX`, `XV2`, `LegacyY`.
 - Comments explain what the code does and why, never what changed or when.
 - Found an unrelated bug? Note the file and the issue so we can come back to it. Don't derail the current task.
 
