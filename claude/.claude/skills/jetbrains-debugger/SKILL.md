@@ -113,6 +113,12 @@ ddev xdebug status          # or: ddev exec XDEBUG_MODE=off php -m | grep -i xde
 That is ground truth. `idea.log` is not a fallback either — its "Xdebug not found
 among available debuggers" line can be hours old and refer to a previous run.
 
+There is also a tell inside the response itself, needing no second tool: check
+whether the paths in `additionalIniFiles` actually exist in the container. A cached
+answer keeps listing `.../conf.d/20-xdebug.ini` after `ddev xdebug off` has deleted
+it. An IDE reporting an ini file that is not on disk is reporting a memory, not a
+reading — and every other field in that response is equally old.
+
 Ask the IDE rather than reading project files, because the answer is split across
 two of them and it is easy to read the wrong half:
 
