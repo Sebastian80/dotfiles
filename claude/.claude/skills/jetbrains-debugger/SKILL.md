@@ -125,15 +125,31 @@ blocks until it times out, and leaves a paused session named `stdin` behind — 
 which holds its process. Symptoms: shell one-liners mysteriously taking >60 s, and a
 growing list in `list_debug_sessions` that you did not start.
 
-Prefix shell one-liners with `XDEBUG_MODE=off`:
+Workaround for a one-off: `ddev exec XDEBUG_MODE=off php -m`.
 
-```bash
-ddev exec XDEBUG_MODE=off php -m
+Permanent fix — drop this in `.ddev/php/zzz-xdebug-trigger.ini` (the name must sort
+after DDEV's own `20-xdebug.ini` so it wins):
+
+```ini
+xdebug.start_with_request=trigger
 ```
 
-This does not affect real debug sessions, which are launched by the IDE through the
-run configuration. If `list_debug_sessions` shows stray paused `stdin` entries, they
-are this — stop them to free the processes.
+Xdebug then connects only when `XDEBUG_TRIGGER`/`XDEBUG_SESSION` is present. IDE
+debugging is unaffected because PhpStorm passes its own
+`-dxdebug.start_with_request=yes` on the command line when it launches a run
+configuration; browser debugging still works via the cookie. Verified on this stack:
+after the change `ddev exec php -v` runs in 0.48 s with no workaround, and a
+breakpoint in the PHPUnit bootstrap still pauses.
+
+If `list_debug_sessions` shows stray paused `stdin` entries, they are this — stop
+them to free the processes.
+
+**`ddev xdebug on` does not survive `ddev restart`.** It is a runtime toggle;
+`.ddev/config.yaml` ships `xdebug_enabled: false`, so any restart silently turns
+Xdebug back off and you are back to sessions that start and never pause. If a
+setup that worked an hour ago stops pausing, check `ddev xdebug status` before
+anything else. Set `xdebug_enabled: true` in `config.yaml` to make it stick, at the
+cost of a permanent performance hit.
 
 If that MCP server isn't connected, you cannot preflight — fall back to detecting
 the failure after the fact (Critical Rule 9).
