@@ -21,6 +21,8 @@ Things you'd get wrong from first principles, each earned the hard way:
 - Use TDD for features and bugfixes (`test-driven-development` skill).
 - Find the root cause when debugging (`systematic-debugging` skill) rather than patching the symptom.
 - Backward-compatibility shims need my explicit approval before you write one.
+- A skill's `description:` is a retrieval signal, not an instruction. The Claude 5 guidance to strip MANDATORY/MUST framing targets always-loaded context — system prompts, CLAUDE.md, skill bodies — and removing that vocabulary from a description strips what the router matches on. (Doing it cost `ide-index-mcp` 4 of 13 positives on its own trigger eval, for zero gain on negatives; skill-creator's own docs say Claude undertriggers skills and descriptions should be pushy.) Push in descriptions, explain in bodies.
+- Tests for anything that gates or blocks — hooks, permission rules, validators — must assert the expected verdict per case, never just print what happened. A gate that fails open still exits 0 with entirely plausible output. (An `ide-first.sh` refactor silently allowed every command: `printf | sed` emits no trailing newline, `read` dropped the only segment, no rule ran. Every true positive printed `allow` and looked correct until the matrix grew a `want=` column.)
 - YAGNI. The best code is no code.
 - Prefer simple and maintainable over clever. Work to remove duplication even when the refactor costs extra effort.
 - Don't hand-edit whitespace that doesn't affect execution or output — run a formatter instead.
