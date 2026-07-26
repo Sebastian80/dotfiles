@@ -95,6 +95,24 @@ the real PHP version, every loaded extension, and a `debuggers` array. If `xdebu
 is absent from `loadedExtensions`, stop and fix that first — no breakpoint will
 ever be hit.
 
+**A green answer here is necessary but not sufficient on container interpreters.**
+PhpStorm caches remote `phpinfo` and does not revalidate it when the container
+changes underneath. Measured on 2026-07-26: with Xdebug provably off — `ddev xdebug
+status` disabled, `php -m` showing no xdebug, `20-xdebug.ini` not present on disk —
+`get_php_project_config` still reported `xdebug` in `loadedExtensions`,
+`20-xdebug.ini` among the ini files, and `debuggers: [xdebug 3.5.3]`. Every field
+stale, every field confident. A session started on that basis returns
+`isCurrent: true`, passes the Rule 9 tell, and runs to completion without pausing.
+
+So for a container interpreter, confirm against the container itself:
+
+```bash
+ddev xdebug status          # or: ddev exec XDEBUG_MODE=off php -m | grep -i xdebug
+```
+
+That is ground truth. `idea.log` is not a fallback either — its "Xdebug not found
+among available debuggers" line can be hours old and refer to a previous run.
+
 Ask the IDE rather than reading project files, because the answer is split across
 two of them and it is easy to read the wrong half:
 
@@ -181,6 +199,25 @@ Settings → PHP. The IDE reports `isRemote: true` when it is right.
 8. **`evaluate_expression` may be safety-filtered by IDE settings.** If a call is blocked, prefer `get_variables`, simple field/arithmetic expressions, or a narrower expression that avoids method calls and risky APIs. Do not retry blocked process, filesystem, network, reflection, native-loading, or environment/system-property operations unless the user explicitly changes the IDE setting.
 
 9. **`status: "started"` is not a live session.** `start_debug_session` returns `{"status":"started","state":"running"}` even when the process dies on launch — for example when the run configuration's interpreter has no Xdebug (the IDE logs `Xdebug not found among available debuggers` and the session is gone before you can attach). The tell is `isCurrent` on the returned session: `false` means it never became the active session. Confirm with `wait_for_pause`, or `list_debug_sessions` — an empty list means dead, not idle. When a session dies this way, the interpreter is the first thing to check, not the breakpoint.
+
+### `wait_for_pause` can hand you someone else's breakpoint
+
+A pause is not necessarily *your* pause. Any other breakpoint in the project —
+left by a colleague, an earlier run, or a concurrent agent — stops the same
+process, and `wait_for_pause` returns that frame. Its variables look entirely
+plausible: a stray breakpoint in a PHPUnit bootstrap yields `$this`, `$_ENV` and
+`$_SERVER`, which is exactly the shape of a real answer. Reading them as though
+they were your target produces a confident, wholly fabricated result.
+
+Two defences, cheap and worth doing every time:
+
+- Compare `breakpointHit.breakpointId` in the response against the id
+  `set_breakpoint` gave you. Different id → resume and keep waiting.
+- Or pass `breakpoint_ids: ["<your id>"]` to `wait_for_pause`, which auto-resumes
+  non-matching pauses for you.
+
+`list_breakpoints` before starting also tells you what else is armed. Remove only
+ids you created — someone else's breakpoints are not yours to clear.
 
 ## Debugging Patterns
 
