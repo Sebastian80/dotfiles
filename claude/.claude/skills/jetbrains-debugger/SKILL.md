@@ -62,7 +62,7 @@ the other side.
 ### Standard Debugging Sequence
 
 ```
-0. PREFLIGHT                        -- confirm Xdebug is actually loaded (see below)
+0. PREFLIGHT                        -- confirm the debugger is really loaded (see below)
 1. list_run_configurations          -- Find a config with can_debug: true
 2. set_breakpoint                   -- Set breakpoint(s) BEFORE starting
 3. start_debug_session              -- Launch the debugger
@@ -75,116 +75,47 @@ the other side.
 10. stop_debug_session              -- Clean up when done
 ```
 
-### Preflight: `can_debug: true` does not mean a breakpoint will be hit
+### Preflight: a debugger being *configured* is not a debugger being *installed*
 
-`can_debug` reflects that a debugger is *configured* for the interpreter
-(`debugger_id="php.debugger.XDebug"`). It says nothing about whether Xdebug is
-*installed* on the PHP that will actually run. When it isn't, `start_debug_session`
+`list_run_configurations` reports `can_debug: true` when the interpreter has a
+debugger configured. It says nothing about whether that debugger is actually
+present in the runtime that will execute. When it isn't, `start_debug_session`
 still answers `{"status":"started"}`, the process runs to completion without
-pausing, and the only trace is `Xdebug not found among available debuggers` in
-`idea.log`, where you will not think to look.
+pausing, and the failure leaves no trace anywhere you would naturally look.
 
-Ask the IDE directly, via the JetBrains built-in MCP server:
+So before setting anything up, establish what the run configuration will really
+execute, and whether the debugger is loaded there. Most JetBrains IDEs expose this
+through their built-in MCP server — for PHP it is `get_php_project_config`, which
+returns the interpreter, its version, the loaded extensions and a `debuggers`
+array in one call.
 
-```
-mcp__phpstorm__execute_tool  command="get_php_project_config"  projectPath=<root>
-```
+**On a remote or containerised interpreter, the IDE's answer can be a memory
+rather than a reading.** Docker Compose, DDEV, Vagrant, WSL, SSH and devcontainer
+interpreters are all introspected once and cached; when the runtime changes
+underneath — an extension toggled off, an image rebuilt — the IDE happily keeps
+serving the old answer, confidently and in full detail. A session started on that
+basis passes every check below and still never pauses.
 
-One call returns the selected interpreter (including whether it is a container),
-the real PHP version, every loaded extension, and a `debuggers` array. If `xdebug`
-is absent from `loadedExtensions`, stop and fix that first — no breakpoint will
-ever be hit.
+Two defences:
 
-**A green answer here is necessary but not sufficient on container interpreters.**
-PhpStorm caches remote `phpinfo` and does not revalidate it when the container
-changes underneath. Measured on 2026-07-26: with Xdebug provably off — `ddev xdebug
-status` disabled, `php -m` showing no xdebug, `20-xdebug.ini` not present on disk —
-`get_php_project_config` still reported `xdebug` in `loadedExtensions`,
-`20-xdebug.ini` among the ini files, and `debuggers: [xdebug 3.5.3]`. Every field
-stale, every field confident. A session started on that basis returns
-`isCurrent: true`, passes the Rule 9 tell, and runs to completion without pausing.
+- **Confirm against the runtime itself**, not the IDE's description of it. Ask the
+  container what is loaded.
+- **Look for self-falsification in the response.** If it names a config file or
+  path, check that the path exists in the runtime. An IDE reporting a file that
+  is not there is reporting a cache, and every other field is equally old.
 
-So for a container interpreter, confirm against the container itself:
+The same caution applies to the IDE log: a "debugger not found" line there can be
+hours stale and refer to a previous run.
 
-```bash
-ddev xdebug status          # or: ddev exec XDEBUG_MODE=off php -m | grep -i xdebug
-```
+**Environment toggles may not survive an environment restart.** Where a debugger
+extension is enabled by a runtime command rather than baked into the image, any
+restart can silently revert it — and the symptom is exactly the one above. If a
+setup that worked an hour ago stops pausing, re-check the runtime before
+suspecting your breakpoint.
 
-That is ground truth. `idea.log` is not a fallback either — its "Xdebug not found
-among available debuggers" line can be hours old and refer to a previous run.
-
-There is also a tell inside the response itself, needing no second tool: check
-whether the paths in `additionalIniFiles` actually exist in the container. A cached
-answer keeps listing `.../conf.d/20-xdebug.ini` after `ddev xdebug off` has deleted
-it. An IDE reporting an ini file that is not on disk is reporting a memory, not a
-reading — and every other field in that response is equally old.
-
-Ask the IDE rather than reading project files, because the answer is split across
-two of them and it is easy to read the wrong half:
-
-| What | Where |
-|---|---|
-| *Which* interpreter the project selected | `.idea/workspace.xml` → `<component name="PhpWorkspaceProjectConfiguration" interpreter_name="…">` |
-| What that interpreter *is* (path, container, debugger id) | `.idea/php.xml` → `<interpreter name="…" home="…">` |
-
-A checker that looks for `interpreter_name` in `php.xml` finds nothing and reports
-"no interpreter selected" for a project that is configured correctly and debugging
-fine. One such script was written and deleted on 2026-07-26 for exactly that.
-
-Two neighbouring traps worth knowing when breakpoints misbehave:
-
-- **Path mappings, not `DOCKER_REMOTE_PROJECT_PATH`, bind breakpoints.** A DDEV
-  interpreter can record `DOCKER_REMOTE_PROJECT_PATH="/opt/project"` while the
-  active mapping is `$PROJECT_DIR$ → /var/www/html`. The mapping wins and matches
-  the real mount. If a verified breakpoint never binds, check the mappings first.
-- **Static analysis and debugging can run on different PHPs.** Here PHPStan and
-  Psalm point at the host `/home/linuxbrew/.linuxbrew/bin/php` (8.5, no Xdebug)
-  while the debugger and tests use the container's 8.3. Neither is wrong; just
-  don't infer one interpreter's extensions from the other's.
-
-**Xdebug on + IDE listening makes shell PHP hang.** With `xdebug.start_with_request=yes`
-(DDEV's default once Xdebug is enabled) *every* CLI PHP process opens a DBGp session
-against the listening IDE. A plain `ddev exec php -m` or `docker exec … php -v` then
-blocks until it times out, and leaves a paused session named `stdin` behind — each of
-which holds its process. Symptoms: shell one-liners mysteriously taking >60 s, and a
-growing list in `list_debug_sessions` that you did not start.
-
-Workaround for a one-off: `ddev exec XDEBUG_MODE=off php -m`.
-
-Permanent fix — drop this in `.ddev/php/zzz-xdebug-trigger.ini` (the name must sort
-after DDEV's own `20-xdebug.ini` so it wins):
-
-```ini
-xdebug.start_with_request=trigger
-```
-
-Xdebug then connects only when `XDEBUG_TRIGGER`/`XDEBUG_SESSION` is present. IDE
-debugging is unaffected because PhpStorm passes its own
-`-dxdebug.start_with_request=yes` on the command line when it launches a run
-configuration; browser debugging still works via the cookie. Verified on this stack:
-after the change `ddev exec php -v` runs in 0.48 s with no workaround, and a
-breakpoint in the PHPUnit bootstrap still pauses.
-
-If `list_debug_sessions` shows stray paused `stdin` entries, they are this — stop
-them to free the processes.
-
-**`ddev xdebug on` does not survive `ddev restart`.** It is a runtime toggle;
-`.ddev/config.yaml` ships `xdebug_enabled: false`, so any restart silently turns
-Xdebug back off and you are back to sessions that start and never pause. If a
-setup that worked an hour ago stops pausing, check `ddev xdebug status` before
-anything else. Set `xdebug_enabled: true` in `config.yaml` to make it stick, at the
-cost of a permanent performance hit.
-
-If that MCP server isn't connected, you cannot preflight — fall back to detecting
-the failure after the fact (Critical Rule 9).
-
-**Container interpreters (DDEV, Docker Compose).** A run configuration bound to the
-host PHP is the common trap: the container has Xdebug and the host does not, so
-everything looks configured and nothing ever pauses. `homePath` starting
-`docker-compose://` confirms the interpreter is the container one. Getting there
-needs the DDEV Integration plugin (or a hand-made Docker Compose interpreter),
-`ddev xdebug on`, and the project's default CLI interpreter switched to it in
-Settings → PHP. The IDE reports `isRemote: true` when it is right.
+> **PHP / Xdebug / DDEV:** the concrete commands, the `ddev xdebug on` restart
+> trap, the CLI-hang fix, path mappings and where PhpStorm stores the interpreter
+> selection are in [references/php-ddev.md](references/php-ddev.md).
 
 ### Critical Rules
 
