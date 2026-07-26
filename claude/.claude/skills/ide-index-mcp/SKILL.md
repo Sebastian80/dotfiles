@@ -1,6 +1,20 @@
 ---
 name: ide-index-mcp
-description: "MANDATORY for all code navigation and refactoring. You MUST invoke this skill whenever: finding where a function/method/class is called or used ('find usages of X', 'who calls X', 'where is X used'), going to a definition ('where is X defined', 'take me to X'), renaming any symbol, finding implementations of an interface or abstract class, tracing call hierarchies ('what calls X', 'what does X call'), checking file structure or class methods, checking errors/warnings/diagnostics in a file, finding classes/symbols by name, searching text or config values project-wide ('search the project for X', service ids, YAML keys, TODOs), type/inheritance hierarchies, syncing IDE after external file changes, reformatting code, or managing IDE projects (multi-project, sleep/wake, Power Save). Do NOT skip this and use Grep/Glob instead. If a user mentions any class name, method name, or symbol and wants to navigate to it, find its usages, rename it, or understand its relationships, this skill MUST be consulted first."
+description: >-
+  JetBrains IDE semantic code navigation and refactoring via MCP: find usages and
+  references of a function, method or class ('who calls X', 'where is X used'),
+  navigate to a definition ('where is X defined', 'take me to X'),
+  find implementations of an interface or abstract class, super methods, call
+  hierarchies ('what calls X', 'what does X call'), type and inheritance
+  hierarchies, file structure and class methods, find classes/symbols by name,
+  project-wide text and config search ('search the project for X', service ids,
+  YAML keys, TODOs), errors/warnings/diagnostics in a file, and semantic
+  refactoring — rename a symbol, move a file with PSR-4 namespace updates,
+  optimize imports, reformat code. Also IDE project management: syncing after
+  external file changes, multi-project, sleep/wake, Power Save. Use these rather
+  than Grep/Glob inside an open IDE project, where structural understanding beats
+  text matching. The tools are absent when the IDE is closed — then the standard
+  tools are correct.
 ---
 
 # IDE Index MCP - Agent Guide
@@ -11,7 +25,7 @@ The IDE Index MCP server exposes JetBrains IDE (IntelliJ, PyCharm, PhpStorm, Web
 
 **Use IDE MCP tools as your primary search, navigation, and refactoring tools.** JetBrains indexes ALL project files — code, config, YAML, Markdown, etc. — so prefer `ide_search_text` and `ide_find_file` even for non-code searches. Fall back to Grep/Glob only for files outside the project, or when IDE Index is unavailable — `ide_search_text` now handles regex itself (see below).
 
-**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony and NEVER ask the user to launch the IDE for it. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back.
+**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony and NEVER ask the user to launch the IDE for it. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case — an empty result is only an answer for a project that is actually open, so check that first (see Multi-project workflow).
 
 The IDE understands your code structurally. Grep sees text. When you need to find usages, trace calls, navigate definitions, rename symbols, check inheritance, or find implementations — always reach for an IDE tool first.
 
@@ -86,10 +100,11 @@ One MCP server per IDE **process**; all projects open in that process are served
 **Multi-project workflow:**
 1. `ide_project_status` first — see what's open, managed, and in which mode.
 2. With more than one project open, pass `project_path` (absolute project root) on **every** call — omitting it returns an error listing the candidates. For workspace projects use the sub-project path.
-3. Enrollment is automatic on the first real semantic call per project; `ide_enroll_all_projects` only needed to opt in projects you haven't touched yet.
-4. Don't micro-manage modes — the lifecycle handles sleep/wake. Set modes explicitly only to pre-warm (`background`) before a batch, or to free memory now (`dormant`/`closed`).
-5. `ide_open_project` on a never-before-opened project can hang on the modal "Trust project?" dialog only a human can answer — if it times out, ask the user.
-6. If a project closed or slept unexpectedly, read `ide_lifecycle_log` before assuming a bug.
+3. **With exactly one project open there is no disambiguation error.** A call made from a different repo's working directory silently answers from that one open project and returns `{"symbols":[],"totalCount":0,"stale":false}` — indistinguishable from "the symbol does not exist". Before trusting an empty semantic result, confirm `ide_project_status` lists your working directory; if it does not, `ide_open_project` it rather than falling back to Grep/rg on a false negative.
+4. Enrollment is automatic on the first real semantic call per project; `ide_enroll_all_projects` only needed to opt in projects you haven't touched yet.
+5. Don't micro-manage modes — the lifecycle handles sleep/wake. Set modes explicitly only to pre-warm (`background`) before a batch, or to free memory now (`dormant`/`closed`).
+6. `ide_open_project` on a never-before-opened project can hang on the modal "Trust project?" dialog only a human can answer — if it times out, ask the user.
+7. If a project closed or slept unexpectedly, read `ide_lifecycle_log` before assuming a bug.
 
 ## When to use built-in tools instead
 
