@@ -11,51 +11,54 @@ The IDE Index MCP server exposes JetBrains IDE (IntelliJ, PyCharm, PhpStorm, Web
 
 **Use IDE MCP tools as your primary search, navigation, and refactoring tools.** JetBrains indexes ALL project files — code, config, YAML, Markdown, etc. — so prefer `ide_search_text` and `ide_find_file` even for non-code searches. Fall back to Grep/Glob only for files outside the project, or when IDE Index is unavailable — `ide_search_text` now handles regex itself (see below).
 
-**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony and NEVER ask the user to launch the IDE for it. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case — an empty result is only an answer for a project that is actually open, so check that first (see Multi-project workflow).
+**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony and NEVER ask the user to launch the IDE for it. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case entirely — see [Before you trust a result](#before-you-trust-a-result).
 
 The IDE understands your code structurally. Grep sees text. When you need to find usages, trace calls, navigate definitions, rename symbols, check inheritance, or find implementations — always reach for an IDE tool first.
 
-## Available Tools
+**The tool list is not documented here.** Each `mcp__phpstorm-index__*` tool carries its own
+description, parameters and examples, and that is the authoritative surface — it changes when
+the plugin updates or you enable tools in Settings → Tools → Index MCP Server. A table in this
+file can only go stale: one here once listed 37 tools while the server served 45. Read the tool
+schemas; this file covers what they don't say.
 
-### Navigation
-| Tool | What it does | Key params |
-|------|-------------|------------|
-| `ide_find_references` | Find all usages of a symbol (calls, imports, field access) | `file`, `line`, `column` |
-| `ide_find_definition` | Go to where a symbol is defined | `file`, `line`, `column` |
-| `ide_find_class` | Search classes/interfaces by name (CamelCase: `USvc` → `UserService`) | `query` |
-| `ide_find_file` | Search files by name (substring, wildcard) | `query` |
-| `ide_find_symbol` | Search any symbol — classes, methods, fields, functions | `query` |
-| `ide_search_text` | Text search via IDE word index; `regex: true` routes through Find-in-Files, `filePattern` masks files | `query`, `context`, `regex`, `filePattern` |
-| `ide_find_implementations` | Find concrete implementations of interfaces/abstract classes | `file`, `line`, `column` |
-| `ide_find_super_methods` | Find parent methods this method overrides/implements | `file`, `line`, `column` |
-| `ide_type_hierarchy` | Full inheritance tree (supertypes + subtypes) | `file`+`line`+`column` or `className` |
-| `ide_call_hierarchy` | Call tree — who calls this / what does this call | `file`, `line`, `column`, `direction` |
-| `ide_file_structure` | File's class/method/field tree (like IDE Structure panel) | `file` |
+## Before you trust a result
 
-### Refactoring
-| Tool | What it does | Key params |
-|------|-------------|------------|
-| `ide_refactor_rename` | Rename a symbol + update all references atomically, OR rename the file itself | symbol: `file`, `line`, `column`, `newName` — file: `file`, `newName` (omit line/column) |
-| `ide_move_file` | Move a file; IDE applies namespace/import updates where a semantic backend exists (PHP PSR-4 aware) | `file`, `destination` |
-| `ide_optimize_imports` | Remove unused imports + organize the rest per project style (does NOT reformat) | `file` |
-| `ide_reformat_code` | Reformat per project style (.editorconfig, IDE settings) | `file` |
+An IDE tool that returns *successfully* has not necessarily answered your question.
 
-### Intelligence
-| Tool | What it does | Key params |
-|------|-------------|------------|
-| `ide_diagnostics` | Errors, warnings, quick fixes for a file | `file` |
-| `ide_build_project` | Build project, surface compilation/type errors | (none required) |
+**An empty result is only an answer for a project the IDE actually has open.** A query made from
+a working directory whose project is closed gets answered by whichever project *is* open, and
+comes back `{"symbols":[],"totalCount":0,"stale":false}` — indistinguishable from "the symbol does
+not exist". `stale:false` does not mean authoritative. Before believing any empty semantic result,
+check that `ide_project_status` lists your working directory.
 
-### Project & Editor
-| Tool | What it does | Key params |
-|------|-------------|------------|
-| `ide_index_status` | Check if IDE is ready (dumb mode = still indexing) | (none required) |
-| `ide_sync_files` | Force sync after external file changes (Write/Edit) | `paths` (optional) |
-| `ide_open_file` | Open file in IDE editor, optionally navigate to line | `file`, `line` |
-| `ide_get_active_file` | Get currently open file(s) with cursor position | (none required) |
-| `ide_read_file` | Read file content — use for library/vendored sources only | `file` or `qualifiedName` |
+**This state arrives on its own.** Lifecycle management closes an idle managed project after
+~10 minutes, so a project you opened earlier in the session can be shut behind you, re-arming the
+trap mid-task with nothing having changed on your side.
 
-### Project Lifecycle & Multi-Project
+**With exactly one project open there is no error to warn you.** `multiple_projects_open` only
+fires with two or more; a single open project answers silently from the wrong index. So run
+`ide_project_status` first, not after a surprising zero.
+
+**`ide_open_project` blocks until indexed** and on a large repo will exceed the MCP client timeout,
+reporting failure for a call that is still succeeding. Confirm with `ide_project_status` rather
+than retrying.
+
+## Writes: when an IDE tool beats Edit
+
+Use an IDE write when the change has consequences **beyond the file** — that is what the IDE knows
+and `Edit` does not:
+
+- `ide_change_signature` — updates every call site
+- `ide_refactor_rename` — updates every reference
+- `ide_move_file` — fixes PSR-4 namespace and imports
+- `ide_structural_search_replace` — AST-aware, so it will not match inside comments or strings
+- `ide_optimize_imports` / `ide_reformat_code` — apply project code style
+
+For a local text change with no such consequence, `Edit` is the right tool and the cheaper one:
+`ide_create_file` and `ide_replace_text_in_file` take an arbitrary path, so they sit behind a dippy
+`ask` prompt and bypass the path-based deny rules that protect `Edit`.
+
+## Project Lifecycle & Multi-Project
 
 One MCP server per IDE **process**; all projects open in that process are served over the same port and routed via `project_path`. Lifecycle management auto-sleeps and wakes projects to keep many of them open cheaply.
 
@@ -81,12 +84,12 @@ One MCP server per IDE **process**; all projects open in that process are served
 | `ide_restart` | Restart the IDE — **kills this MCP server; must be the final call** | (none required) |
 | `ide_install_plugin` | Install a plugin zip (defaults to the project's `build/distributions/*.zip`); needs `ide_restart` after | `path` |
 
-**Lifecycle modes** (managed projects move automatically): `active` (full IDE, Power Save off) → `background` (Power Save on, index + MCP fully functional — the default while MCP works) → `dormant` (editors closed, PSI cache freed; after ~2 min MCP inactivity) → `closed` (fully unloaded; after ~10 min inactivity). Any MCP call **auto-wakes** the project — a call against a `closed` managed project auto-reopens it with a 5–15 s delay, so a slow first response after idle time is normal, not an error.
+**Lifecycle modes** (managed projects move automatically): `active` (full IDE, Power Save off) → `background` (Power Save on, index + MCP fully functional — the default while MCP works) → `dormant` (editors closed, PSI cache freed; after ~2 min MCP inactivity) → `closed` (fully unloaded; after ~10 min inactivity). Any MCP call **auto-wakes** the project — a call against a `closed` managed project auto-reopens it with a 5–15 s delay, so a slow first response after idle time is normal, not an error. Waking is **user-visible**: the IDE opens the project window again, exactly as if it had been picked from Recent Projects (verified — one `ide_index_status` call carrying a closed project's `project_path` put a second PhpStorm window on screen). So a routine tool call can rearrange the user's desktop. With two managed projects the pair oscillates: whichever you touch wakes, the other drifts `dormant` → `closed`, which is what keeps producing the single-open-project state. `ide_release_project` takes one out of lifecycle management and stops it.
 
 **Multi-project workflow:**
 1. `ide_project_status` first — see what's open, managed, and in which mode.
 2. With more than one project open, pass `project_path` (absolute project root) on **every** call — omitting it returns an error listing the candidates. For workspace projects use the sub-project path.
-3. **With exactly one project open there is no disambiguation error.** A call made from a different repo's working directory silently answers from that one open project and returns `{"symbols":[],"totalCount":0,"stale":false}` — indistinguishable from "the symbol does not exist". Before trusting an empty semantic result, confirm `ide_project_status` lists your working directory; if it does not, `ide_open_project` it rather than falling back to Grep/rg on a false negative.
+3. With exactly one project open there is no disambiguation error and a query from the wrong working directory is answered silently — see [Before you trust a result](#before-you-trust-a-result). If `ide_project_status` doesn't list your working directory, `ide_open_project` it rather than falling back to Grep/rg on a false negative. A call carrying `project_path` for a managed-but-closed project auto-wakes it (5–15 s), so an explicit open is only needed for a project the IDE has never had open.
 4. Enrollment is automatic on the first real semantic call per project; `ide_enroll_all_projects` only needed to opt in projects you haven't touched yet.
 5. Don't micro-manage modes — the lifecycle handles sleep/wake. Set modes explicitly only to pre-warm (`background`) before a batch, or to free memory now (`dormant`/`closed`).
 6. `ide_open_project` on a never-before-opened project can hang on the modal "Trust project?" dialog only a human can answer — if it times out, ask the user.
