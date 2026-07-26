@@ -19,18 +19,7 @@ Dippy is the PreToolUse Bash gate that decides allow/ask/deny for every shell co
 
 The config file `~/.dippy/config` is a **symlink** to the dotfiles repo at `~/dotfiles/dippy/.dippy/config`. **Always edit through the dotfile path** so the change lands in git, not just in the symlink target.
 
-## When to use this skill
-
-Trigger on any of:
-
-- "allow `<tool>`" / "auto-approve `<tool>`" / "wildcard `<tool>`" / "stop prompting for `<tool>`"
-- "ask before `<command>`" / "prompt me for `<command>`" / "confirm before `<command>`"
-- "block `<command>`" / "deny `<command>`" / "never run `<command>`"
-- "why does dippy block / allow / ask for `<command>`" — debugging an existing decision
-- Any mention of `.dippy/config` or "dippy permissions" or "dippy rules" or "the autopilot"
-- "wildcard bash and only ask on destructive stuff" — describes the existing architecture; verify it's still in place + add narrow asks/denies as requested
-
-If the user is asking about the **Claude Code** permission system in `~/.claude/settings.json` (the `permissions.allow`/`permissions.deny` arrays) rather than dippy, use the `update-config` skill instead. Dippy and the Claude Code static permissions are two different layers — `Bash` is wildcard-allowed at the static layer and dippy provides the actual gating.
+This skill covers the dippy layer only. The static Claude Code permission arrays (`permissions.allow`/`permissions.deny` in `~/.claude/settings.json`) are a separate layer — `Bash` is wildcard-allowed there and dippy provides the actual gating. For changes to the static layer, edit the settings file directly (through the dotfiles path).
 
 ## Rule syntax cheatsheet
 
@@ -79,7 +68,7 @@ The trailing `|` is dippy's "exact" anchor — only matches `git status` with no
 
 ### CRITICAL: trailing-` *` fallback
 
-Dippy has a special-case at `core/config.py:673-677`: a glob pattern ending with ` *` ALSO matches the bare command (zero trailing args). This is the key to writing one rule that catches both end-of-command flags and middle-of-command flags.
+Dippy has a special case in `core/config.py` (in the glob-match path near `_match_words` — line numbers shift between brew versions, search for the trailing-` *` comment): a glob pattern ending with ` *` ALSO matches the bare command (zero trailing args). This is the key to writing one rule that catches both end-of-command flags and middle-of-command flags.
 
 Example: `ask jira * -X DELETE *` matches **all** of:
 - `jira issue KEY -X DELETE` (DELETE at the very end — caught by the fallback)
@@ -200,9 +189,9 @@ Always print the test output to the user before saying "done". They need to see 
 - Other commands are unaffected
 - The `permissionDecisionReason` mentions the right pattern
 
-### Step 8 — Don't commit unless the user asks
+### Step 8 — Leave the change ready; commit when Sebastian asks
 
-Edits land in `~/dotfiles/dippy/.dippy/config` (a tracked dotfile in the dotfiles repo). Per the global CLAUDE.md "NEVER commit changes unless the user explicitly asks you to" — leave the change as a working-tree modification and tell the user it's ready.
+Edits land in `~/dotfiles/dippy/.dippy/config` (a tracked dotfile in the dotfiles repo). Session convention: leave the verified change as a working-tree modification, show the matrix, and tell Sebastian it's ready — he says when to commit. Never push unasked.
 
 ## Common patterns (reach for these first)
 
@@ -290,7 +279,7 @@ echo '{"tool_name":"Bash","tool_input":{"command":"<command>"}}' | dippy --claud
 | `~/.dippy/config` | Dippy config (symlink) |
 | `~/dotfiles/dippy/.dippy/config` | Dotfile target (edit here) |
 | `/home/linuxbrew/.linuxbrew/bin/dippy` | Dippy binary on PATH |
-| `/home/linuxbrew/.linuxbrew/Cellar/dippy/<version>/libexec/src/dippy/core/config.py` | Pattern matching source (line 639 `_match_words`, 660 prefix logic, 673 trailing-` *` fallback) |
+| `/home/linuxbrew/.linuxbrew/Cellar/dippy/<version>/libexec/src/dippy/core/config.py` | Pattern matching source — `_match_words`, prefix logic, trailing-` *` fallback (search by name; line numbers shift per version) |
 | `/home/linuxbrew/.linuxbrew/Cellar/dippy/<version>/libexec/src/dippy/core/allowlists.py` | Built-in `SIMPLE_SAFE` allowlist |
 | `~/.claude/settings.json` | Claude Code permissions + the PreToolUse hook that calls dippy |
 | `references/wiki/` (this skill) | Mirror of the dippy GitHub wiki |
