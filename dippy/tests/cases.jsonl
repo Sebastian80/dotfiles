@@ -1,0 +1,15 @@
+{"want":"ask","label":"IDE raw write: replace_text_in_file","payload":{"tool_name":"mcp__phpstorm-index__ide_replace_text_in_file","tool_input":{"file":"/home/sebastian/workspace/x/app/etc/env.php"}}}
+{"want":"ask","label":"IDE raw write: create_file","payload":{"tool_name":"mcp__phpstorm-index__ide_create_file","tool_input":{"file":"/tmp/x.php"}}}
+{"want":"allow","label":"IDE semantic write: edit_member","payload":{"tool_name":"mcp__phpstorm-index__ide_edit_member","tool_input":{}}}
+{"want":"allow","label":"IDE semantic write: change_signature","payload":{"tool_name":"mcp__phpstorm-index__ide_change_signature","tool_input":{}}}
+{"want":"allow","label":"IDE semantic write: structural_search_replace","payload":{"tool_name":"mcp__phpstorm-index__ide_structural_search_replace","tool_input":{}}}
+{"want":"allow","label":"IDE run_tests","payload":{"tool_name":"mcp__phpstorm-index__ide_run_tests","tool_input":{}}}
+{"want":"allow","label":"IDE read: find_references","payload":{"tool_name":"mcp__phpstorm-index__ide_find_references","tool_input":{}}}
+{"want":"allow","label":"debugger remove_breakpoint (deliberate override of deny-mcp remove_*)","payload":{"tool_name":"mcp__phpstorm-debugger__remove_breakpoint","tool_input":{}}}
+{"want":"allow","label":"debugger stop_debug_session","payload":{"tool_name":"mcp__phpstorm-debugger__stop_debug_session","tool_input":{}}}
+{"want":"deny","label":"mcp delete on a third-party server","payload":{"tool_name":"mcp__github__delete_repo","tool_input":{}}}
+{"want":"allow","label":"mcp get on a third-party server","payload":{"tool_name":"mcp__github__get_me","tool_input":{}}}
+{"want":"allow","label":"bash: git status","payload":{"tool_name":"Bash","tool_input":{"command":"git status"}}}
+{"want":"ask","label":"bash: recursive delete of home","payload":{"tool_name":"Bash","tool_input":{"command":"rm -rf ~"}}}
+{"want":"ask","label":"bash: force push","payload":{"tool_name":"Bash","tool_input":{"command":"git push --force origin main"}}}
+{"want":"deny","label":"bash: pip install (uv rule)","payload":{"tool_name":"Bash","tool_input":{"command":"pip install requests"}}}

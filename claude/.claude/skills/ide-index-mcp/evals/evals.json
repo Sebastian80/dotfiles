@@ -144,7 +144,15 @@
         "Checked ide_project_status (or otherwise verified the working directory is an open project) before trusting an empty result",
         "Either opened the project with ide_open_project, fell back to text search, or told the user the project is not open — any of these, but not silent acceptance of the empty",
         "Recognised that stale:false does not make an empty result authoritative"
-      ]
+      ],
+      "precondition": {
+        "automatable": true,
+        "ide_projects_open": [
+          "/home/sebastian/workspace/shop"
+        ],
+        "cwd": "/home/sebastian/workspace/magento-shop",
+        "note": "Exactly one project open, and it is NOT the cwd. Set with ide_close_project / ide_open_project before the run."
+      }
     },
     {
       "id": 13,
@@ -155,7 +163,12 @@
         "Answered using standard search tools",
         "Did NOT ask the user to start the IDE, or claim the answer would be better with it running",
         "Did not spend turns probing for IDE tools that are absent from the session"
-      ]
+      ],
+      "precondition": {
+        "automatable": false,
+        "ide_running": false,
+        "note": "Requires PhpStorm fully quit so no ide_* tools register. Cannot be set from inside a session - run by hand."
+      }
     },
     {
       "id": 14,
@@ -166,7 +179,16 @@
         "Retried the same IDE tool with project_path after the disambiguation error",
         "Did NOT fall back to text search because of the error",
         "Picked the project matching the working directory rather than guessing"
-      ]
+      ],
+      "precondition": {
+        "automatable": true,
+        "ide_projects_open": [
+          "/home/sebastian/workspace/shop",
+          "/home/sebastian/workspace/magento-shop"
+        ],
+        "cwd": "/home/sebastian/workspace/magento-shop",
+        "note": "Two projects open so the first project_path-less call errors with multiple_projects_open."
+      }
     }
   ]
 }
