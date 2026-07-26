@@ -1,13 +1,14 @@
 # Jira Usage
 
-Everything goes through the `jira:jira-communication` skill (netresearch
-jira-integration plugin). The old standalone `jira` CLI is gone — its syntax
-(`jira issue KEY --format ai`, `-X PATCH --custom`, `--text`) survives in old
-notes and tickets and is obsolete.
+Everything goes through two skills: `jira:jira-communication` (CLI mechanics —
+JQL, worklogs, attachments, wiki markup via `jira:jira-syntax`) and
+`netresearch-jira` (NR conventions — team routing, custom field IDs, sprint
+board, linking conventions, QA workflows). The old standalone `jira` CLI is
+gone — its syntax (`jira issue KEY --format ai`, `-X PATCH --custom`, `--text`)
+survives in old notes and tickets and is obsolete.
 
-Below is only what that plugin does **not** know: facts about our own Jira
-instance and our team conventions. For link semantics, sprint mechanics, JQL,
-worklogs, attachments and wiki markup, use the skill and its references.
+Below is only what neither skill knows: traps and conventions earned on our
+own tickets.
 
 ## jira.netresearch.de instance facts
 
@@ -29,12 +30,11 @@ worklogs, attachments and wiki markup, use the skill and its references.
 - Converting a standard issue to a Sub-task is UI-only; the edit API rejects the
   `parent` field. Hand over the wizard link:
   `https://jira.netresearch.de/secure/ConvertIssueToSubTask!default.jspa?id=<numeric-id>`.
-- UAT instructions go in the dedicated `UAT` field (`customfield_10071`, format
-  `h4. UAT` / `h5. Voraussetzungen` + case table, see PROJZ-1550), not in comments;
-  only UAT *results* are comments. Ignore `customfield_11489` "User Acceptance
-  Tests" (unused template). Not on every issue type's screen — PROJY
-  `Technical task` has it, `Neue Aufgabe` does not.
-- Sprint field is `customfield_10480`; the eCom board is `119`.
+- UAT field (`customfield_10071`) basics are in `netresearch-jira`; three DHL
+  deltas: our format is `h4. UAT` / `h5. Voraussetzungen` + case table (see
+  PROJZ-1550), not the plugin's `h2.` bullet example. Ignore `customfield_11489`
+  "User Acceptance Tests" (unused template). Not on every issue type's screen —
+  PROJY `Technical task` has it, `Neue Aufgabe` does not.
 - Don't curl attachment URLs — that needs credentials Claude must not read.
   `jira-attachment.py` carries auth for both directions.
 
@@ -43,11 +43,6 @@ worklogs, attachments and wiki markup, use the skill and its references.
 - **Before any write, fetch the ticket and check the summary matches the intent.**
   A key quoted back at you may echo an earlier mistake — a delete-guard evidence
   comment once landed on PROJX-2322 (PIM import) instead of PROJX-2272 this way.
-- **After creating a ticket, add it to the project's active sprint** unless the
-  user says backlog or the project has no active sprint.
-- When an MR exists, attach it as a **weblink** (title `MR !N: <mr title>`), not
-  only as a comment — comments scroll away, weblinks stay in the sidebar. Pattern:
-  weblink for the MR, comment for evidence (test results, review verdicts).
 - Release-ticket chaining uses the `Relation` link type.
 - Re-fetch after any write to confirm it landed. Jira DC has a history of silent
   no-ops.
