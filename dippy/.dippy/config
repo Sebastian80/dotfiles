@@ -207,6 +207,14 @@ deny-mcp mcp__*__drop_*                   "MCP drop — ask Sebastian"
 # for tools like remove_breakpoint, stop_debug_session, etc.
 allow-mcp mcp__phpstorm-index__*
 allow-mcp mcp__phpstorm-debugger__*
+# IDE write tools that take an arbitrary path: these bypass the Edit(.env*)/
+# Edit(*secret*) deny rules in settings.json, and MCP rules match on tool NAME
+# only — dippy cannot see the target path — so gate the tool itself.
+# The semantic write tools (edit/insert/replace_member, change_signature,
+# structural_search_replace, refactor_rename) stay allowed: they operate on
+# code members and cannot meaningfully target a secrets file.
+ask-mcp mcp__phpstorm-index__ide_create_file
+ask-mcp mcp__phpstorm-index__ide_replace_text_in_file
 
 #---- Redirect rules ----#
 # Allow file writes broadly; deny-redirects below override for secrets paths.
