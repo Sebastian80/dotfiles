@@ -12,8 +12,13 @@ description: >-
   that the code, docblock or config contradicts what they actually observe.
   Reach for the debugger before reading more source and guessing — and consult
   this skill before starting a session, because a session can report success and
-  never pause. Not for post-mortem log or stack-trace analysis, static analyzer
-  findings, profiling, or IDE debugger settings.
+  never pause. USE IT ALSO for getting a debugger working at all: breakpoints
+  that never hit, a session that starts and finishes without stopping, "the
+  debugger won't attach", and working out which service or container needs the
+  debugger enabled (php-fpm vs a CLI/toolbox container vs queue consumers) on
+  Docker, DDEV, Oro/PROJX and similar setups — that setup question is where most
+  of the lost time is. Not for post-mortem log or stack-trace analysis, static
+  analyzer findings, profiling, or IDE debugger settings.
 ---
 
 # JetBrains Debugger MCP
@@ -113,9 +118,18 @@ restart can silently revert it — and the symptom is exactly the one above. If 
 setup that worked an hour ago stops pausing, re-check the runtime before
 suspecting your breakpoint.
 
-> **PHP / Xdebug / DDEV:** the concrete commands, the `ddev xdebug on` restart
-> trap, the CLI-hang fix, path mappings and where PhpStorm stores the interpreter
-> selection are in [references/php-ddev.md](references/php-ddev.md).
+**Per-environment recipes.** The principles above are general; the commands are
+not. Read the one that matches the project — and only that one:
+
+| Environment | Reference | Covers |
+|---|---|---|
+| PHP on DDEV / Docker Compose | [references/php-ddev.md](references/php-ddev.md) | `get_php_project_config`, the `ddev xdebug on` restart trap, the CLI-hang fix, path mappings, where PhpStorm stores the interpreter selection |
+| Oro Commerce / PROJX | [references/oro.md](references/oro.md) | which service to enable (phpfpm vs toolbox vs message-queue), the two project families and their different make targets, the message-queue replica trap, the cookie flow for web requests |
+
+If the environment is neither, the general rules still hold: find out what the run
+configuration really executes, confirm the debugger is loaded *in that runtime*,
+and treat the IDE's description of a remote runtime as a cache until proven
+otherwise.
 
 ### Critical Rules
 
