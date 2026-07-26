@@ -1,20 +1,6 @@
 ---
 name: ide-index-mcp
-description: >-
-  JetBrains IDE semantic code navigation and refactoring via MCP: find usages and
-  references of a function, method or class ('who calls X', 'where is X used'),
-  navigate to a definition ('where is X defined', 'take me to X'),
-  find implementations of an interface or abstract class, super methods, call
-  hierarchies ('what calls X', 'what does X call'), type and inheritance
-  hierarchies, file structure and class methods, find classes/symbols by name,
-  project-wide text and config search ('search the project for X', service ids,
-  YAML keys, TODOs), errors/warnings/diagnostics in a file, and semantic
-  refactoring — rename a symbol, move a file with PSR-4 namespace updates,
-  optimize imports, reformat code. Also IDE project management: syncing after
-  external file changes, multi-project, sleep/wake, Power Save. Use these rather
-  than Grep/Glob inside an open IDE project, where structural understanding beats
-  text matching. The tools are absent when the IDE is closed — then the standard
-  tools are correct.
+description: "MANDATORY for all code navigation and refactoring. You MUST invoke this skill whenever: finding where a function/method/class is called or used ('find usages of X', 'who calls X', 'where is X used'), going to a definition ('where is X defined', 'take me to X'), renaming any symbol, finding implementations of an interface or abstract class, tracing call hierarchies ('what calls X', 'what does X call'), checking file structure or class methods, checking errors/warnings/diagnostics in a file, finding classes/symbols by name, searching text or config values project-wide ('search the project for X', service ids, YAML keys, TODOs), type/inheritance hierarchies, syncing IDE after external file changes, reformatting code, or managing IDE projects (multi-project, sleep/wake, Power Save). Do NOT skip this and use Grep/Glob instead. If a user mentions any class name, method name, or symbol and wants to navigate to it, find its usages, rename it, or understand its relationships, this skill MUST be consulted first."
 ---
 
 # IDE Index MCP - Agent Guide
