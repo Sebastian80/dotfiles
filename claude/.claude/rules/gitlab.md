@@ -1,10 +1,13 @@
 # GitLab (glab) Usage
 
-- The internal GitLab instance is `git.netresearch.de`.
+Instance facts, glab configuration, API recipes and CI troubleshooting for
+`git.netresearch.de` live in the `netresearch-gitlab` skill. Below is only
+what it does not cover.
+
 - Composer authentication for internal GitLab: `composer config gitlab-token.git.netresearch.de <token>`
 - To delete a remote branch: `git push <remote-url> --delete <branch>` — useful for cleaning up accidental pushes to wrong repos.
 - A CI job failing with `couldn't find remote ref refs/heads/<branch>` right after an MR merge is the duplicate BRANCH pipeline racing the source-branch deletion — not a real failure. Dedupe with standard `workflow:` rules (prefer `merge_request_event`; suppress `$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS`; keep branch/tag pipelines otherwise).
-- `glab mr create --repo X` silently takes the MR SOURCE project from the current directory's git remote, not from `--repo` — run from another repo's checkout it fails with 422 "Source project is not a fork of the target project" (or worse, targets the wrong repo). Always `cd` into the repo the MR belongs to before `glab mr create`.
+- `glab mr create --repo X` silently takes the MR SOURCE project from the current directory's git remote, not from `--repo` — run from another repo's checkout it fails with 422 "Source project is not a fork of the target project" (or worse, targets the wrong repo). Either `cd` into the repo the MR belongs to first, or create the MR via `glab api` (the skill's troubleshooting reference has the recipe — `glab mr create` cannot work checkout-less at all).
 
 ## Internal skill marketplace (coding-ai group)
 
