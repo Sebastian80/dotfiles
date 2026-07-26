@@ -89,6 +89,84 @@
         "Covered vendor code deliberately: scope project_and_libraries on find_* tools where a symbol anchor exists, and rg -uu for index-excluded vendor subtrees (ide_search_text has NO scope parameter)",
         "Distinguished exact-symbol matches from substring false positives (word-boundary discipline)"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "add a nullable ?LoggerInterface $logger parameter to CombinedPriceListsBuilder::build() — every call site has to keep working",
+      "expected_output": "Uses ide_change_signature so the IDE updates all call sites atomically. Does NOT hand-edit the declaration and then hunt callers with grep.",
+      "files": [],
+      "expectations": [
+        "Used ide_change_signature (not Edit, not ide_replace_text_in_file)",
+        "Did NOT grep/rg for call sites afterwards — the refactoring updates them",
+        "If the tool was unavailable or failed, said so rather than silently falling back to a manual edit plus a grep sweep"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "across the test suite, every ->getMock() call should become ->createMock(). don't touch the string 'getMock' where it appears in comments or docblocks",
+      "expected_output": "Uses ide_structural_search_replace, which is AST-aware and will not match comments or string literals. A text-level replace is wrong here precisely because the prompt excludes comments.",
+      "files": [],
+      "expectations": [
+        "Used ide_structural_search_replace",
+        "Did NOT use a stream editor, ide_replace_text_in_file, or Edit for a project-wide code pattern",
+        "Reasoning acknowledged that a text-level replace cannot honour the comment/docblock exclusion"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "run the unit tests for the pricing bundle and tell me what fails",
+      "expected_output": "Uses ide_run_tests so the run goes through the IDE run configuration and its configured interpreter. On this machine the host php is 8.5 and breaks Magento/Oro test bootstraps, while the IDE interpreter points at the container — so invoking the host binary directly is the wrong instrument.",
+      "files": [],
+      "expectations": [
+        "Used ide_run_tests, or explicitly chose a runner bound to the project interpreter (ddev exec / container php)",
+        "Did NOT invoke the host php binary directly",
+        "Reported actual failures from the run rather than predicting them from source"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "create a new empty PHP class Acme\\PricingBundle\\Util\\PriceRounder with a namespace declaration and nothing else in it",
+      "expected_output": "A plain new file with no cross-file consequences. Claude's Write tool is the efficient choice; ide_create_file is gated behind a dippy ask and buys nothing here. Either is defensible, but reaching for the gated tool without a reason is not.",
+      "files": [],
+      "expectations": [
+        "Created the file (Write preferred; ide_create_file acceptable if justified)",
+        "Did NOT use a semantic refactoring tool for what is a plain file creation",
+        "If ide_create_file was used, gave a reason (e.g. wanting the IDE to index it immediately) rather than defaulting to it"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "find every usage of PriceListToCustomerRepository",
+      "expected_output": "REGRESSION TEST for the 2026-07-26 false negative. Run with the target project NOT open in the IDE while a different project is. ide_find_symbol returns an empty result with stale:false — an authoritative-looking zero answered from the wrong project. The agent must not report 'no usages found'.",
+      "files": [],
+      "expectations": [
+        "Did NOT report 'no usages' on the strength of an empty IDE result",
+        "Checked ide_project_status (or otherwise verified the working directory is an open project) before trusting an empty result",
+        "Either opened the project with ide_open_project, fell back to text search, or told the user the project is not open — any of these, but not silent acceptance of the empty",
+        "Recognised that stale:false does not make an empty result authoritative"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "who calls WebsiteSearchIndexer::reindex?",
+      "expected_output": "Run with the IDE closed, so no ide_* tools exist in the session. The agent should use standard search tools without ceremony and must not ask the user to launch PhpStorm.",
+      "files": [],
+      "expectations": [
+        "Answered using standard search tools",
+        "Did NOT ask the user to start the IDE, or claim the answer would be better with it running",
+        "Did not spend turns probing for IDE tools that are absent from the session"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "show me the file structure of PriceProvider.php",
+      "expected_output": "Run with two or more projects open. The first call without project_path errors with multiple_projects_open and a candidate list. The agent should retry with the correct project_path, not abandon the IDE tools.",
+      "files": [],
+      "expectations": [
+        "Retried the same IDE tool with project_path after the disambiguation error",
+        "Did NOT fall back to text search because of the error",
+        "Picked the project matching the working directory rather than guessing"
+      ]
     }
   ]
 }

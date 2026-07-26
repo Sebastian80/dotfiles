@@ -1,0 +1,13 @@
+{"label":"[TP] recursive grep on src/","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"grep -rn \"PriceProvider\" src/"}}
+{"label":"[TP] rg on app/code","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"rg \"PriceProvider\" app/code"}}
+{"label":"[TP] find+xargs grep on php","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"find . -name \"*.php\" | xargs grep Foo"}}
+{"label":"[TP] in-place stream edit on php","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"sed -i s/a/b/ src/Foo.php"}}
+{"label":"[TP] mv php file","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"mv src/Foo.php src/Bar.php"}}
+{"label":"[TP] blocked stmt is first of a chain","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"grep -rn Foo src/ && echo done"}}
+{"label":"[FP-1 today] php path in a DIFFERENT statement","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"P=\"dev/tests/x/vendor/autoload.php\"\nls -la \"$P\"\ngrep -rl \"8457ece5\" /home/sebastian/.config/JetBrains/"}}
+{"label":"[FP-2 today] trigger words in prose, php elsewhere","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"cat > /tmp/x.json <<EOF\n\"Did NOT use sed -i or Edit for a project-wide pattern\"\n\"applies to src/Foo.php files\"\nEOF"}}
+{"label":"[NEG] git grep is exempt","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"git grep PriceProvider -- src/"}}
+{"label":"[NEG] rg -uu escape hatch","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"rg -uu PriceProvider vendor/oro"}}
+{"label":"[NEG] plain git status","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"git status --short"}}
+{"label":"[NEG] mv php to /tmp is a backup","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"mv src/Foo.php /tmp/Foo.php.bak"}}
+{"label":"[NEG] outside ~/workspace entirely","cwd":"/home/sebastian/dotfiles","tool_input":{"command":"grep -rn Foo src/"}}
