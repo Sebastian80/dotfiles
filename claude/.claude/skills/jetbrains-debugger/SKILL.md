@@ -95,9 +95,45 @@ the real PHP version, every loaded extension, and a `debuggers` array. If `xdebu
 is absent from `loadedExtensions`, stop and fix that first — no breakpoint will
 ever be hit.
 
-Do **not** try to answer this from `.idea/php.xml`. PhpStorm buffers settings and
-flushes them lazily, so the file lags the live state: a project with a correctly
-selected interpreter can show no `interpreter_name` on disk at all.
+Ask the IDE rather than reading project files, because the answer is split across
+two of them and it is easy to read the wrong half:
+
+| What | Where |
+|---|---|
+| *Which* interpreter the project selected | `.idea/workspace.xml` → `<component name="PhpWorkspaceProjectConfiguration" interpreter_name="…">` |
+| What that interpreter *is* (path, container, debugger id) | `.idea/php.xml` → `<interpreter name="…" home="…">` |
+
+A checker that looks for `interpreter_name` in `php.xml` finds nothing and reports
+"no interpreter selected" for a project that is configured correctly and debugging
+fine. One such script was written and deleted on 2026-07-26 for exactly that.
+
+Two neighbouring traps worth knowing when breakpoints misbehave:
+
+- **Path mappings, not `DOCKER_REMOTE_PROJECT_PATH`, bind breakpoints.** A DDEV
+  interpreter can record `DOCKER_REMOTE_PROJECT_PATH="/opt/project"` while the
+  active mapping is `$PROJECT_DIR$ → /var/www/html`. The mapping wins and matches
+  the real mount. If a verified breakpoint never binds, check the mappings first.
+- **Static analysis and debugging can run on different PHPs.** Here PHPStan and
+  Psalm point at the host `/home/linuxbrew/.linuxbrew/bin/php` (8.5, no Xdebug)
+  while the debugger and tests use the container's 8.3. Neither is wrong; just
+  don't infer one interpreter's extensions from the other's.
+
+**Xdebug on + IDE listening makes shell PHP hang.** With `xdebug.start_with_request=yes`
+(DDEV's default once Xdebug is enabled) *every* CLI PHP process opens a DBGp session
+against the listening IDE. A plain `ddev exec php -m` or `docker exec … php -v` then
+blocks until it times out, and leaves a paused session named `stdin` behind — each of
+which holds its process. Symptoms: shell one-liners mysteriously taking >60 s, and a
+growing list in `list_debug_sessions` that you did not start.
+
+Prefix shell one-liners with `XDEBUG_MODE=off`:
+
+```bash
+ddev exec XDEBUG_MODE=off php -m
+```
+
+This does not affect real debug sessions, which are launched by the IDE through the
+run configuration. If `list_debug_sessions` shows stray paused `stdin` entries, they
+are this — stop them to free the processes.
 
 If that MCP server isn't connected, you cannot preflight — fall back to detecting
 the failure after the fact (Critical Rule 9).
