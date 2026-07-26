@@ -1,0 +1,23 @@
+[
+  {"query": "shipping cost comes out 0 for DE->AT in the paket carrier but the config looks fine. i need to see what $rateRequest actually holds by the time it reaches collectRates", "should_trigger": true},
+  {"query": "step through CodSupportHandler::isAvailable and tell me why it returns false for this quote", "should_trigger": true},
+  {"query": "cant work out why getPimAttribute comes back null here. can we stick a breakpoint in and actually look", "should_trigger": true},
+  {"query": "PriceProviderTest only fails on the 3rd data provider row. i want to stop at that iteration and inspect the fixture", "should_trigger": true},
+  {"query": "the combined price list rebuild loop goes wrong somewhere around the 50th item — can we stop only when i == 50", "should_trigger": true},
+  {"query": "what is actually in $context when the checkout submit handler runs? the docblock claims CheckoutContext and i don't believe it", "should_trigger": true},
+  {"query": "value is correct going into the shipping mapper and wrong coming out. i want to watch where it changes", "should_trigger": true},
+  {"query": "phpunit throws somewhere deep in the pricing bundle, can you catch it and give me the stack at the moment it blows up", "should_trigger": true},
+  {"query": "i'd like to try a fix without a full restart — change the variable at runtime and see whether the downstream still breaks", "should_trigger": true},
+  {"query": "trace the acme shipping tour warehouse resolution at runtime, i want the actual call order not what the code looks like", "should_trigger": true},
+
+  {"query": "here's the stack trace from var/log/exception.log — work out which line actually threw and what the cause was", "should_trigger": false},
+  {"query": "add some error_log calls around the price calculation so i can see the values in the next prod run", "should_trigger": false},
+  {"query": "enable xdebug in the phpfpm container and set the XDEBUG_SESSION cookie so i can debug the storefront in the browser", "should_trigger": false},
+  {"query": "getPimField returns null because the property is never assigned in the constructor, right? just read the class and confirm", "should_trigger": false},
+  {"query": "checkout takes 4 seconds. find which query is responsible", "should_trigger": false},
+  {"query": "run the unit tests for the pricing bundle and show me what fails", "should_trigger": false},
+  {"query": "phpstan level 7 complains about a possibly-null on PriceProvider.php line 88, sort it out", "should_trigger": false},
+  {"query": "the gitlab job died with a segfault, have a look at the CI job log and tell me what happened", "should_trigger": false},
+  {"query": "explain how xdebug step debugging actually works under the hood, i've never really understood the protocol", "should_trigger": false},
+  {"query": "phpstorm stops on the first line of index.php every single time, turn that off", "should_trigger": false}
+]

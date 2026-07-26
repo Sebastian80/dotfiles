@@ -1,14 +1,19 @@
 ---
 name: jetbrains-debugger
 description: >-
-  Drive a JetBrains IDE debugger programmatically over MCP: run configurations,
-  debug sessions, breakpoints, stepping (over/into/out, run to line), stack traces,
-  frames and threads, inspecting and setting variables, evaluating expressions.
-  Use when debugging any application, investigating bugs, tracing execution flow,
-  inspecting runtime state, or when the user says "debug", "breakpoint", "step
-  through", "inspect variable", "why is this returning X", "trace execution", or
-  similar. Prefer the debugger over reading code and guessing when runtime
-  behavior is unclear.
+  Drive a JetBrains IDE debugger over MCP — breakpoints, stepping, stack frames,
+  live variable inspection and expression evaluation. USE THIS SKILL whenever
+  answering would otherwise mean guessing at runtime behaviour: what a variable,
+  parameter, request or context object actually holds at some point; where a good
+  value turns bad between two points; the real call order; why something returns
+  null/false/0/empty for one specific input; state at iteration N or for one
+  record. Also whenever the user says "debug", "breakpoint", "step through",
+  "inspect variable", "why is this returning X", "trace execution", or reports
+  that the code, docblock or config contradicts what they actually observe.
+  Reach for the debugger before reading more source and guessing — and consult
+  this skill before starting a session, because a session can report success and
+  never pause. Not for post-mortem log or stack-trace analysis, static analyzer
+  findings, profiling, or IDE debugger settings.
 ---
 
 # JetBrains Debugger MCP
@@ -16,6 +21,26 @@ description: >-
 Use these tools to **actually debug** applications in a JetBrains IDE rather than guessing from static code.
 
 **Complete parameter reference:** See [references/tool-reference.md](references/tool-reference.md) for all tool parameters, types, defaults, and return schemas.
+
+## Two debugger surfaces — know which one you are on
+
+There may be **two** ways to drive the debugger, and they are not interchangeable:
+
+| Surface | Shape | This skill documents |
+|---|---|---|
+| `mcp__phpstorm-debugger__*` | one tool per operation (`set_breakpoint`, `wait_for_pause`, …) | **yes** — every rule and return shape below |
+| `mcp__phpstorm__execute_tool` with `command="xdebug_*"` | JetBrains' built-in server, dispatched through one universal tool | no |
+
+The built-in server ships a parallel set (`xdebug_set_breakpoint`,
+`xdebug_start_debugger_session`, `xdebug_get_stack`, `xdebug_evaluate_expression`
+and friends). Same job, different names, different responses — the behaviours
+documented here, notably the `status: "started"` trap in Critical Rule 9, were
+observed on `phpstorm-debugger` and should not be assumed to transfer.
+
+Pick one surface and stay on it for the whole session; mixing them means two
+independent notions of "the current session". Use the built-in server for the
+preflight below regardless, since `get_php_project_config` has no equivalent on
+the other side.
 
 ## When to Use the Debugger
 
@@ -37,6 +62,7 @@ Use these tools to **actually debug** applications in a JetBrains IDE rather tha
 ### Standard Debugging Sequence
 
 ```
+0. PREFLIGHT                        -- confirm Xdebug is actually loaded (see below)
 1. list_run_configurations          -- Find a config with can_debug: true
 2. set_breakpoint                   -- Set breakpoint(s) BEFORE starting
 3. start_debug_session              -- Launch the debugger
@@ -48,6 +74,41 @@ Use these tools to **actually debug** applications in a JetBrains IDE rather tha
 9. wait_for_pause(timeout=60)       -- Block until next breakpoint hit
 10. stop_debug_session              -- Clean up when done
 ```
+
+### Preflight: `can_debug: true` does not mean a breakpoint will be hit
+
+`can_debug` reflects that a debugger is *configured* for the interpreter
+(`debugger_id="php.debugger.XDebug"`). It says nothing about whether Xdebug is
+*installed* on the PHP that will actually run. When it isn't, `start_debug_session`
+still answers `{"status":"started"}`, the process runs to completion without
+pausing, and the only trace is `Xdebug not found among available debuggers` in
+`idea.log`, where you will not think to look.
+
+Ask the IDE directly, via the JetBrains built-in MCP server:
+
+```
+mcp__phpstorm__execute_tool  command="get_php_project_config"  projectPath=<root>
+```
+
+One call returns the selected interpreter (including whether it is a container),
+the real PHP version, every loaded extension, and a `debuggers` array. If `xdebug`
+is absent from `loadedExtensions`, stop and fix that first — no breakpoint will
+ever be hit.
+
+Do **not** try to answer this from `.idea/php.xml`. PhpStorm buffers settings and
+flushes them lazily, so the file lags the live state: a project with a correctly
+selected interpreter can show no `interpreter_name` on disk at all.
+
+If that MCP server isn't connected, you cannot preflight — fall back to detecting
+the failure after the fact (Critical Rule 9).
+
+**Container interpreters (DDEV, Docker Compose).** A run configuration bound to the
+host PHP is the common trap: the container has Xdebug and the host does not, so
+everything looks configured and nothing ever pauses. `homePath` starting
+`docker-compose://` confirms the interpreter is the container one. Getting there
+needs the DDEV Integration plugin (or a hand-made Docker Compose interpreter),
+`ddev xdebug on`, and the project's default CLI interpreter switched to it in
+Settings → PHP. The IDE reports `isRemote: true` when it is right.
 
 ### Critical Rules
 
