@@ -4,7 +4,7 @@
     "BASH_ENV": "/home/sebastian/.bash/path.bash",
     "BASH_DEFAULT_TIMEOUT_MS": "60000",
     "BASH_MAX_TIMEOUT_MS": "600000",
-    "MCP_TIMEOUT": "60000",
+    "MCP_TIMEOUT": "120000",
     "MAX_MCP_OUTPUT_TOKENS": "50000",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "ENABLE_TOOL_SEARCH": "true",
@@ -76,7 +76,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5[1m]",
   "skillOverrides": {
     "docs-with-mermaid": "off",
     "cco": "off",
@@ -126,10 +125,9 @@
     "command": "/bin/bash /home/sebastian/.claude/statusline-omp.sh"
   },
   "enabledPlugins": {
-    "agent-browser@agent-browser": true,
     "code-simplifier@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
-    "skill-creator@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": false,
     "superpowers@superpowers-dev": true,
     "codex@openai-codex": true,
@@ -147,23 +145,10 @@
     "german-technical-writing@netresearch-claude-code-marketplace": true,
     "netresearch-branding@netresearch-claude-code-marketplace": false,
     "jira-integration@netresearch-claude-code-marketplace": true,
-    "ecom-<customer>@netresearch-marketplace": true
+    "ecom-<customer>@netresearch-marketplace": true,
+    "agent-browser@agent-browser": true
   },
   "extraKnownMarketplaces": {
-    "superpowers-dev": {
-      "source": {
-        "source": "github",
-        "repo": "obra/superpowers"
-      },
-      "autoUpdate": true
-    },
-    "agent-browser": {
-      "source": {
-        "source": "github",
-        "repo": "vercel-labs/agent-browser"
-      },
-      "autoUpdate": true
-    },
     "openai-codex": {
       "source": {
         "source": "github",
@@ -182,20 +167,35 @@
         "source": "git",
         "url": "git@git.netresearch.de:coding-ai/marketplace.git"
       }
+    },
+    "agent-browser": {
+      "source": {
+        "source": "github",
+        "repo": "vercel-labs/agent-browser"
+      }
+    },
+    "superpowers-dev": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers"
+      }
     }
   },
   "language": "english",
   "alwaysThinkingEnabled": true,
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "plansDirectory": ".claude/plan",
   "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
   "preferredNotifChannel": "terminal_bell",
   "teammateMode": "in-process",
+  "skipAutoPermissionPrompt": true,
   "autoMode": {
     "allow": [
       "$defaults",
       "ddev start, stop, status, list, describe, exec, ssh, restart, logs, mysql, snapshot, xdebug — local DDEV dev stack, no production impact"
     ]
-  }
+  },
+  "model": "claude-fable-5[1m]"
 }
