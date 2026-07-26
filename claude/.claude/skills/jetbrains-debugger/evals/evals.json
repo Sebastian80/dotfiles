@@ -6,7 +6,10 @@
       "prompt": "the shipping cost comes out as 0 for a DE->AT quote in the paket carrier. i want to see what the rate request actually contains when it reaches collectRates",
       "expected_output": "Preflights the interpreter before starting anything, sets a breakpoint, starts a session, waits for the pause, and reports the observed values. The happy path — establishes the sequence is followed at all.",
       "files": [],
-      "precondition": {"automatable": true, "note": "Working setup: project open, container interpreter selected, Xdebug loaded."},
+      "precondition": {
+        "automatable": true,
+        "note": "Working setup: project open, container interpreter selected, Xdebug loaded."
+      },
       "expectations": [
         "Confirmed Xdebug is actually loaded before starting a session (get_php_project_config or equivalent)",
         "Set the breakpoint BEFORE start_debug_session, not after",
@@ -17,15 +20,18 @@
     },
     {
       "id": 2,
-      "prompt": "put a breakpoint in CodSupportHandler::isAvailable and tell me what the quote object holds when it runs",
-      "expected_output": "REGRESSION TEST for the afternoon of 2026-07-26. With the run configuration bound to a PHP that has no Xdebug, list_run_configurations still reports canDebug:true and start_debug_session still answers status:started. The agent must catch this at preflight and say the interpreter is wrong, rather than starting a session that silently never pauses.",
+      "prompt": "put a breakpoint at dev/tests/unit/framework/bootstrap.php line 25 and run the Main configuration under the debugger — tell me what $this is when it pauses",
+      "expected_output": "REGRESSION TEST for 2026-07-26. The breakpoint line is provably reachable and pauses in a healthy setup, so the ONLY reason this can fail is the interpreter lacking Xdebug. Earlier wording targeted an unreachable line, which gave the agent a second valid reason to decline and did not isolate the preflight.",
       "files": [],
-      "precondition": {"automatable": false, "note": "Requires the project's CLI interpreter pointed at a PHP without Xdebug (e.g. the host binary). Invasive - set by hand, revert after."},
+      "precondition": {
+        "automatable": false,
+        "note": "Requires the project's CLI interpreter pointed at a PHP without Xdebug (e.g. the host binary). Invasive - set by hand, revert after."
+      },
       "expectations": [
-        "Detected the missing Xdebug BEFORE starting a debug session",
-        "Did NOT treat canDebug:true as evidence a breakpoint would be hit",
-        "Named the interpreter as the problem and said how to fix it (container interpreter / ddev xdebug on / switch the project default)",
-        "Did NOT sit in wait_for_pause waiting for a session that was never going to pause",
+        "Detected the missing Xdebug BEFORE starting a debug session, or immediately after the session failed to pause",
+        "Did NOT treat canDebug:true or a green get_php_project_config as proof a breakpoint would be hit",
+        "Verified against the container (ddev xdebug status / php -m) rather than trusting the IDE cache",
+        "Named the interpreter as the cause and gave a concrete fix",
         "Did NOT conclude the breakpoint line was wrong or unreachable"
       ]
     },
@@ -34,7 +40,10 @@
       "prompt": "start debugging the Main phpunit config and stop at the first thing that runs",
       "expected_output": "start_debug_session answers status:started for a session that died on launch. isCurrent:false on the returned session is the tell. The agent should verify the session is live rather than trusting the success field.",
       "files": [],
-      "precondition": {"automatable": false, "note": "Same broken-interpreter state as case 2 - the session starts and immediately dies."},
+      "precondition": {
+        "automatable": false,
+        "note": "Same broken-interpreter state as case 2 - the session starts and immediately dies."
+      },
       "expectations": [
         "Did NOT treat status:started as proof the session was running",
         "Checked isCurrent on the returned session, or confirmed via list_debug_sessions / wait_for_pause",
@@ -45,13 +54,17 @@
     {
       "id": 4,
       "prompt": "which php is my debugger actually going to use, and does it have xdebug?",
-      "expected_output": "One call to get_php_project_config answers all of it. The failure mode to avoid is reconstructing the answer from .idea/php.xml, which lags the live state because PhpStorm flushes settings lazily.",
+      "expected_output": "get_php_project_config answers it in one call. Two failure modes to avoid: reconstructing it from .idea/php.xml (the selection lives in workspace.xml under PhpWorkspaceProjectConfiguration, not php.xml), and trusting the answer on a container interpreter without confirming against the container, since PhpStorm caches remote phpinfo and can report xdebug loaded when it is not.",
       "files": [],
-      "precondition": {"automatable": true, "note": "Any state; the answer differs but the method should not."},
+      "precondition": {
+        "automatable": true,
+        "note": "Any state; the answer differs but the method should not."
+      },
       "expectations": [
         "Asked the IDE via get_php_project_config rather than parsing .idea/php.xml",
         "Reported the interpreter, the real PHP version and whether xdebug is in loadedExtensions",
-        "Noted whether the interpreter is a container (isRemote / docker-compose homePath) when it is"
+        "Noted whether the interpreter is a container (isRemote / docker-compose homePath) when it is",
+        "On a container interpreter, confirmed against the container (ddev xdebug status / php -m) rather than trusting the cached IDE answer"
       ]
     },
     {
@@ -59,7 +72,10 @@
       "prompt": "i want to inspect the combined price list rebuild but only on the 50th item, stepping through 49 times is not happening",
       "expected_output": "A conditional breakpoint is the whole answer. Tests a documented capability never exercised in practice.",
       "files": [],
-      "precondition": {"automatable": true, "note": "Working setup."},
+      "precondition": {
+        "automatable": true,
+        "note": "Working setup."
+      },
       "expectations": [
         "Used set_breakpoint with a condition rather than stepping repeatedly",
         "Wrote the condition in the target language's syntax",
@@ -71,7 +87,10 @@
       "prompt": "here's the exception trace from var/log/exception.log — work out which call actually threw and why",
       "expected_output": "Post-mortem analysis of an existing artifact. No runtime session is needed or possible; starting one is over-reach and wastes a container start.",
       "files": [],
-      "precondition": {"automatable": true, "note": "Any state."},
+      "precondition": {
+        "automatable": true,
+        "note": "Any state."
+      },
       "expectations": [
         "Read and analysed the trace directly",
         "Did NOT start a debug session",
