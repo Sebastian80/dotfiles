@@ -1,16 +1,14 @@
 ---
 name: jetbrains-debugger
 description: >-
-  Guide for using JetBrains IDE Debugger MCP tools to programmatically debug applications.
-  TRIGGER when ANY of these MCP tools are available: list_run_configurations, execute_run_configuration,
-  start_debug_session, stop_debug_session, get_debug_session_status, list_debug_sessions,
-  set_breakpoint, remove_breakpoint, list_breakpoints, resume_execution, pause_execution,
-  step_over, step_into, step_out, run_to_line, wait_for_pause, get_stack_trace, select_stack_frame,
-  list_threads, get_variables, set_variable, get_source_context, evaluate_expression.
-  Use when debugging any application, investigating bugs, tracing execution flow, inspecting
-  runtime state, or when the user says "debug", "breakpoint", "step through", "inspect variable",
-  "why is this returning X", "trace execution", or similar debugging-related requests.
-  PREFER the debugger over reading code and guessing when runtime behavior is unclear.
+  Drive a JetBrains IDE debugger programmatically over MCP: run configurations,
+  debug sessions, breakpoints, stepping (over/into/out, run to line), stack traces,
+  frames and threads, inspecting and setting variables, evaluating expressions.
+  Use when debugging any application, investigating bugs, tracing execution flow,
+  inspecting runtime state, or when the user says "debug", "breakpoint", "step
+  through", "inspect variable", "why is this returning X", "trace execution", or
+  similar. Prefer the debugger over reading code and guessing when runtime
+  behavior is unclear.
 ---
 
 # JetBrains Debugger MCP
@@ -68,6 +66,8 @@ Use these tools to **actually debug** applications in a JetBrains IDE rather tha
 7. **`project_path` is required when multiple projects are open.** If omitted with multiple projects, tools return an error listing available projects.
 
 8. **`evaluate_expression` may be safety-filtered by IDE settings.** If a call is blocked, prefer `get_variables`, simple field/arithmetic expressions, or a narrower expression that avoids method calls and risky APIs. Do not retry blocked process, filesystem, network, reflection, native-loading, or environment/system-property operations unless the user explicitly changes the IDE setting.
+
+9. **`status: "started"` is not a live session.** `start_debug_session` returns `{"status":"started","state":"running"}` even when the process dies on launch — for example when the run configuration's interpreter has no Xdebug (the IDE logs `Xdebug not found among available debuggers` and the session is gone before you can attach). The tell is `isCurrent` on the returned session: `false` means it never became the active session. Confirm with `wait_for_pause`, or `list_debug_sessions` — an empty list means dead, not idle. When a session dies this way, the interpreter is the first thing to check, not the breakpoint.
 
 ## Debugging Patterns
 
@@ -127,6 +127,7 @@ Use these tools to **actually debug** applications in a JetBrains IDE rather tha
 | Not waiting after `resume_execution` | Use `wait_for_pause` to block until the next breakpoint is hit |
 | Calling `evaluate_expression` with method calls in Rust/C++/Go | Use `get_variables` for native languages; method calls may fail in LLDB/GDB |
 | Retrying an `evaluate_expression` blocked by safety settings | Use `get_variables` or a simpler read-only expression; blocked categories are controlled by the user in IDE settings |
+| Treating `start_debug_session`'s `status: "started"` as proof a session is live | Check `isCurrent` on the returned session, then `wait_for_pause` / `list_debug_sessions` |
 | Guessing variable values from source code | Use the debugger to inspect actual runtime values |
 | Forgetting to `stop_debug_session` when done | Always clean up debug sessions |
 

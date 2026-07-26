@@ -1,6 +1,6 @@
 ---
 name: dippy-config
-description: Manage dippy permission rules in ~/.dippy/config (allow/ask/deny/deny-redirect/aliases). Use whenever the user says things like "allow X without asking", "wildcard add Y to dippy", "stop dippy from prompting for Z", "make dippy ask before W", "block dippy from V", "why does dippy block/allow/ask for command Q", "add an exception for", "narrow ask for destructive variant", or otherwise needs to add, remove, debug, or audit dippy autopilot rules. Knows the prefix-tokenized fnmatch syntax, last-match-wins precedence, the trailing-` *` fallback trick for end-of-command flags, the dotfile symlink layout, and the verification flow via direct `echo {...} | dippy --claude` invocation. Always reads the current config first, places rules in the correct section, and proves the change with a positive/negative test matrix before declaring done.
+description: Manage dippy permission rules in ~/.dippy/config (allow/ask/deny/deny-redirect/aliases). Use whenever the user says things like "allow X without asking", "wildcard add Y to dippy", "stop dippy from prompting for Z", "make dippy ask before W", "block dippy from V", "why does dippy block/allow/ask for command Q", "add an exception for", "narrow ask for destructive variant", or otherwise needs to add, remove, debug, or audit dippy autopilot rules. Covers the prefix-tokenized fnmatch syntax, last-match-wins precedence, the dotfile symlink layout, and how to verify a rule against the real `dippy --claude` decision path.
 ---
 
 # Dippy Config Skill
