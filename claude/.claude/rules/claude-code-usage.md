@@ -12,6 +12,10 @@
 - Before acting on a review finding (human, Codex, or subagent), decompose it into independently falsifiable claims — typically arithmetic/logic, external API behavior, and real-world reachability — and test each with the cheapest decisive instrument: unit-level repro against real objects, a direct API probe, a production-data query. Verdicts like "no-ship" often bundle one true claim with refutable ones.
 - For framework-internal mechanisms, a minimal runtime experiment outranks any source-reading chain. Source-reading produces plausible mechanism stories that miss gates elsewhere in the call path (PROJX-2329 lesson: a source-verified UnitOfWork "reachability walk throws" analysis missed the `commit()` nothing-to-do early return sitting BEFORE the assert — both the original claim and its refutation were part-wrong until a 60-row experiment settled it).
 
+## MCP server design
+
+- MCP resource reads display as a raw escaped-JSON envelope in the Claude Code transcript; tool responses render their text readably. Anything a human should read belongs in a TOOL — use resources only for machine consumption. (Learned building oro-mate: profiler panels needed a bridging tool solely because the upstream extension exposed them as resources.)
+
 ## Task tracking
 
 - Never delete tasks without Sebastian's explicit approval.
