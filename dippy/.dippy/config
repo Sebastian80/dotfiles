@@ -207,6 +207,11 @@ deny-mcp mcp__*__drop_*                   "MCP drop — ask Sebastian"
 # for tools like remove_breakpoint, stop_debug_session, etc.
 allow-mcp mcp__phpstorm-index__*
 allow-mcp mcp__phpstorm-debugger__*
+# oro-mate (symfony/ai-mate workspace ~/workspace/ai-mate-oro): read-only Oro
+# introspection — datagrid YAML, config/enum/workflow and snapshot SELECTs,
+# profiler panel reads. No write tools; keep it that way, or this blanket
+# allow has to become per-tool.
+allow-mcp mcp__oro-mate__*
 # IDE write tools that take an arbitrary path: these bypass the Edit(.env*)/
 # Edit(*secret*) deny rules in settings.json, and MCP rules match on tool NAME
 # only — dippy cannot see the target path — so gate the tool itself.
