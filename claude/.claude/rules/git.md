@@ -9,6 +9,7 @@
 - Never push commits directly to main/release branches — not even the same SHA via a combined refspec (`git push origin HEAD:develop HEAD:main`). Commits land on feature branches or develop; main only ever follows develop via fast-forward as a separate, deliberate step (`git checkout main && git merge --ff-only develop && git push origin main` — `--ff-only` hard-fails on divergence instead of silently rewriting).
 - Never `git add -A` unless you've just run `git status` — don't add random test files to the repo.
 - Never commit `.env` files, API keys, tokens, or credentials. If a file looks like it contains secrets, warn Sebastian before staging.
+- `**/CLAUDE.md` is globally gitignored (`~/.config/git/ignore`, deliberate). In repos, write `AGENTS.md` and add a local `CLAUDE.md` symlink — a created CLAUDE.md silently never stages, so never expect it to commit.
 
 ## Remotes and submodules
 

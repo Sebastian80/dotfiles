@@ -17,3 +17,4 @@ All tools are installed via Homebrew (`/home/linuxbrew/.linuxbrew/bin/`), except
 - **JSON**: `jq` is available for JSON processing in shell pipelines.
 - **Locale**: prefix awk/sort/printf pipelines that parse or emit decimal numbers with `LC_ALL=C` — the German locale turns `%.2f` into comma decimals and silently breaks joins/greps on dot-decimal data.
 - **Code search**: `ast-grep` for structural/AST-based code search (use via ast-grep skill).
+- **ripgrep in pipelines**: the ripgreprc forces line numbers even on piped output — any `rg` whose output is consumed as data (paths into `head`/loops/`xargs`) needs `-N`, or downstream reads fail on `1:`-prefixed paths.
