@@ -1,14 +1,14 @@
-# Oro Commerce / PROJX — Dockerized Xdebug
+# Oro Commerce — Dockerized Xdebug
 
 Stack-specific detail for the preflight and container guidance in SKILL.md. Read
-this when the project is Oro Commerce or an PROJX customer stack. Xdebug is never
+this when the project is Oro Commerce, reference stack or NR customer stack. Xdebug is never
 on by default here, and the way you enable it differs *between* these projects —
 enabling the wrong thing produces a session that starts and never pauses.
 
 ## Contents
 
 - [Which family is this project](#which-family-is-this-project)
-- [Per-service family (PROJX)](#per-service-family-shop)
+- [Per-service family (NR customer stacks)](#per-service-family-nr-customer-stacks)
 - [Global family (Oro reference stacks)](#global-family-oro-reference-stacks)
 - [Verifying](#verifying)
 - [Debugging a web request](#debugging-a-web-request)
@@ -17,12 +17,12 @@ enabling the wrong thing produces a session that starts and never pauses.
 ## Which family is this project
 
 ```bash
-ls make/xdebug.mk 2>/dev/null && echo "per-service (PROJX)" || echo "global (Oro reference)"
+ls make/xdebug.mk 2>/dev/null && echo "per-service (NR customer stack)" || echo "global (Oro reference)"
 ```
 
-## Per-service family (PROJX)
+## Per-service family (NR customer stacks)
 
-`shop`, `shop-61.docker.local`. State lives in `php.env` as
+NR customer stacks (`<project>.docker.local`). State lives in `php.env` as
 `<SERVICE>_XDEBUG_ENABLED`. Services are independent, and **you must enable the one
 that will actually run your code**:
 

@@ -12,6 +12,6 @@ what it does not cover.
 ## Internal skill marketplace (coding-ai group)
 
 - Internal Claude Code skills/plugins live in `coding-ai/<name>` repos on git.netresearch.de, registered via MR in `coding-ai/marketplace` (`.claude-plugin/marketplace.json`, source = git URL). Visibility `internal` — customer infrastructure details (project ids, hosts, IPs) belong HERE, never in the public GitHub marketplace (`netresearch/claude-code-marketplace` and its skill repos are PUBLIC).
-- Plugin naming is team/domain-prefixed: `ecom-*` (eCom team), `dxp-*`, `typo3-*`, `netresearch-*`, `it-*`. Customer plugins get the team prefix too (e.g. `ecom-<customer>`), not the bare customer name.
+- Plugin naming is team/domain-prefixed: `ecom-*` (eCom team), `dxp-*`, `typo3-*`, `netresearch-*`, `it-*`. Customer plugins get the team prefix too (`<team>-<customer>`), not the bare customer name.
 - New repos in `coding-ai` get `main` protected by group policy after the first push — all subsequent changes go through MRs.
 - The CI component (`ci-components/claude-code-skill`) requires in-repo: `scripts/validate-skill.sh` and `.markdownlint.jsonc` (120-char lines, code blocks/tables exempt) — copy both from `coding-ai/ecom-orocommerce-docker-skill` and run `sh scripts/validate-skill.sh` + `npx markdownlint-cli2 "**/*.md"` locally before pushing.

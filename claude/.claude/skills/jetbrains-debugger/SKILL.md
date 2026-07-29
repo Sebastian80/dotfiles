@@ -16,7 +16,7 @@ description: >-
   that never hit, a session that starts and finishes without stopping, "the
   debugger won't attach", and working out which service or container needs the
   debugger enabled (php-fpm vs a CLI/toolbox container vs queue consumers) on
-  Docker, DDEV, Oro/PROJX and similar setups — that setup question is where most
+  Docker, DDEV, Oro and similar setups — that setup question is where most
   of the lost time is. Not for post-mortem log or stack-trace analysis, static
   analyzer findings, profiling, or IDE debugger settings.
 ---
@@ -124,7 +124,7 @@ not. Read the one that matches the project — and only that one:
 | Environment | Reference | Covers |
 |---|---|---|
 | PHP on DDEV / Docker Compose | [references/php-ddev.md](references/php-ddev.md) | `get_php_project_config`, the `ddev xdebug on` restart trap, the CLI-hang fix, path mappings, where PhpStorm stores the interpreter selection |
-| Oro Commerce / PROJX | [references/oro.md](references/oro.md) | which service to enable (phpfpm vs toolbox vs message-queue), the two project families and their different make targets, the message-queue replica trap, the cookie flow for web requests |
+| Oro Commerce (incl. NR customer stacks) | [references/oro.md](references/oro.md) | which service to enable (phpfpm vs toolbox vs message-queue), the two project families and their different make targets, the message-queue replica trap, the cookie flow for web requests |
 
 If the environment is neither, the general rules still hold: find out what the run
 configuration really executes, confirm the debugger is loaded *in that runtime*,
