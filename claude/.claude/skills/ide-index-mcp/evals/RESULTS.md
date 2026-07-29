@@ -1,6 +1,6 @@
 # trigger-eval results — 2026-07-26
 
-Three arms over the same 24 cases, same environment (shop + magento-shop both open
+Three arms over the same 24 cases, same environment (two large customer projects both open
 in PhpStorm, `ide-first.sh` hook active). Metric: did the run reach any
 `mcp__phpstorm-index__*` tool, and was the skill itself invoked.
 

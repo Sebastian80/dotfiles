@@ -24,6 +24,7 @@
 - Without a ticket, use conventional prefixes (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `test:`).
 - Branch with a ticket: the ticket key alone — `TICKET-123`, no description suffix. Check `git branch -r` if unsure; existing repo convention always wins.
 - Branch without a ticket: `feature/`, `bugfix/`, or `hotfix/` + descriptive name.
+- Before `glab mr create` / `gh pr create`, verify the base: `git log --oneline <target>..HEAD` must list only your own commits. A workspace checked out on a long-lived side branch silently makes every new branch fork from it, and the MR drags the side branch into the target. (An MR created from a workspace sitting on an experiment branch nearly dragged 18 unrelated commits into develop; only the merge-conflict refusal stopped it.)
 
 ## MR / PR descriptions
 

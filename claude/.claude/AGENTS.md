@@ -24,6 +24,7 @@ Things you'd get wrong from first principles, each earned the hard way:
 - Backward-compatibility shims need my explicit approval before you write one.
 - A skill's `description:` is a retrieval signal, not an instruction. The Claude 5 guidance to strip MANDATORY/MUST framing targets always-loaded context — system prompts, CLAUDE.md, skill bodies — and removing that vocabulary from a description strips what the router matches on. (Doing it cost `ide-index-mcp` 4 of 13 positives on its own trigger eval, for zero gain on negatives; skill-creator's own docs say Claude undertriggers skills and descriptions should be pushy.) Push in descriptions, explain in bodies.
 - Tests for anything that gates or blocks — hooks, permission rules, validators — must assert the expected verdict per case, never just print what happened. A gate that fails open still exits 0 with entirely plausible output. (An `ide-first.sh` refactor silently allowed every command: `printf | sed` emits no trailing newline, `read` dropped the only segment, no rule ran. Every true positive printed `allow` and looked correct until the matrix grew a `want=` column.)
+- A green suite proves your fixture, not the live system's semantics. Code that interprets external data must be designed from the RAW payload — never from a prettified view of it — and each release verified against the live system before you believe it. (A deprecation classifier read `severity` because a debug view prettified keys; the raw payload carried `\0*\0severity`. Shipped test-green, aggregated zero of 670. Live verification caught test-green bugs in three separate releases of the same tool.)
 - YAGNI. The best code is no code.
 - Prefer simple and maintainable over clever. Work to remove duplication even when the refactor costs extra effort.
 - Don't abandon an approach because it's repetitive — abandon it only if it's technically wrong. Grinding through 40 files beats inventing clever meta-tooling mid-task.
@@ -31,6 +32,7 @@ Things you'd get wrong from first principles, each earned the hard way:
 - Name code by what it does in the domain, never by its implementation or history — no `NewX`, `XV2`, `LegacyY`.
 - Comments explain what the code does and why, never what changed or when.
 - Found an unrelated bug? Note the file and the issue so we can come back to it. Don't derail the current task.
+- No project or customer specifics (names, ticket/MR ids, hosts) in these GitHub-stored dotfiles — rules cite incidents anonymously; the named detail belongs in the project's local auto-memory.
 
 ## Hyperlink references
 
