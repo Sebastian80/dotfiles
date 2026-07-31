@@ -76,6 +76,7 @@
     ],
     "defaultMode": "auto"
   },
+  "model": "claude-fable-5[1m]",
   "skillOverrides": {
     "docs-with-mermaid": "off",
     "cco": "off",
@@ -125,28 +126,20 @@
     "command": "/bin/bash /home/sebastian/.claude/statusline-omp.sh"
   },
   "enabledPlugins": {
-    "code-simplifier@claude-plugins-official": false,
-    "claude-md-management@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": false,
     "superpowers@superpowers-dev": true,
     "codex@openai-codex": true,
-    "agent-harness@netresearch-claude-code-marketplace": false,
-    "agent-rules@netresearch-claude-code-marketplace": false,
-    "context7@netresearch-claude-code-marketplace": false,
-    "data-tools@netresearch-claude-code-marketplace": false,
-    "docker-development@netresearch-claude-code-marketplace": false,
-    "enterprise-readiness@netresearch-claude-code-marketplace": false,
-    "file-search@netresearch-claude-code-marketplace": false,
     "git-workflow@netresearch-claude-code-marketplace": true,
-    "github-project@netresearch-claude-code-marketplace": false,
-    "php-modernization@netresearch-claude-code-marketplace": false,
     "security-audit@netresearch-claude-code-marketplace": true,
     "german-technical-writing@netresearch-claude-code-marketplace": true,
-    "netresearch-branding@netresearch-claude-code-marketplace": false,
     "jira-integration@netresearch-claude-code-marketplace": true,
-    "ecom-<customer>@netresearch-marketplace": true,
-    "agent-browser@agent-browser": true
+    "agent-browser@agent-browser": true,
+    "activity-detective@netresearch-marketplace": true,
+    "netresearch-gitlab@netresearch-marketplace": true,
+    "netresearch-jira@netresearch-marketplace": true,
+    "tempo-timesheet-sync@netresearch-marketplace": true,
+    "skill-repo@netresearch-claude-code-marketplace": true,
+    "agent-harness@netresearch-claude-code-marketplace": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
@@ -172,7 +165,8 @@
       "source": {
         "source": "github",
         "repo": "vercel-labs/agent-browser"
-      }
+      },
+      "autoUpdate": true
     },
     "superpowers-dev": {
       "source": {
@@ -190,12 +184,13 @@
   "skipWorkflowUsageWarning": true,
   "preferredNotifChannel": "terminal_bell",
   "teammateMode": "in-process",
+  "remoteControlAtStartup": false,
+  "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
   "autoMode": {
     "allow": [
       "$defaults",
       "ddev start, stop, status, list, describe, exec, ssh, restart, logs, mysql, snapshot, xdebug — local DDEV dev stack, no production impact"
     ]
-  },
-  "model": "claude-fable-5[1m]"
+  }
 }
