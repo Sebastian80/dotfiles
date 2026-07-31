@@ -123,7 +123,7 @@
     "netresearch-jira@netresearch-marketplace": true,
     "tempo-timesheet-sync@netresearch-marketplace": true,
     "skill-repo@netresearch-claude-code-marketplace": true,
-    "agent-harness@netresearch-claude-code-marketplace": true
+    "agent-harness@netresearch-claude-code-marketplace": false
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
