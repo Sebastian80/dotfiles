@@ -45,4 +45,4 @@ Linkify references in any output (PR descriptions, commit messages, chat replies
 | Commit  | 7c12680  | `{repo_url}/commit/7c12680`                   |
 | Jira    | PROJ-1 | `https://jira.netresearch.de/browse/PROJ-1` |
 
-GitLab repos use `/-/merge_requests/N`, `/-/issues/N`, `/-/commit/HASH`. Jira comments and descriptions are the exception — they use wiki markup `[text|url]` (see `rules/jira-cli.md`).
+GitLab repos use `/-/merge_requests/N`, `/-/issues/N`, `/-/commit/HASH`. Jira comments and descriptions are the exception — they use wiki markup `[text|url]` (see `rules/jira.md`).
