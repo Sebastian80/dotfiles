@@ -16,6 +16,29 @@
 
 - MCP resource reads display as a raw escaped-JSON envelope in the Claude Code transcript; tool responses render their text readably. Anything a human should read belongs in a TOOL — use resources only for machine consumption. (Learned building an MCP profiler extension: its panels needed a bridging tool solely because the upstream extension exposed them as resources.)
 
+## Parallel agents in one checkout
+
+Contract for running several write-agents concurrently in a single working copy
+(proven on a five-agent build round: zero merge conflicts, but three incidents
+shaped these rules):
+
+- **Partition file ownership up front**; agents never touch shared files
+  (service registration, instructions, docs, skills). Registration and doc text
+  ship as snippets in a per-agent handoff file; the integrator applies them and
+  owns every shared-file edit and all commits — agents run no git at all.
+- **Agents run only their own test files**, never the full suite — a sibling's
+  mid-edit failures are not theirs. The integrator runs full gates.
+- **A deliverable is a snapshot until the agent's completion message.** An
+  integrator scan mid-edit found phpstan errors that were real at that instant
+  and gone at completion — indistinguishable from a broken deliverable except
+  by line numbers. The reverse also happened: a "no work on disk" nudge based
+  on mtimes was itself stale seconds later. Judge only after completion, or
+  have agents touch a gates-green marker file as their last act and compare
+  its mtime against the sources.
+- Brief agents to research payload shapes against the LIVE system and to
+  build fixtures from raw payloads; every live-verification pass in that round
+  caught a bug that green unit tests had missed.
+
 ## Task tracking
 
 - Never delete tasks without Sebastian's explicit approval.
