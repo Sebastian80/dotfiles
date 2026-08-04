@@ -95,6 +95,17 @@ One MCP server per IDE **process**; all projects open in that process are served
 6. `ide_open_project` on a never-before-opened project can hang on the modal "Trust project?" dialog only a human can answer — if it times out, ask the user.
 7. If a project closed or slept unexpectedly, read `ide_lifecycle_log` before assuming a bug.
 
+## Two JetBrains MCPs — routing rule
+
+When both this plugin (`mcp__phpstorm-index__*` / `mcp__intellij-index__*`) and the JetBrains built-in server (`mcp__phpstorm__*` / `mcp__intellij__*`) are connected, they are **not interchangeable**:
+
+| Need | Use |
+|------|-----|
+| Code navigation, search, diagnostics, rename, move, run tests | index plugin (`*-index`) |
+| Terminal, running non-test processes, Symfony service lookup (`locate_symfony_service`) | built-in server only |
+
+The built-in server is **not a fallback** for the index plugin: it cannot do semantic code search, and during dumb mode it fails the same way. Dumb mode / stale index are transient — wait and retry the index plugin, or use the Grep/rg fallbacks below; don't reroute to the built-in server.
+
 ## When to use built-in tools instead
 
 - **Regex pattern matching** → `ide_search_text` with `regex: true` + optional `filePattern` (in-project regex no longer needs `Grep`; routes through IntelliJ Find in Files)
@@ -114,7 +125,7 @@ After creating or modifying files outside the IDE (via Write/Edit), call `ide_sy
 ## Parameter Essentials
 
 1. **Line and column are 1-based** (first line = 1, first column = 1)
-2. **File paths are relative** to project root — never absolute
+2. **File paths are relative** to project root — never absolute. Exception: when a tool *returns* an absolute path or `jar://` URL for a library/dependency file (e.g. under `vendor/`), pass it back **unchanged** to read-only navigation tools or `ide_read_file` — rewriting it to a relative path breaks library navigation.
 3. **Column must point to the first character of the symbol name** — not keywords (`def`, `class`, `function`), whitespace, or punctuation. A wrong column silently resolves to the wrong symbol.
 4. **project_path** — required on every call when multiple projects are open in the IDE instance (absolute project root; sub-project path for workspace projects); omit with a single project
 5. **Default `scope: project_and_libraries`** for every tool that accepts a `scope` parameter (`ide_find_class`, `ide_find_file`, `ide_find_symbol`, `ide_find_references`, `ide_find_implementations`, `ide_type_hierarchy`, `ide_call_hierarchy`). The MCP server defaults to `project_files`, which covers only what the IDE classifies as project source roots. Whether that includes `vendor/` / `node_modules/` is **project-dependent**: when they're marked as External Libraries or Excluded (common in Symfony/Node setups) `project_files` silently omits them; when they're configured as content/source roots — as in Magento, which indexes `vendor/` as source — they're included. Since you usually can't tell which applies, default to `project_and_libraries` (a superset) so dependency code is never silently missed. Only narrow to `project_files` when you specifically want to exclude libraries; use `project_production_files` / `project_test_files` for test-aware filtering.
