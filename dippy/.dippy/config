@@ -180,6 +180,22 @@ ask docker compose down * --volumes *     "docker compose down --volumes — con
 # false positives in command-level matching.
 deny * *.env *                    "Don't access .env files via bash — ask Sebastian"
 deny * *.env.* *                  "Don't access .env files via bash — ask Sebastian"
+# Exception: *.env.dist are tracked, secret-free templates — READ-ONLY access
+# is fine (last-match-wins: these allows sit after the .env denies above).
+# Write paths stay guarded by deny-redirect **/.env* below.
+allow cat *.env.dist *
+allow cat * *.env.dist *
+allow grep * *.env.dist *
+allow head * *.env.dist *
+allow tail * *.env.dist *
+allow diff * *.env.dist *
+allow git show *.env.dist *
+allow git show * *.env.dist *
+# Re-assert after the dist allows: a command that ALSO names a real .env file
+# (e.g. `cp .env.dist .env`, `grep X .env .env.dist`) stays blocked.
+deny * .env *                     "Don't access .env files via bash — ask Sebastian"
+deny * *.env *                    "Don't access .env files via bash — ask Sebastian"
+deny * *.env.jira *               "Don't touch Jira credentials"
 deny * ~/.ssh/* *                 "Don't access SSH keys via bash — ask Sebastian"
 deny * ~/.aws/* *                 "Don't access AWS credentials via bash — ask Sebastian"
 deny * ~/.gnupg/* *               "Don't access GPG keyring via bash — ask Sebastian"
