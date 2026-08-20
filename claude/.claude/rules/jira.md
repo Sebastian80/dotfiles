@@ -38,6 +38,10 @@ own tickets.
   auto-memory for its deltas before filling it.
 - Don't curl attachment URLs — that needs credentials Claude must not read.
   `jira-attachment.py` carries auth for both directions.
+- MR/URL as a remote link on a ticket:
+  `utility/jira-weblink.py add KEY --url <url> --title <title>` —
+  `jira-link.py` is issue-to-issue only, and no skill's CLI table lists the
+  weblink script (cost a scripts-dir hunt once).
 
 ## Conventions
 
