@@ -136,6 +136,7 @@
 	directory = /home/sebastian/workspace/shop-6.1/vendor/orolab/cart
 	directory = /home/sebastian/workspace/shop-6.1
 	directory = /home/sebastian/workspace/oro-commerce-enterprise-reference
+	directory = /home/sebastian/workspace/acme-61.docker.local/vendor/acme/oro-extension
 [credential "https://git.netresearch.de"]
 	helper = 
 	helper = !/home/linuxbrew/.linuxbrew/bin/glab auth git-credential
