@@ -40,8 +40,7 @@ own tickets.
   `jira-attachment.py` carries auth for both directions.
 - MR/URL as a remote link on a ticket:
   `utility/jira-weblink.py add KEY --url <url> --title <title>` —
-  `jira-link.py` is issue-to-issue only, and no skill's CLI table lists the
-  weblink script (cost a scripts-dir hunt once).
+  `jira-link.py` is issue-to-issue only.
 
 ## Conventions
 
