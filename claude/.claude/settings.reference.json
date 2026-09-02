@@ -7,11 +7,9 @@
     "MCP_TIMEOUT": "120000",
     "MAX_MCP_OUTPUT_TOKENS": "50000",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
-    "ENABLE_TOOL_SEARCH": "true",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS": "10",
     "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "2",
-    "CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION": "200",
     "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION": "50"
   },
   "attribution": {
@@ -129,16 +127,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "notify-send -t 5000 'Claude Code' 'Task completed' 2>/dev/null || true"
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
@@ -199,13 +187,12 @@
   },
   "language": "english",
   "feedbackDrafts": "off",
-  "alwaysThinkingEnabled": true,
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "plansDirectory": ".claude/plan",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
-  "preferredNotifChannel": "terminal_bell",
+  "preferredNotifChannel": "ghostty",
   "teammateMode": "in-process",
   "remoteControlAtStartup": false,
   "agentPushNotifEnabled": true,
