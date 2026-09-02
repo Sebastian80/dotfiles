@@ -20,7 +20,6 @@
   },
   "permissions": {
     "allow": [
-      "Bash",
       "WebFetch",
       "WebSearch",
       "Skill",
@@ -60,7 +59,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "fable[1m]",
   "skillOverrides": {
     "docs-with-mermaid": "off",
     "cco": "off",
@@ -121,7 +120,7 @@
     "activity-detective@netresearch-marketplace": true,
     "netresearch-gitlab@netresearch-marketplace": true,
     "netresearch-jira@netresearch-marketplace": true,
-    "tempo-timesheet-sync@netresearch-marketplace": true,
+    "tempo-timesheet-sync@netresearch-marketplace": false,
     "skill-repo@netresearch-claude-code-marketplace": true,
     "agent-harness@netresearch-claude-code-marketplace": false
   },
@@ -137,13 +136,15 @@
       "source": {
         "source": "github",
         "repo": "netresearch/claude-code-marketplace"
-      }
+      },
+      "autoUpdate": true
     },
     "netresearch-marketplace": {
       "source": {
         "source": "git",
         "url": "git@git.netresearch.de:coding-ai/marketplace.git"
-      }
+      },
+      "autoUpdate": true
     },
     "agent-browser": {
       "source": {
@@ -160,6 +161,7 @@
     }
   },
   "language": "english",
+  "feedbackDrafts": "off",
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
