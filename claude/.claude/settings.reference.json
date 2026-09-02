@@ -55,9 +55,59 @@
       "Bash(bash -c *)",
       "Bash(zsh -c *)",
       "Bash(eval *)",
-      "Bash(exec *)"
+      "Bash(exec *)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.gnupg/**)",
+      "Edit(~/.env.jira)",
+      "Bash(* .env*)",
+      "Bash(*/.env*)",
+      "Bash(*.env.jira*)",
+      "Bash(*.ssh/*)",
+      "Bash(*.aws/*)",
+      "Bash(*.gnupg/*)",
+      "Bash(python3 *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(pip3 install *)",
+      "Bash(git push --no-verify*)",
+      "Bash(git push * --no-verify*)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "ask": [
+      "Bash(glab mr merge *)",
+      "Bash(glab mr close *)",
+      "Bash(glab mr rebase *)",
+      "Bash(glab * delete *)",
+      "Bash(glab api * DELETE *)",
+      "Bash(glab api * DELETE)",
+      "Bash(glab repo archive *)",
+      "Bash(glab auth login *)",
+      "Bash(glab auth logout *)",
+      "Bash(ddev delete *)",
+      "Bash(ddev clean *)",
+      "Bash(ddev poweroff *)",
+      "Bash(ddev stop --remove-data*)",
+      "Bash(ddev stop * --remove-data*)",
+      "Bash(ddev snapshot restore *)",
+      "Bash(ddev import-db *)",
+      "Bash(ddev import-files *)",
+      "Bash(make behat-install *)",
+      "Bash(make deploy *)",
+      "Bash(make migrate *)",
+      "Bash(make seed *)",
+      "Bash(make install *)",
+      "Bash(make reset *)",
+      "Bash(make destroy *)",
+      "Bash(make purge *)",
+      "Bash(brew upgrade *)",
+      "Bash(brew uninstall *)",
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * -f *)",
+      "Bash(git push * -f)"
+    ]
   },
   "model": "fable[1m]",
   "skillOverrides": {
@@ -74,21 +124,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "dippy"
-          },
-          {
-            "type": "command",
             "command": "bash /home/sebastian/.claude/hooks/ide-first.sh",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "dippy"
           }
         ]
       }

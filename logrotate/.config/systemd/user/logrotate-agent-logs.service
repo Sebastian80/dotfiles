@@ -1,5 +1,5 @@
 [Unit]
-Description=Rotate agent logs (dippy audit, Claude Code hook approvals)
+Description=Rotate agent logs (Claude Code hook approvals)
 
 [Service]
 Type=oneshot

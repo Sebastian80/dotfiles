@@ -126,7 +126,7 @@
     {
       "id": 11,
       "prompt": "create a new empty PHP class Acme\\PricingBundle\\Util\\PriceRounder with a namespace declaration and nothing else in it",
-      "expected_output": "A plain new file with no cross-file consequences. Claude's Write tool is the efficient choice; ide_create_file is gated behind a dippy ask and buys nothing here. Either is defensible, but reaching for the gated tool without a reason is not.",
+      "expected_output": "A plain new file with no cross-file consequences. Claude's Write tool is the efficient choice; ide_create_file goes through the auto-mode classifier and buys nothing here. Either is defensible, but reaching for the gated tool without a reason is not.",
       "files": [],
       "expectations": [
         "Created the file (Write preferred; ide_create_file acceptable if justified)",

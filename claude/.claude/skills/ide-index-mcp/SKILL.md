@@ -55,8 +55,8 @@ and `Edit` does not:
 - `ide_optimize_imports` / `ide_reformat_code` — apply project code style
 
 For a local text change with no such consequence, `Edit` is the right tool and the cheaper one:
-`ide_create_file` and `ide_replace_text_in_file` take an arbitrary path, so they sit behind a dippy
-`ask` prompt and bypass the path-based deny rules that protect `Edit`.
+`ide_create_file` and `ide_replace_text_in_file` take an arbitrary path, so they bypass the path-based
+deny rules that protect `Edit` and are judged by the auto-mode classifier instead.
 
 ## Project Lifecycle & Multi-Project
 
