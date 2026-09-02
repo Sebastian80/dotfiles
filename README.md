@@ -30,12 +30,11 @@ dotfiles/
 │       ├── CLAUDE.md       # Global instructions (critical rules, collaboration)
 │       ├── rules/          # Modular topic-specific rules (git, testing, python, ...)
 │       ├── commands/       # Custom slash commands (pr-draft, pr-review, refactor)
-│       ├── skills/         # Custom skills (cco, dippy-config, docs-with-mermaid,
+│       ├── skills/         # Custom skills (cco, docs-with-mermaid,
 │       │                   #   ide-index-mcp, python-cosmic, python-sqlalchemy-core,
 │       │                   #   python-sqlalchemy-cosmic)
 │       ├── hooks/          # Event hooks
 │       └── statusline-omp.sh  # oh-my-posh statusline
-├── dippy/          # Dippy permission hook config (bash parser + steering)
 ├── git/            # Git configuration
 ├── gtk/            # GTK theme configuration
 ├── ghostty/        # Ghostty terminal
@@ -115,7 +114,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -424,10 +423,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # 4. Deploy packages
-stow bash bin claude dippy git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile
