@@ -31,7 +31,7 @@ Execute a run configuration in debug or run mode.
 | `name` | string | **Yes** | | Configuration name (exact match) |
 | `mode` | string | No | `"debug"` | `"debug"` or `"run"` |
 
-**Returns:** `status`, `configurationName`, `mode`, `message`
+**Returns:** `status`, `configurationName`, `mode`, `message`, `sessionId` — null in `run` mode, since no debugger attaches (upstream 5.0.2 doc; not independently verified here).
 
 ### `list_debug_sessions`
 List all active debug sessions.
@@ -78,7 +78,7 @@ Get comprehensive session state in a single call. **Use this as the first inspec
 
 **Returns:**
 - `sessionId`, `name`, `state` ("running", "paused", "stopped")
-- `pausedReason` ("breakpoint", "step", "exception", "pause") - null if running
+- `pausedReason` - null if running. **The four schema values are not actually distinguished**: detection is a pause-site heuristic that yields `"breakpoint"` or `"step"` in practice, and a manual pause reports `"step"`. Never branch on `"exception"` or `"pause"` — check `breakpointHit` and the stack instead (upstream 5.0.2 doc).
 - `currentLocation` (file, line, className, methodName) - null if not paused
 - `breakpointHit` (breakpoint info) - null if not hit
 - `stackSummary[]` (index, file, line, className, methodName)
@@ -100,13 +100,15 @@ List all breakpoints in the project.
 
 **Returns:** `breakpoints[]` (id, type, file, line, enabled, condition, logMessage, suspendPolicy, hitCount, temporary), `totalCount`, `enabledCount`
 
+**`hitCount` is always `0`** — the platform exposes no hit-count accessor for language-agnostic breakpoints, so the field is present but never populated. To count hits, use a tracepoint (`suspend_policy: "none"` + `log_message`) instead of reading it back (upstream 5.0.2 doc).
+
 ### `set_breakpoint`
 Set a line breakpoint with optional conditions or log messages.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `project_path` | string | No | | Project path |
-| `file_path` | string | **Yes** | | **Absolute** file path |
+| `file_path` | string | **Yes** | | **Absolute** file path. Files inside a JAR work via the `!/` separator (`/path/lib-sources.jar!/com/example/Foo.kt`) — JVM only, irrelevant for PHP |
 | `line` | integer | **Yes** | | 1-based line number (min: 1) |
 | `condition` | string | No | | Boolean expression (e.g., `"count > 10"`) |
 | `log_message` | string | No | | Message with `{expression}` placeholders |
