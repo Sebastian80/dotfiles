@@ -80,6 +80,9 @@ fi
 #                    Used by: glab CLI, Composer (via COMPOSER_AUTH)
 #   COMPOSER_AUTH  - Generated from GitHub + GitLab + Magento tokens in proper JSON format
 #                    Format: {"github-oauth":{...},"gitlab-token":{...},"http-basic":{"repo.magento.com":{...}}}
+#                    Plus "bearer":{"$COMPOSER_SATIS_HOST":"<gitlab token>"} when that variable is
+#                    set (see ~/.bash/local.bash) — an internal Satis behind GitLab Pages access
+#                    control needs it, and reuses the GitLab PAT rather than a separate secret.
 #
 # Usage:
 #   load_bw_secrets         # Load and display status
@@ -169,12 +172,21 @@ load_bw_secrets() {
             composer_auth+='"http-basic":{"repo.magento.com":{"username":"'"$magento_user"'","password":"'"$magento_pass"'"}}'
         fi
 
+        # Bearer auth for the internal Satis, which now sits behind GitLab Pages access control.
+        # Unauthenticated it answers with the GitLab sign-in page, composer reports
+        # "does not contain valid JSON", and the repository silently falls back to a stale cache.
+        # It takes the same GitLab PAT as gitlab-token above — there is no separate secret.
+        if [[ -n "$gitlab_token" && "$gitlab_token" != "null" && -n "$COMPOSER_SATIS_HOST" ]]; then
+            [[ "$composer_auth" != '{' ]] && composer_auth+=','
+            composer_auth+='"bearer":{"'"$COMPOSER_SATIS_HOST"'":"'"$gitlab_token"'"}'
+        fi
+
         composer_auth+='}'
 
         export COMPOSER_AUTH="$composer_auth"
         # Use umask in subshell to ensure secure permissions from creation (no race window)
         (umask 077; echo "$composer_auth" >| "/run/user/${UID:-$(id -u)}/bw-composer-auth")
-        [[ "$quiet" == false ]] && echo "   📦 COMPOSER_AUTH loaded (GitHub + GitLab + Magento)"
+        [[ "$quiet" == false ]] && echo "   📦 COMPOSER_AUTH loaded (GitHub + GitLab + Magento${COMPOSER_SATIS_HOST:+ + Satis})"
     fi
 
     if [[ "$quiet" == false ]]; then
