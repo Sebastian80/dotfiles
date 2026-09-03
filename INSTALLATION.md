@@ -552,13 +552,7 @@ After completing installation:
    ```
    Installs Node.js 20 (default) + 22 via fnm, plus Claude Code CLI.
 
-7. **Install UV tools**:
-   ```bash
-   ./scripts/setup/install-uv-tools.sh
-   ```
-   Installs claude-code-tools (provides tmux-cli, aichat, etc.)
-
-8. **Consider future enhancements**:
+7. **Consider future enhancements**:
    - Add pre-commit hooks for secret scanning
    - Set up GitHub Actions for testing
    - Add more tool configs (nvim, etc.)

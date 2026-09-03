@@ -24,7 +24,6 @@ dotfiles/
 │   │   ├── install-fonts.sh   # Nerd Fonts installation
 │   │   ├── install-ghostty.sh # Ghostty terminal installation
 │   │   ├── install-node.sh    # Node.js + npm globals
-│   │   ├── install-uv-tools.sh # UV Python tools
 │   │   └── uninstall.sh       # Remove all dotfiles and installed components
 │   │
 │   ├── maintenance/
@@ -189,32 +188,6 @@ cd ~/dotfiles
 | Package | Command | Description |
 |---------|---------|-------------|
 | @anthropic-ai/claude-code | `claude` | AI coding assistant CLI |
-
----
-
-#### install-uv-tools.sh
-**Purpose:** Install Python CLI tools via uv
-
-**What it does:**
-1. Displays package manifest with all provided commands
-2. Installs packages via uv tool
-3. Verifies installation
-
-**Usage:**
-```bash
-cd ~/dotfiles
-./scripts/setup/install-uv-tools.sh
-```
-
-**UV Tool Packages:**
-| Package | Command | Description |
-|---------|---------|-------------|
-| claude-code-tools | `tmux-cli` | Terminal multiplexer CLI control |
-| | `aichat` | Claude Code session management |
-| | `env-safe` | Safe .env inspection (no secret exposure) |
-| | `gdoc2md` | Google Docs to Markdown |
-| | `md2gdoc` | Markdown to Google Docs |
-| | `vault` | Encrypted .env backup/sync |
 
 ---
 
@@ -563,7 +536,6 @@ dotfiles/
 | Install Docker | `./scripts/setup/install-docker.sh` |
 | Install fonts | `./scripts/setup/install-fonts.sh` |
 | Install Node.js | `./scripts/setup/install-node.sh` |
-| Install UV tools | `./scripts/setup/install-uv-tools.sh` |
 | Uninstall all | `./scripts/setup/uninstall.sh` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
 | Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |
