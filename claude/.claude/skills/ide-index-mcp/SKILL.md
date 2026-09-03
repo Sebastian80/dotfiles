@@ -17,9 +17,15 @@ The IDE understands your code structurally. Grep sees text. When you need to fin
 
 **The tool list is not documented here.** Each `mcp__phpstorm-index__*` tool carries its own
 description, parameters and examples, and that is the authoritative surface — it changes when
-the plugin updates or you enable tools in Settings → Tools → Index MCP Server. A table in this
-file can only go stale: one here once listed 37 tools while the server served 45. Read the tool
-schemas; this file covers what they don't say.
+the plugin updates or you enable tools in Settings → Tools → Index MCP Server → **Exposed Tools**
+(its own child page since plugin 5.9.3; the main page keeps port, history, projects and lifecycle).
+A table in this file can only go stale: one here once listed 37 tools while the server served 45.
+Read the tool schemas; this file covers what they don't say.
+
+**A tool the server withholds and one it never registered are indistinguishable** — both answer
+`Tool <name> not found`. The disabled set persists application-wide in
+`~/.config/JetBrains/<Product><Version>/options/mcp-plugin.xml` under `disabledTools`, so read that
+file to tell the two apart; toggle in the UI, since the running IDE rewrites it on exit.
 
 ## Before you trust a result
 
@@ -53,6 +59,11 @@ and `Edit` does not:
 - `ide_move_file` — fixes PSR-4 namespace and imports
 - `ide_structural_search_replace` — AST-aware, so it will not match inside comments or strings
 - `ide_optimize_imports` / `ide_reformat_code` — apply project code style
+
+`ide_edit_member`, `ide_insert_member` and `ide_replace_member` look like the structural way to do
+exactly this, and are **Java/Kotlin only**: PhpStorm exposes all three, and every PHP file gets
+*"Member editing not supported for PHP. Supported: Java, Kotlin."* Don't route PHP edits through
+them — `Edit`, or `ide_change_signature` when call sites must follow.
 
 For a local text change with no such consequence, `Edit` is the right tool and the cheaper one:
 `ide_create_file` and `ide_replace_text_in_file` take an arbitrary path, so they bypass the path-based
@@ -140,9 +151,12 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 2. `ide_call_hierarchy` with `direction: "callers"` — full call chain upward
 
 ### Understanding what X is
-1. `ide_find_definition` — jump to source
-2. `ide_type_hierarchy` — inheritance chain (prefer `file`+`line`+`column` over `className`)
-3. `ide_find_super_methods` — what interface/base method it implements
+1. `ide_symbol_info` — resolved signature and doc comment without reading the file. In PHP it
+   degrades to the raw declaration line (`parameters`, `returnType`, `visibility` all null), and the
+   `symbol` form wants `\App\Entity\Plant::getName` — not the `#` syntax its own schema shows.
+2. `ide_find_definition` — jump to source
+3. `ide_type_hierarchy` — inheritance chain (prefer `file`+`line`+`column` over `className`)
+4. `ide_find_super_methods` — what interface/base method it implements
 
 ### Finding a class/file/symbol
 1. `ide_find_class` — classes by name (supports CamelCase: `USvc` → `UserService`)
@@ -161,8 +175,11 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 6. `ide_reformat_code` — apply project code style
 
 ### Checking for problems
-1. `ide_diagnostics` — errors, warnings, quick fixes
-2. `ide_build_project` — full project build to surface compilation/type errors
+1. `ide_diagnostics` — one file: errors, warnings, and the quick fixes available at a position
+2. `ide_project_diagnostics` — many files or the whole project. It carries a fail-closed coverage
+   contract the single-file tool does not: an empty `problems` list is a clean signal **only** when
+   `complete: true`. Check that flag and `incompleteFiles` before reporting "no problems".
+3. `ide_build_project` — full project build to surface compilation/type errors
 
 ### Finding implementations
 1. `ide_find_implementations` — cursor on interface/abstract class/method

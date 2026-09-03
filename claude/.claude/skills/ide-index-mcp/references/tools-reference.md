@@ -5,10 +5,11 @@ Complete parameter reference for all IDE MCP tools. All tools use JSON-RPC via M
 ## Contents
 
 - [Common Parameters](#common-parameters) · [Response Format](#response-format)
-- [Navigation Tools](#navigation-tools) — `ide_find_references`, `ide_find_definition`, `ide_find_class`, `ide_find_file`, `ide_search_text`, `ide_find_implementations`, `ide_find_symbol`, `ide_find_super_methods`, `ide_type_hierarchy`, `ide_call_hierarchy`, `ide_file_structure`, `ide_read_file`
-- [Intelligence Tools](#intelligence-tools) — `ide_diagnostics`
+- [Navigation Tools](#navigation-tools) — `ide_find_references`, `ide_find_definition`, `ide_find_class`, `ide_find_file`, `ide_search_text`, `ide_find_implementations`, `ide_find_symbol`, `ide_find_super_methods`, `ide_type_hierarchy`, `ide_call_hierarchy`, `ide_file_structure`, `ide_read_file`, `ide_symbol_info`
+- [Intelligence Tools](#intelligence-tools) — `ide_diagnostics`, `ide_project_diagnostics`
 - [Refactoring Tools](#refactoring-tools) — `ide_refactor_rename`, `ide_move_file`, `ide_refactor_safe_delete`, `ide_optimize_imports`, `ide_reformat_code`
-- [Project Tools](#project-tools) — `ide_index_status`, `ide_sync_files`, `ide_build_project`
+- [Structural Editing Tools](#structural-editing-tools-javakotlin-only) — `ide_edit_member`, `ide_insert_member`, `ide_replace_member`
+- [Project Tools](#project-tools) — `ide_index_status`, `ide_sync_files`, `ide_build_project`, `ide_run_tests`, `ide_create_module`, `ide_link_build_system`
 - [Editor Tools](#editor-tools) — `ide_get_active_file`, `ide_open_file`
 - [Project Lifecycle & Multi-Project Tools](#project-lifecycle--multi-project-tools) — `ide_project_status`, `ide_open_project`, `ide_close_project`, `ide_enroll_all_projects`, `ide_get_project_modes`, `ide_set_project_mode`, `ide_set_all_project_modes`, `ide_release_project`, `ide_release_all_projects`, `ide_set_power_save_mode`, `ide_lifecycle_log`, `ide_set_lifecycle_log_file`, `ide_reload_project`, `ide_install_plugin`, `ide_restart`
 
@@ -242,6 +243,31 @@ Read file content by path or qualified name, including library/jar sources.
 
 ---
 
+### ide_symbol_info (disabled by default)
+Resolved signature and documentation of a symbol, without reading the file. Use before changing a call site or checking what a parameter accepts — `ide_find_definition` returns source text with unresolved short type names and no doc comment.
+
+**Target (mutually exclusive):** `file`+`line`+`column` OR `language`+`symbol`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file` | string | conditional | Relative path; required for position-based lookup (addresses overloads) |
+| `line` / `column` | integer | conditional | 1-based, with `file` |
+| `language` | enum | conditional | `TypeScript`, `JavaScript`, `PHP` — required with `symbol` |
+| `symbol` | string | conditional | Fully-qualified symbol reference |
+| `includeDoc` | boolean | no | Include the rendered doc comment (default true) |
+| `maxDocLength` | integer | no | Truncation budget, default 4000, max 20000 |
+| `project_path` | string | no | Project root path |
+
+**Returns**: `{ name, kind, qualifiedName, signature, signatureSource, parameters, returnType, typeParameters, thrownTypes, modifiers, visibility, containingDeclaration, documentation, documentationTruncated, file, line, column, language }`
+
+**The `symbol` syntax in the tool's own schema is Java-shaped and rejected for PHP.** The schema documents `com.example.ClassName#memberName`; PHP needs a leading backslash and `::`, exactly as the five navigation tools do — `\App\Entity\Plant::getName`. The `#` form fails fast with a format error that lists the correct PHP examples, so the mistake is cheap, but do not copy the schema example.
+
+**For PHP the structured fields are all null.** `signatureSource` comes back `element_text` with `parameters`, `returnType`, `typeParameters`, `thrownTypes`, `modifiers` and `visibility` all `null`; only `signature` (the raw declaration line), `documentation`, `qualifiedName`, `containingDeclaration` and the location are populated. Full resolution (`signatureSource: "java_psi"`, structured `parameters`) is Java-only; other languages fall back to what Quick Documentation renders. Verified 2026-09-03 on plugin 5.9.4 / PhpStorm 2026.2.1: `\App\Entity\Plant::getName` returned `signature: "public function getName(): ?string"` and nothing structured.
+
+**Do not feed `qualifiedName` back in as `symbol`.** It is rendered in a mixed dialect — `\App\Entity\Plant.getName` for the PHP method above, with `containingDeclaration: "Entity.Plant"` — and neither string is valid input. Build the `symbol` argument yourself from the namespace and member name.
+
+---
+
 ## Intelligence Tools
 
 ### ide_diagnostics
@@ -259,6 +285,30 @@ Analyze a file for errors, warnings, and available quick fixes/intentions.
 **Returns**: `{ problems: [{message, severity, line, column, source}], intentions: [{name, description, familyName}], problemCount, intentionCount, analysisFresh, analysisTimedOut, analysisMessage }`
 **Notes**: Open files use fresh daemon highlights. Closed files use public batch analysis, so `WEAK_WARNING` results and quick-fix intentions may be less complete unless the file is already open in an editor.
 **Severity levels**: `ERROR`, `WARNING`, `WEAK_WARNING`
+
+---
+
+### ide_project_diagnostics
+Analyze many files — up to the whole project, including files no editor has open — for errors and warnings. The multi-file counterpart to `ide_diagnostics`, which stays the right tool for one file plus its quick-fix intentions.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `paths` | string[] | no | Files/directories relative to project root; omit for every content root |
+| `severity` | enum | no | `all` (default), `errors`, `warnings` |
+| `maxFiles` | integer | no | Default 1000, max 10000 |
+| `maxProblems` | integer | no | Default 1000, max 5000 (`problemCount` keeps counting past it) |
+| `timeoutSeconds` | integer | no | Whole-analysis budget, default 600, max 3600 |
+| `waitSeconds` | integer | no | How long this call blocks, default 45, max 55 |
+| `analysisId` | string | no | Poll a run that returned `{"status": "running"}`; excludes every other parameter |
+| `project_path` | string | no | Project root path |
+
+**Returns**: `{ complete, status, filesConsidered, filesAnalyzed, filesAnalyzedOpenDaemon, filesAnalyzedClosedBatch, filesTimedOut, filesFailed, filesSkipped, filesNotAnalyzed, incompleteFiles, problems, problemCount, errorCount, warningCount, durationMs, analysisMessage }`
+
+**An empty `problems` list means "clean" only when `complete: true`.** Every file in scope lands in exactly one state — analyzed, `timed_out`, `failed`, `skipped`, `not_analyzed` — and `maxFiles`/`timeoutSeconds` cutting the run short still returns `problems: []`. Read `complete` and `incompleteFiles` before reporting a clean bill of health; this is the fail-closed contract `ide_diagnostics` does not have.
+
+**Closed files are analyzed in batch mode** (`filesAnalyzedClosedBatch`), which reports errors and warnings but no weak warnings and no editor-only annotators — the same asymmetry as `ide_diagnostics`. Only files open in an editor get fresh daemon highlights.
+
+**Only one analysis runs per project.** A call whose `waitSeconds` budget expires returns `{"status": "running", "analysisId": ...}` while analysis continues in the IDE; poll with that id rather than starting a second run. Verified 2026-09-03 on a single PHP file: `complete: true`, one file via `closed_batch`, 6.1 s.
 
 ---
 
@@ -339,6 +389,28 @@ Reformat code per project style (.editorconfig, IDE settings). Equivalent to Ctr
 
 ---
 
+## Structural Editing Tools (Java/Kotlin only)
+
+`ide_edit_member`, `ide_insert_member` and `ide_replace_member` edit a class member through the PSI
+instead of by text range: replace a whole declaration, insert a member at a structural position
+(`before`/`after` an anchor member, or `first`/`last`), or swap just a method body / field
+initializer. All three take `file` + `member` (+ `class`, `line`, `parameterCount` to disambiguate)
+and reformat the changed range by default.
+
+**They are exposed in PhpStorm but refuse every PHP file**, with:
+
+```
+Member editing not supported for PHP. Supported: Java, Kotlin.
+```
+
+Verified 2026-09-03 on plugin 5.9.4 / PhpStorm 2026.2.1 — all three, against a freshly synced class
+in `src/`. The tools appearing in `tools/list` says nothing about language support; the refusal
+comes from the tool, not from the file. In a PHP project use `Edit`, or `ide_change_signature` when
+call sites must follow. There is no PHP equivalent of member-level structural editing in this
+plugin.
+
+---
+
 ## Project Tools
 
 ### ide_index_status
@@ -374,6 +446,52 @@ Build project using IDE's build system (JPS, Gradle, Maven).
 
 **Returns**: `{ success, aborted, errors?, warnings?, buildMessages: [{message, file, line, column, severity}], truncated, rawOutput?, durationMs }`
 Note: `errors`/`warnings` are `null` when no messages were captured (not 0).
+
+---
+
+### ide_run_tests (disabled by default)
+Run tests through the IDE's run-configuration infrastructure; returns structured per-test results.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `target` | string | conditional | Run-config name, or a fully-qualified class / `Class#method`. Exactly one of `target`/`runId`. |
+| `runId` | string | conditional | From a previous `{"status": "running"}` response — keeps waiting instead of starting a new run. |
+| `waitSeconds` | integer | no | Max seconds this call blocks before returning `running` (default 45, max 55) |
+| `timeoutSeconds` | integer | no | Max seconds the run may take, counted from test-process start (default 120) |
+| `activateToolWindow` | boolean | no | Focus the Run tool window (default false) |
+| `project_path` | string | no | For workspace sub-projects |
+
+**Returns**: `{ success, timedOut, noTestsFound, exitCode, passed, failed, errors, total, output, tests: [{name, status, errorMessage, stackTrace, output}] }`
+
+**A PHP class FQN works as `target`, contrary to the documentation.** Upstream's `USAGE.md` and the tool's own description both state that creating a run config from a class/method FQN is Java/Kotlin-only, and that PHP must pass an existing run-config name. That is false on plugin 5.9.4 / PhpStorm 2026.2: a bare PHP class FQN runs, including for a class that had no run config beforehand. Verified on an Oro project (PHPUnit 9.6.34 inside the DDEV container) with both a vendor test class and one from the project's own `src/`. The `Class#method` form was not tested for PHP — assume nothing there.
+
+**Each FQN run leaves a run config behind**, named after the class. They accumulate under Run → Edit Configurations. Harmless, but they are a side effect of your own calls: never read the presence of such a config as evidence that one already existed.
+
+---
+
+### ide_create_module
+Add a directory to the project as an IntelliJ module with a content root, so files under it get indexed and covered by the navigation tools. Intended for layouts the IDE does not derive from a build file (plain directories, TypeScript trees).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | yes | **Absolute** directory path to add as a content root |
+| `name` | string | no | Module name (defaults to directory name) |
+| `excludes` | string[] | no | Relative dirs to mark excluded (e.g. `["node_modules", "dist"]`) |
+| `project_path` | string | no | Which open project window to add it to |
+
+**Not needed for a composer project** — PhpStorm already treats the project root as a content root. Reach for it only when `ide_find_*` comes back empty for a directory that exists on disk *and* the [Troubleshooting](../SKILL.md#troubleshooting) row for missing content roots applies. Untested here: it mutates `.idea/` project structure, so validate on a scratch project rather than a live one.
+
+### ide_link_build_system
+Link an unlinked Maven or Gradle project — the equivalent of clicking "Load Maven/Gradle Project" in the IDE notification bar. Use when `ide_reload_project` reports a build file on disk that is not linked.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | no | Absolute project directory; defaults to the resolved project |
+| `linkId` | string | no | Poll a link started by an earlier call; mutually exclusive with `path` |
+| `waitSeconds` | integer | no | Default 45, max 55 |
+| `project_path` | string | no | Project root path |
+
+**JVM-only, and a no-op you can safely ignore in PHP work.** Verified 2026-09-03 against a Symfony project: `No recognized build file found in <path>, or build system plugin not available.` `composer.json` is not a recognized build file — same story as `ide_reload_project`.
 
 ---
 
