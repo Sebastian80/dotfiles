@@ -39,6 +39,43 @@ shaped these rules):
   build fixtures from raw payloads; every live-verification pass in that round
   caught a bug that green unit tests had missed.
 
+## Permissions and auto mode — measured behaviour
+
+All of this was measured with a throwaway bare repo plus clone under the session scratchpad, after a
+run of wrong assumptions cost an evening. Do not re-derive it from the schema; the schema does not say
+most of it.
+
+- **`git -C <dir> …` bypasses every git permission rule.** Rules match a command prefix, so a command
+  starting `git -C` matches none of the `Bash(git push …)` entries. Measured: `git -C <dir> push origin
+  main` ran while `cd <dir> && git push origin main` was denied by the very rule meant to stop it. Use
+  `git -C` for read-only git only — never for push, and **never** as a way around a refusal.
+- **A rule needs one entry per flag spelling.** `Bash(git push --force:*)` did not cover
+  `--force-with-lease`; `--delete` does not cover `git push origin :branch`. The mechanism is not
+  established (the prompt attributed the match to a bare-prefix glob, which contradicts a
+  word-boundary theory), so rely on the observation, not on a story about pattern compilation.
+- Follows from those two: **a prefix rule cannot guarantee anything**, because every command has
+  spellings you did not enumerate. Guarantees belong in `autoMode` (`soft_deny`/`hard_deny`), which is
+  judged semantically. Permission rules are for the common shape and for cutting noise.
+- **`permissions.allow` is the only list that removes protection** — an allow rule suspends the
+  classifier for that command (`autoMode.classifyAllShell` defaults false). Auditing what is in `allow`
+  protects more than adding denies. The harness drops *some* allow rules itself, logging
+  `Ignoring dangerous permission … (bypasses classifier)`, but it is not a safety net: it flagged
+  `Bash(python -m pytest:*)` and did **not** flag `Bash(rm:*)` or `Bash(find:*)`.
+- Prefer `ask` over `deny` for anything that is sometimes legitimate. A deny forces a copy-paste
+  hand-off; an ask is one click. And a rule cannot see which repo it is in, so a deny meant for one
+  project's `main` silently governs every repo touched in that session.
+- **Settings edits apply mid-session — no restart.** The harness watches the settings files
+  (`Watching for changes in setting files …` in the debug log). Proven both ways: adding a deny made the
+  command fail immediately, removing it made the same command run again.
+- **A safe probe cannot test the auto-mode classifier.** It is context-aware, so anything harmless
+  enough to run is harmless enough for it to allow — `rm -rf` of a directory it just watched being
+  created, a push to a bare repo in `/tmp`, `composer update` where there is no `composer.json`. String
+  rules are testable this way; classifier behaviour is not. A green probe there proves nothing.
+- **`claude -p "reply ok" --debug-file /tmp/x.log < /dev/null`** is the instrument for harness
+  questions — it writes the harness's own log for grepping. It does *not* contain the classifier prompt,
+  so it cannot answer whether project-level `autoMode` is read or whether those arrays merge across
+  settings levels. That question is still open.
+
 ## Task tracking
 
 - Never delete tasks without Sebastian's explicit approval.
