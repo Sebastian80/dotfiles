@@ -108,7 +108,7 @@
       "Bash(git push * -f)"
     ]
   },
-  "model": "fable[1m]",
+  "model": "opus[1m]",
   "skillOverrides": {
     "docs-with-mermaid": "off",
     "cco": "off"
@@ -135,7 +135,6 @@
     "skill-creator@claude-plugins-official": true,
     "superpowers@superpowers-dev": true,
     "codex@openai-codex": true,
-    "git-workflow@netresearch-claude-code-marketplace": true,
     "security-audit@netresearch-claude-code-marketplace": true,
     "german-technical-writing@netresearch-claude-code-marketplace": true,
     "jira-integration@netresearch-claude-code-marketplace": true,
