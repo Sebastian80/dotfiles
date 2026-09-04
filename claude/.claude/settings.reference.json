@@ -111,10 +111,7 @@
   "model": "fable[1m]",
   "skillOverrides": {
     "docs-with-mermaid": "off",
-    "cco": "off",
-    "python-cosmic": "off",
-    "python-sqlalchemy-core": "off",
-    "python-sqlalchemy-cosmic": "off"
+    "cco": "off"
   },
   "hooks": {
     "PreToolUse": [
