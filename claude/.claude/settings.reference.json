@@ -21,9 +21,7 @@
     "allow": [
       "WebFetch",
       "WebSearch",
-      "Skill",
-      "Edit",
-      "Write"
+      "Skill"
     ],
     "deny": [
       "Read(.env*)",
