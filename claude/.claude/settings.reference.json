@@ -100,7 +100,11 @@
       "Bash(git push * -f *)",
       "Bash(git push * -f)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "~/workspace",
+      "/tmp/claude-1001"
+    ]
   },
   "model": "claude-fable-5-1",
   "hooks": {
