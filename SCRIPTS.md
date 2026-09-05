@@ -28,7 +28,8 @@ dotfiles/
 │   │
 │   ├── maintenance/
 │   │   ├── verify-installation.sh  # Verify dotfiles installation
-│   │   └── verify-auth.sh          # Verify authentication setup
+│   │   ├── verify-auth.sh          # Verify authentication setup
+│   │   └── claude-settings-sync.sh # Sync live Claude settings to the tracked reference
 │   │
 │   └── utils/
 │       └── manual-backup.sh        # Manual backup utility
@@ -271,6 +272,21 @@ make verify-auth
 - Troubleshooting authentication issues
 - Verifying Bitwarden integration
 - Checking token availability
+
+---
+
+#### claude-settings-sync.sh
+**Purpose:** Keep the tracked `claude/.claude/settings.reference.json` equal to the live, gitignored `~/.claude/settings.json`
+
+**Usage:**
+```bash
+./scripts/maintenance/claude-settings-sync.sh          # show drift, exit 1 if any
+./scripts/maintenance/claude-settings-sync.sh --apply  # copy live → reference
+```
+
+**When to use:**
+- After changing Claude Code settings (plugins, permissions, auto mode, model)
+- In a session retro, before committing dotfiles
 
 ---
 

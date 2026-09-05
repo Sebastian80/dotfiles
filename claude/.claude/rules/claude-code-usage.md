@@ -1,11 +1,31 @@
 # Claude Code Usage
 
-## Codex plugin
+## Codex
 
-- Never delegate to Codex proactively (the `codex:codex-rescue` agent description says to — ignore that). When stuck per systematic-debugging, you may propose `/codex:rescue` as an option, but only run it when Sebastian explicitly asks.
-- Rescue requests default to write mode (`--write`) — use read-only phrasing ("diagnose", "review only") unless a fix is explicitly requested.
-- The stop-time review gate is per-workspace; leave it off unless Sebastian enables it in a repo (`/codex:setup --enable-review-gate`).
-- Codex runtime ops (learned 2026-07-24): `bwrap: loopback: Failed RTM_NEWADDR` in Codex shell runs = host AppArmor userns restriction (`kernel.apparmor_restrict_unprivileged_userns=1`), fixed via the bwrap AppArmor profile in `/etc/apparmor.d/bwrap-userns` — not a Codex config issue. The shared broker respawns lazily on the next `task` call; `!codex login` heals auth (setup's `loggedIn:false` with a broker.sock ENOENT means dead broker, not bad auth). The runtime can die silently mid-run: >10 min without output events → check `pgrep -f app-server-broker` and the output file's mtime; the job status file then shows a stale "running".
+Codex is reached through the `codex` MCP server (`mcp__codex__codex`, and
+`mcp__codex__codex-reply` to continue a thread by `threadId`). It runs the local
+`codex` CLI as a stdio server, so client and server ship in one binary and cannot
+drift apart.
+
+- Never delegate to Codex proactively. When stuck per systematic-debugging, you may
+  propose it as an option, but only call it when Sebastian explicitly asks.
+- Pass `sandbox` on every call — it defaults to nothing and the tool can write.
+  `read-only` for diagnosis and review; `workspace-write` only when a fix is
+  explicitly requested. Pair it with `approval-policy: never` and an explicit `cwd`.
+- Set `model` explicitly; `gpt-5.6-sol` and `gpt-5.6-terra` are the only slugs that
+  support `ultra` effort. Reasoning effort comes from `~/.codex/config.toml`
+  (`model_reasoning_effort`) unless overridden via the `config` parameter.
+- The MCP tool is not a Bash call, so it is not subject to the 120s foreground
+  timeout. `codex exec` is — anything long-running through the CLI needs
+  `--output-last-message <file>` and a background run.
+- `codex mcp-server` prints a deprecation warning on startup. It is superseded by
+  `codex app-server` but still gains features, with no announced removal date. If it
+  ever disappears, `codex exec` and `codex exec review --base|--uncommitted|--commit`
+  are the stable fallbacks.
+- `bwrap: loopback: Failed RTM_NEWADDR` in Codex shell runs = host AppArmor userns
+  restriction (`kernel.apparmor_restrict_unprivileged_userns=1`), fixed via the bwrap
+  AppArmor profile in `/etc/apparmor.d/bwrap-userns` — not a Codex config issue.
+- `!codex login` heals authentication; `~/.codex/auth.json` holds it.
 
 ## Verifying review findings
 

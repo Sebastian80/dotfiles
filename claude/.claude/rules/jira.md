@@ -24,8 +24,6 @@ Below is only what neither skill knows.
   `~/.bash/exports/jira.bash`, not `~/.env.jira`.
 - Never curl attachment URLs (needs credentials Claude must not read) — `jira-attachment.py` carries
   auth both ways.
-- Remote link (MR, job, pipeline) on a ticket: `utility/jira-weblink.py add KEY --url <url> --title
-  <title>`; `jira-link.py` is issue-to-issue only.
 
 ## Conventions
 
