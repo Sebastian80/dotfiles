@@ -36,6 +36,11 @@ mkdir -p "$T/c/src"
 # Project D: stub formatter that changes nothing.
 mkdir -p "$T/d/src" "$T/d/vendor/bin"; touch "$T/d/.php-cs-fixer.dist.php"
 printf '#!/usr/bin/env bash\nexit 0\n' > "$T/d/vendor/bin/php-cs-fixer"; chmod +x "$T/d/vendor/bin/php-cs-fixer"
+# Project E: .claude/format-file override (the "run it in the container" hook),
+# plus a host php-cs-fixer stub that must NOT run when the override exists.
+mkdir -p "$T/e/src" "$T/e/.claude" "$T/e/vendor/bin"; touch "$T/e/.php-cs-fixer.dist.php"
+printf '#!/usr/bin/env bash\necho "// via format-file" >> "$1"\n' > "$T/e/.claude/format-file"; chmod +x "$T/e/.claude/format-file"
+printf '#!/usr/bin/env bash\necho "// via host fixer" >> "$3"\n' > "$T/e/vendor/bin/php-cs-fixer"; chmod +x "$T/e/vendor/bin/php-cs-fixer"
 
 run_case() {  # label file want(reformatted|silent)
   local lbl=$1 file=$2 want=$3 got out before after
@@ -61,6 +66,13 @@ run_case "php file, config but no binary"          "$T/b/src/Foo.php"  silent
 run_case "php file, no config anywhere"            "$T/c/src/Foo.php"  silent
 run_case "php file, formatter changes nothing"     "$T/d/src/Foo.php"  silent
 run_case "non-code extension (.txt) ignored"       "$T/a/src/notes.txt" silent
+run_case "override: .claude/format-file rewrites"  "$T/e/src/Foo.php"  reformatted
+run_case "override: any extension goes to it"      "$T/e/src/x.twig"   reformatted
+if grep -q 'via host fixer' "$T/e/src/Foo.php"; then
+  echo "override must win over host fixer               -> BOTH RAN     want=override     FAIL"; fail=$((fail+1))
+else
+  echo "override must win over host fixer               -> override     want=override     ok"; pass=$((pass+1))
+fi
 
 # Missing file and empty input must be silent too.
 out=$(jq -nc '{tool_name:"Edit",tool_input:{file_path:"/nonexistent/x.php"}}' | bash "$HOOK" 2>/dev/null)
