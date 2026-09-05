@@ -215,6 +215,7 @@
   "language": "english",
   "feedbackDrafts": "off",
   "effortLevel": "high",
+  "workflowSizeGuideline": "small",
   "autoUpdatesChannel": "latest",
   "plansDirectory": ".claude/plan",
   "tui": "fullscreen",
