@@ -63,10 +63,6 @@
       "Bash(*.ssh/*)",
       "Bash(*.aws/*)",
       "Bash(*.gnupg/*)",
-      "Bash(python3 *)",
-      "Bash(python *)",
-      "Bash(pip install *)",
-      "Bash(pip3 install *)",
       "Bash(git push --no-verify*)",
       "Bash(git push * --no-verify*)"
     ],
