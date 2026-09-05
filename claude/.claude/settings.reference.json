@@ -69,7 +69,15 @@
       "Bash(*.aws/*)",
       "Bash(*.gnupg/*)",
       "Bash(git push --no-verify*)",
-      "Bash(git push * --no-verify*)"
+      "Bash(git push * --no-verify*)",
+      "Read(/run/user/**)",
+      "Bash(*/run/user/*)",
+      "Bash(bw)",
+      "Bash(bw *)",
+      "Bash(command bw *)",
+      "Bash(printenv)",
+      "Bash(printenv *)",
+      "Bash(env)"
     ],
     "ask": [
       "Bash(glab mr merge *)",
