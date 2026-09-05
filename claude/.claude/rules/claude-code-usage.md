@@ -81,6 +81,21 @@ Measured with a throwaway repo under the scratchpad, after an evening lost to as
   classifier out, a control case that must pass, and a `want=` per case. (The guide claimed `--add-dir`
   leaves the cd block in place; two runs showed the opposite.)
 
+## Workflow fan-out
+
+Nothing in the harness caps the agent count of a Workflow script. Verified against 2.1.261: the
+`workflowSizeGuideline` (small <5, medium <15, large <50) is prompt text, the size warning is a warning
+and is skipped entirely under ultracode, workflow concurrency is `min(16, CPUs-2)` and ignores
+`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`, and the only hard limits are 1000 agents per run and a `+Nk`
+budget directive in the prompt. (A research script asked five sweep agents for "every claim", got 254,
+and scheduled one verifier each; it had to be paused by hand.)
+
+- The number of agents a script can spawn must be a literal or a `slice()` to one — never the length of
+  an agent-produced list. Batch items per topic or file group instead of one agent per item.
+- State the worst-case agent count in the message that launches the workflow, and add a `+Nk` budget
+  when the run is unattended.
+- Teammates take no subagent concurrency slot either; the 10-agent env cap governs the Agent tool only.
+
 ## Task tracking
 
 - Never delete tasks without Sebastian's explicit approval.

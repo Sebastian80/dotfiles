@@ -4,12 +4,13 @@
 
 - If the project isn't in a git repo, ask permission before initializing one.
 - Stop and ask how to handle uncommitted changes or untracked files when starting work. Suggest committing existing work first.
-- Commit frequently throughout development, even if the high-level task isn't done.
+- Commit frequently throughout development, even if the high-level task isn't done. On a feature branch (or this dotfiles repo's `main`) that means committing without asking; pushing, tagging and anything on a shared branch always waits for an explicit go.
 - Starting work without a clear branch for the task? Create one before the first commit.
 - Never skip, evade, or disable a pre-commit hook.
 - In team repos, never push commits directly to main/release branches — not even the same SHA via a combined refspec (`git push origin HEAD:develop HEAD:main`). Commits land on feature branches or develop; main only ever follows develop via fast-forward as a separate, deliberate step (`git checkout main && git merge --ff-only develop && git push origin main` — `--ff-only` hard-fails on divergence instead of silently rewriting). A personal repo whose only long-lived branch is `main` (this dotfiles repo) commits on `main`.
 - Never `git add -A` unless you've just run `git status` — don't add random test files to the repo.
 - Never commit `.env` files, API keys, tokens, or credentials. If a file looks like it contains secrets, warn Sebastian before staging.
+- Data leaked into history (secrets, customer paths) gets a history rewrite with `git-filter-repo` as the default proposal, stated with its blast radius (force-push, every clone re-fetches). A forward-only commit removes nothing. Ask before rewriting; it changes shared history.
 - `**/CLAUDE.md` is globally gitignored (`~/.config/git/ignore`, deliberate). In repos, write `AGENTS.md` and add a local `CLAUDE.md` symlink — a created CLAUDE.md silently never stages, so never expect it to commit.
 
 ## Remotes and submodules
