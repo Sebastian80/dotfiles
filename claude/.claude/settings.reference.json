@@ -19,7 +19,21 @@
   },
   "permissions": {
     "allow": [
-      "WebFetch",
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:platform.claude.com)",
+      "WebFetch(domain:support.claude.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:docs.gitlab.com)",
+      "WebFetch(domain:gitlab.com)",
+      "WebFetch(domain:doc.oroinc.com)",
+      "WebFetch(domain:symfony.com)",
+      "WebFetch(domain:packagist.org)",
+      "WebFetch(domain:docs.phpunit.de)",
+      "WebFetch(domain:developer.dhl.com)",
       "WebSearch",
       "Skill"
     ],
@@ -129,6 +143,18 @@
             "type": "command",
             "command": "bash /home/sebastian/.claude/hooks/ide-first.sh",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/sebastian/.claude/hooks/format-on-write.sh",
+            "timeout": 30
           }
         ]
       }
