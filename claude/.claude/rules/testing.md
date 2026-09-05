@@ -12,7 +12,7 @@ paths:
 
 # Testing
 
-- Every test failure is yours to deal with, even the ones you didn't cause.
+- Every test failure on the path you touch is yours to fix immediately, even the ones you didn't cause. Failures elsewhere get noted, not chased (see AGENTS.md).
 - Reducing test coverage is worse than failing tests. Never delete a failing test — raise it with Sebastian instead.
 - Tests cover all production code paths.
 - Never write a test that asserts on mocked behavior instead of real logic. If you find one, stop and warn Sebastian.

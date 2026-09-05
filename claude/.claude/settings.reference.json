@@ -70,7 +70,6 @@
       "Bash(git push --no-verify*)",
       "Bash(git push * --no-verify*)"
     ],
-    "defaultMode": "auto",
     "ask": [
       "Bash(glab mr merge *)",
       "Bash(glab mr close *)",
@@ -104,13 +103,10 @@
       "Bash(git push -f *)",
       "Bash(git push * -f *)",
       "Bash(git push * -f)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
-  "model": "opus[1m]",
-  "skillOverrides": {
-    "docs-with-mermaid": "off",
-    "cco": "off"
-  },
+  "model": "claude-fable-5-1",
   "hooks": {
     "PreToolUse": [
       {
@@ -132,7 +128,6 @@
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
     "superpowers@superpowers-dev": true,
-    "codex@openai-codex": true,
     "security-audit@netresearch-claude-code-marketplace": true,
     "german-technical-writing@netresearch-claude-code-marketplace": true,
     "jira-integration@netresearch-claude-code-marketplace": true,
@@ -142,16 +137,14 @@
     "netresearch-jira@netresearch-marketplace": true,
     "tempo-timesheet-sync@netresearch-marketplace": false,
     "skill-repo@netresearch-claude-code-marketplace": true,
-    "agent-harness@netresearch-claude-code-marketplace": false
+    "agent-harness@netresearch-claude-code-marketplace": false,
+    "data-tools@netresearch-claude-code-marketplace": true,
+    "markdown-to-pdf@netresearch-claude-code-marketplace": true,
+    "netresearch-branding@netresearch-claude-code-marketplace": true,
+    "php-modernization@netresearch-claude-code-marketplace": true,
+    "retro@netresearch-claude-code-marketplace": true
   },
   "extraKnownMarketplaces": {
-    "openai-codex": {
-      "source": {
-        "source": "github",
-        "repo": "openai/codex-plugin-cc"
-      },
-      "autoUpdate": true
-    },
     "netresearch-claude-code-marketplace": {
       "source": {
         "source": "github",
@@ -195,7 +188,15 @@
   "autoMode": {
     "allow": [
       "$defaults",
-      "ddev start, stop, status, list, describe, exec, ssh, restart, logs, mysql, snapshot, xdebug — local DDEV dev stack, no production impact"
+      "ddev start, stop, status, list, describe, exec, ssh, restart, logs, mysql, snapshot, xdebug — local DDEV dev stack, no production impact",
+      "Bash(rsync:*) for local DDEV sync tasks — local dev stack only",
+      "Bash(glab:*) against git.netresearch.de — routine GitLab CLI usage across the org's namespaces, high frequency, no destructive denial history observed",
+      "Local version-control operations — including history rewriting — inside a disposable clone under the session scratchpad directory, where nothing is shared until it is pushed"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "gcloud destructive/write subcommands (delete, deployments update, iam) — no established prod-safe carve-out; treat as soft block pending review",
+      "Force-pushing or deleting a branch other people build on, and rewriting already-published history — destructive but clearable when the user has asked for it in this conversation"
     ]
   }
 }
