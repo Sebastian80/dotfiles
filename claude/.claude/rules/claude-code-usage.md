@@ -75,6 +75,11 @@ Measured with a throwaway repo under the scratchpad, after an evening lost to as
 - Settings apply mid-session, no restart (the harness watches the files — proven both directions).
 - A safe probe can't test the classifier: context-aware, so anything harmless enough to run is harmless
   enough to allow. `claude -p "reply ok" --debug-file /tmp/x.log` is the honest instrument.
+- A docs summary or claude-code-guide answer is a hypothesis, not a verdict, for anything the harness
+  enforces (directory bounds, deny rules, `cd`). Settle it with `claude -p`: prompt via stdin
+  (`--allowedTools` is variadic and eats a positional prompt), `--permission-mode default` to keep the
+  classifier out, a control case that must pass, and a `want=` per case. (The guide claimed `--add-dir`
+  leaves the cd block in place; two runs showed the opposite.)
 
 ## Task tracking
 
