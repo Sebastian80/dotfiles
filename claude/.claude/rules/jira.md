@@ -30,4 +30,5 @@ Below is only what neither skill knows.
 - **Fetch the ticket and check the summary before any write** — a key quoted back at you may echo an
   earlier mistake; an evidence comment once landed on an entirely unrelated ticket that way.
 - Re-fetch after every write. Jira DC has a history of silent no-ops.
+- Given a ticket key, read the ticket and every linked MR before touching code, vendor dirs or pipeline traces, then echo scope back in three lines: in scope, out of scope, proof to be produced. Done-state names differ per project (`Fertig` vs `Geschlossen` and the like) and live in that project's auto-memory — never guess one.
 - Release-ticket chaining uses the `Relation` link type.
