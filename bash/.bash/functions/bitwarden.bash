@@ -34,8 +34,10 @@ if command -v bw &>/dev/null; then
     # Cache user ID to avoid multiple calls
     _BW_RUNDIR="/run/user/${UID:-$(id -u)}"
 
-    # Load session and tokens if available
-    [[ -f "$_BW_RUNDIR/bw-session" ]] && export BW_SESSION=$(command cat "$_BW_RUNDIR/bw-session")
+    # Load session and tokens if available. The session token stays out of
+    # shells that belong to Claude Code (it sets CLAUDECODE=1): the agent gets
+    # the derived tokens below, never the key to the vault.
+    [[ -f "$_BW_RUNDIR/bw-session" && -z "${CLAUDECODE:-}" ]] && export BW_SESSION=$(command cat "$_BW_RUNDIR/bw-session")
     [[ -f "$_BW_RUNDIR/bw-github-token" ]] && export GITHUB_TOKEN=$(command cat "$_BW_RUNDIR/bw-github-token")
     if [[ -f "$_BW_RUNDIR/bw-gitlab-token" ]]; then
         export GITLAB_TOKEN=$(command cat "$_BW_RUNDIR/bw-gitlab-token")
