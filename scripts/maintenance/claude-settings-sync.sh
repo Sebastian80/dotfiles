@@ -17,13 +17,17 @@ for f in "$LIVE" "$REF"; do
   jq -e . "$f" >/dev/null || { echo "invalid JSON: $f" >&2; exit 2; }
 done
 
+# autoMode.environment describes internal infrastructure (hosts, namespaces) for the
+# classifier; the dotfiles repo is public, so it never enters the reference.
+STRIP='del(.autoMode.environment)'
+
 case "${1:-}" in
   --apply)
-    cp "$LIVE" "$REF"
-    echo "reference synced from live"
+    jq --indent 2 "$STRIP" "$LIVE" > "$REF"
+    echo "reference synced from live (autoMode.environment stripped)"
     ;;
   "")
-    if diff -u --label reference --label live <(jq -S . "$REF") <(jq -S . "$LIVE"); then
+    if diff -u --label reference --label live <(jq -S . "$REF") <(jq -S "$STRIP" "$LIVE"); then
       echo "reference == live"
     else
       echo "drift: run $0 --apply" >&2
