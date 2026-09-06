@@ -82,7 +82,7 @@ fi
 # 3. Check Stow Packages
 section "Stow Packages"
 
-PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr)
+PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr)
 
 for package in "${PACKAGES[@]}"; do
     if [[ -d "$package" ]]; then

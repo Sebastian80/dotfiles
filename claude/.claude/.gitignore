@@ -14,10 +14,8 @@ settings.local.json
 # Ephemeral data
 cache/
 debug/
-docs/
 file-history/
 history.jsonl
-memories/
 paste-cache/
 plans/
 projects/
@@ -26,14 +24,6 @@ shell-snapshots/
 stats-cache.json
 statsig/
 telemetry/
-todos/
-
-# Internal directories
-.claude/
-.serena/
 
 # Plugins managed separately
 plugins/
-
-# Old/unused scripts
-statusline-enhanced.sh

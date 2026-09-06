@@ -42,8 +42,6 @@ dotfiles/
 ├── eza/            # Modern ls with Catppuccin Frappé theme
 ├── fzf/            # Fuzzy finder configuration
 ├── glow/           # Markdown viewer configuration
-├── lazygit/        # Git TUI configuration
-├── lazydocker/     # Docker TUI configuration
 ├── ripgrep/        # Ripgrep search configuration
 ├── yazi/           # File manager
 ├── micro/          # Text editor
@@ -115,7 +113,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -425,10 +423,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
 
 # 4. Deploy packages
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile

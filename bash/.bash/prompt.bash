@@ -9,11 +9,6 @@
 if command -v oh-my-posh &>/dev/null; then
     # Initialize oh-my-posh with custom theme
     eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/netresearch.omp.json)"
-
-    # Ghostty 1.3.x auto-injects shell integration (__ghostty_hook) which handles
-    # all OSC 133 FTCS marks (A/B/C/D) for jump_to_prompt, click-to-cursor, etc.
-    # Disable oh-my-posh's own 133;C to avoid duplicate marks.
-    _omp_ftcs_marks=0
 fi
 
 # ============================================

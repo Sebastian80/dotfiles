@@ -20,10 +20,7 @@ fi
 
 cd "$DOTFILES_DIR" || exit 1
 
-step "Pulling latest changes from git..."
-git pull --rebase
-
-step "Restowing all packages..."
+step "Pulling latest changes and restowing all packages..."
 make update
 
 info "✓ Dotfiles updated and restowed successfully!"

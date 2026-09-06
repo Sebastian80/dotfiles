@@ -116,7 +116,7 @@ fi
 
 # Check for config directories
 CONFIG_DIRS=()
-for dir in ghostty htop yazi micro btop lazygit lazydocker gtk-3.0 gtk-4.0; do
+for dir in ghostty htop yazi micro btop gtk-3.0 gtk-4.0; do
     if [[ -d "$HOME/.config/$dir" ]]; then
         CONFIG_DIRS+=("$dir")
     fi
@@ -231,7 +231,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " stowed_dotfiles " ]]; then
 
     if [[ -d "$DOTFILES_DIR" ]]; then
         cd "$DOTFILES_DIR"
-        PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr)
+        PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr)
 
         for package in "${PACKAGES[@]}"; do
             if [[ -d "$package" ]]; then

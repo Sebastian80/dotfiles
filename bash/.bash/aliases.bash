@@ -150,7 +150,7 @@ alias eea-restart='sudo systemctl restart eea.service'
 alias eea-status='systemctl status eea.service'
 
 # Show open ports
-alias ports='netstat -tulanp'
+alias ports='ss -tulanp'
 
 # Get public IP address
 alias myip='curl -s https://api.ipify.org && echo'

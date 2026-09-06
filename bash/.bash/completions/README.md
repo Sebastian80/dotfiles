@@ -8,8 +8,7 @@ Custom bash completion configurations for tools not covered by system/Homebrew c
 |------|-------------|
 | `bitwarden.bash` | Bitwarden CLI (bw) with shortcut support |
 | `composer.bash` | PHP Composer (Symfony's official completion) |
-| `dynamic.bash` | Lazy-loading completions for docker, git alias (g), npm |
-| `ripgrep.bash` | Ripgrep (rg) search tool - lazy-loaded |
+| `dynamic.bash` | Lazy-loading completions for docker and the git alias (g) |
 
 ## Architecture
 

@@ -142,4 +142,3 @@ fi
 # echo "Welcome to $(hostname)!"
 # echo "Type 'tools' for a list of available terminal enhancement tools."
 
-alias claude-mem='bun "/home/sebastian/.claude/plugins/cache/sebastian80/claude-mem/0.2.1/scripts/worker-cli.js"'

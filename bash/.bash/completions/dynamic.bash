@@ -79,25 +79,6 @@ fi
 # NPM Completion (Lazy Loading)
 # ============================================
 
-# Note: npm completion is typically provided as a static file by Homebrew's node formula
-# at /home/linuxbrew/.linuxbrew/etc/bash_completion.d/npm, so bash-completion
-# should auto-discover it. This is here as a fallback.
-
-if command -v npm &>/dev/null && ! complete -p npm &>/dev/null; then
-    _npm_lazy_load() {
-        complete -r npm 2>/dev/null
-        unset -f _npm_lazy_load
-
-        if eval "$(npm completion 2>/dev/null)"; then
-            if declare -F _npm_completion &>/dev/null; then
-                _init_completion || return
-                return 124  # Tell bash to retry completion with new function
-            fi
-        fi
-    }
-    complete -F _npm_lazy_load npm
-fi
-
 # ============================================
 # Summary of Completion Coverage
 # ============================================
@@ -108,6 +89,8 @@ fi
 #   - brew      : Homebrew provides its own completion
 #   - eza       : Homebrew's eza formula provides completion file
 #   - npm       : Homebrew's node formula provides npm completion file
+#   - rg, fd    : Homebrew formulae provide completion files
+#   - yazi, ya  : Homebrew's yazi formula provides completion files
 #   - git       : System bash-completion package (/usr/share/bash-completion/completions/git)
 #
 # ✓ Dynamically generated (by this file):
@@ -120,6 +103,3 @@ fi
 #
 # ✗ No completion available:
 #   - lazygit   : No official bash completion (TUI tool, less critical)
-#   - yazi      : No official bash completion (TUI tool, less critical)
-#   - fd        : No official bash completion (simple CLI, less critical)
-#   - rg        : No official bash completion (simple CLI, less critical)
