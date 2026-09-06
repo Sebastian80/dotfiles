@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# claude-agent-watch — render a Claude Code subagent transcript live, for a herdr/tmux pane
+#
+# Usage: claude-agent-watch <agent-name>        newest transcript whose file name contains the name
+#        claude-agent-watch <path/to/file.jsonl>
+#
+# Subagents have no terminal; Claude Code streams their JSONL transcript to
+# ~/.claude/projects/<project>/<session>/subagents/agent-*<name>*.jsonl. This tails
+# that file and prints the readable parts: assistant text, tool calls with a
+# one-line summary, tool results.
+set -euo pipefail
+
+if [ $# -ne 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    sed -n '2,10p' "$0" | cut -c3-
+    exit 2
+fi
+
+if [ -f "$1" ]; then
+    file=$1
+else
+    file=""
+    for _ in $(seq 1 40); do   # the file appears a moment after the agent is spawned
+        file=$(ls -t "$HOME"/.claude/projects/*/*/subagents/agent-*"$1"*.jsonl 2>/dev/null | head -1 || true)
+        [ -n "$file" ] && break
+        sleep 0.5
+    done
+    [ -n "$file" ] || { echo "no transcript matching '$1' under ~/.claude/projects" >&2; exit 1; }
+    echo "watching $file" >&2
+fi
+
+tail -n +1 -F "$file" 2>/dev/null | jq --unbuffered -r '
+  def clip($n): tostring | gsub("\n"; " ") | .[0:$n];
+  def summary: (.command // .description // .file_path // .pattern // .prompt // .query // .url // (. | tostring)) | clip(110);
+  if .type == "assistant" then
+    .message.content[]? |
+      if .type == "text" then "\n● " + .text
+      elif .type == "tool_use" then "▸ " + .name + "  " + (.input | summary)
+      elif .type == "thinking" then "… thinking"
+      else empty end
+  elif .type == "user" then
+    .message.content[]? | select(.type == "tool_result") |
+      "  ↳ " + ((.content | if type == "array" then map(.text // "") | join(" ") else . end) | clip(110))
+  else empty end
+'
