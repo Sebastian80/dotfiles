@@ -70,8 +70,12 @@ case "$REPLY" in
         TEMP_DIR=$(mktemp -d)
         cd "$TEMP_DIR"
 
+        # Release assets carry one .deb per Ubuntu version and architecture
+        # (ghostty_<ver>_amd64_26.04.deb); pick the one built for this system.
+        UBUNTU_VERSION=$(. /etc/os-release && echo "$VERSION_ID")
+        DEB_ARCH=$(dpkg --print-architecture)
         LATEST_URL=$(curl -s https://api.github.com/repos/mkasberg/ghostty-ubuntu/releases/latest \
-            | grep "browser_download_url.*\.deb" \
+            | grep "browser_download_url.*_${DEB_ARCH}_${UBUNTU_VERSION}\.deb" \
             | cut -d '"' -f 4 \
             | head -1)
 

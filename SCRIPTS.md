@@ -32,7 +32,8 @@ dotfiles/
 │   │   └── claude-settings-sync.sh # Sync live Claude settings to the tracked reference
 │   │
 │   └── utils/
-│       └── manual-backup.sh        # Manual backup utility
+│       ├── manual-backup.sh        # Manual backup utility
+│       └── pre-reinstall-backup.sh # Snapshot home + system config before a reinstall
 │
 └── [other stow packages...]
 ```
@@ -305,6 +306,20 @@ cd ~/dotfiles
 ./scripts/utils/manual-backup.sh
 ```
 
+#### pre-reinstall-backup.sh
+**Purpose:** Copy everything a fresh install cannot regenerate onto an external disk:
+`$HOME` minus caches and package stores, root-owned config (NetworkManager
+connections, `/etc/hosts`, grub kernel params, custom AppArmor/modprobe/sysctl,
+local CAs, apt sources), exported VPN profiles and package inventories.
+Re-runs are incremental; a second rsync pass verifies the copy.
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/utils/pre-reinstall-backup.sh --dry-run /media/$USER/backup   # stats only
+./scripts/utils/pre-reinstall-backup.sh /media/$USER/backup             # needs sudo once
+```
+
 ---
 
 ## PATH Configuration
@@ -513,6 +528,7 @@ dotfiles/
 ├── install-docker.sh
 ├── install-fonts.sh
 ├── manual-backup.sh
+├── pre-reinstall-backup.sh
 ├── verify-installation.sh
 └── ghostty/.config/ghostty/
     ├── install-glow.sh
