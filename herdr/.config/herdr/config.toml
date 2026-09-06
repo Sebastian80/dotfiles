@@ -62,6 +62,12 @@ type = "plugin_action"
 command = "herdr-spreader.apply"
 description = "spreader: apply the workspace layout from plugins/config/herdr-spreader/config.yaml"
 
+[[keys.command]]
+key = "prefix+alt+p"
+type = "plugin_action"
+command = "ray.plugin-manager.open"
+description = "plugin manager popup: install, update, enable, disable, browse the marketplace"
+
 [worktrees]
 # Under ~/workspace so Claude Code's additionalDirectories cover agent worktrees
 directory = "~/workspace/.worktrees"
