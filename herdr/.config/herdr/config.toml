@@ -56,3 +56,7 @@ tab_bar_right_separator = " · "
 [ui.toast]
 # Desktop notification through Ghostty when a background agent needs attention or finishes
 delivery = "terminal"
+
+[experimental]
+# Keep recent pane screen history across full server restarts (reboot, `herdr server stop`)
+pane_history = true
