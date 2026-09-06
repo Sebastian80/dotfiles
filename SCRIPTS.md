@@ -415,7 +415,7 @@ make bin          # Install only bin/ package
 **Relevant targets:**
 ```makefile
 # PACKAGES variable (defined once, used by install/uninstall/update):
-PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
 ```
 
 ---

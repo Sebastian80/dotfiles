@@ -153,6 +153,10 @@ claude/.claude/settings.json
 # htop runtime state
 htop/.config/htop/htop_history
 
+# Herdr runtime state (sockets, logs, plugins) shares the config dir
+herdr/.config/herdr/*
+!herdr/.config/herdr/config.toml
+
 # Ghostty
 ghostty/.config/ghostty/*.backup-*
 

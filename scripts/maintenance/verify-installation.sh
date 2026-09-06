@@ -24,9 +24,9 @@ success() { echo -e "${GREEN}[PASS]${NC} $1"; PASSED=$((PASSED + 1)); }
 section() { echo -e "\n${BLUE}===${NC} $1 ${BLUE}===${NC}"; }
 
 # Check if script is run from dotfiles directory
-if [[ ! -f "$(pwd)/verify-installation.sh" ]]; then
+if [[ ! -f "$(pwd)/Makefile" || ! -d "$(pwd)/scripts/maintenance" ]]; then
     error "Please run this script from the dotfiles directory"
-    echo "  cd ~/dotfiles && ./verify-installation.sh"
+    echo "  cd ~/dotfiles && ./scripts/maintenance/verify-installation.sh"
     exit 1
 fi
 
@@ -82,7 +82,7 @@ fi
 # 3. Check Stow Packages
 section "Stow Packages"
 
-PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep)
+PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr)
 
 for package in "${PACKAGES[@]}"; do
     if [[ -d "$package" ]]; then

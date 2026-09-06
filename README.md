@@ -50,6 +50,7 @@ dotfiles/
 ├── htop/           # System monitor
 ├── btop/           # Modern system monitor
 ├── tmux/           # Terminal multiplexer
+├── herdr/          # Agent multiplexer (persistent panes for Claude Code & co.)
 ├── system/         # System-level configurations (requires sudo)
 │   ├── .config/
 │   │   └── sudoers.d/
@@ -114,7 +115,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -356,6 +357,7 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list o
 - **ghostty** - Modern GPU-accelerated terminal (via apt)
 - **oh-my-posh** - Cross-platform prompt engine with custom themes
 - **tmux** - Terminal multiplexer for session management
+- **herdr** - Agent multiplexer: persistent panes with agent state, Claude Code hook + skill wired in
 
 ### Modern CLI Tools (Rust-based)
 - **bat** - `cat` with syntax highlighting and Git integration
@@ -423,10 +425,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
 
 # 4. Deploy packages
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow lazygit lazydocker ripgrep herdr
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile

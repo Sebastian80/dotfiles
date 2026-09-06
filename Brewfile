@@ -24,6 +24,7 @@ brew "bitwarden-cli"  # Bitwarden CLI for password management
 
 # Terminal Multiplexer
 brew "tmux"         # Terminal multiplexer for session management
+brew "herdr"        # Agent multiplexer: persistent panes with Claude/Codex state awareness
 
 # Utilities
 brew "jq"           # JSON processor

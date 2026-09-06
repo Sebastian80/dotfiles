@@ -1,0 +1,58 @@
+# ~/.config/herdr/config.toml - Herdr agent multiplexer (tmux for coding agents)
+# Mirrors ~/.tmux.conf muscle memory: prefix ctrl+b, = / - splits, hjkl panes, alt+1-9 tabs.
+# Reload: prefix + r (or `herdr server reload-config`). All defaults: `herdr --default-config`.
+# Docs: https://herdr.dev/docs/configuration/
+
+# First-run notification wizard is answered here (see [ui.toast]).
+onboarding = false
+
+[theme]
+# "terminal" reuses the host ANSI palette, so Ghostty's Catppuccin Frappé/Latte
+# auto-switching carries over. Herdr's own "catppuccin" is Mocha; no Frappé variant exists.
+name = "terminal"
+
+[update]
+# Homebrew owns upgrades (Brewfile). Keep herdr from advertising `herdr update`,
+# which would install a second binary outside brew.
+version_check = false
+
+[keys]
+prefix = "ctrl+b"
+
+# Splits as in tmux: = side by side, - stacked
+split_vertical = "prefix+="
+split_horizontal = "prefix+minus"
+
+# Tabs: prefix+1-9 or direct alt+1-9 (Ghostty forwards alt+digit as ESC digit, see ghostty config)
+switch_tab = ["prefix+1..9", "alt+1..9"]
+
+# tmux habit: prefix+r reloads; resize mode moves to prefix+R
+reload_config = "prefix+r"
+resize_mode = "prefix+shift+r"
+
+# Direct resize without entering resize mode (tmux prefix+H/J/K/L)
+resize_pane_left = "prefix+shift+h"
+resize_pane_down = "prefix+shift+j"
+resize_pane_up = "prefix+shift+k"
+resize_pane_right = "prefix+shift+l"
+
+[[keys.command]]
+key = "prefix+alt+g"
+type = "popup"
+command = "lazygit"
+description = "lazygit"
+width = "90%"
+height = "90%"
+
+[worktrees]
+# Under ~/workspace so Claude Code's additionalDirectories cover agent worktrees
+directory = "~/workspace/.worktrees"
+
+[ui]
+# Right side of the tab bar, like the tmux status-right
+tab_bar_right = [{ type = "hostname" }, { type = "datetime", format = "%H:%M" }]
+tab_bar_right_separator = " · "
+
+[ui.toast]
+# Desktop notification through Ghostty when a background agent needs attention or finishes
+delivery = "terminal"
