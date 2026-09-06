@@ -84,15 +84,6 @@ window-save-state = never
 # Added via PR: https://github.com/ghostty-org/ghostty/pull/4200
 gtk-custom-css = tab-style.css
 
-# Wide GNOME-style tabs for better readability
-gtk-wide-tabs = true
-
-# Tab position: top or bottom (left/right not supported in this GTK version)
-gtk-tabs-location = top
-
-# Tab bar visibility: always, auto, or never
-window-show-tab-bar = auto
-
 # Toolbar style: flat (no shadow) vs raised (with shadow)
 gtk-toolbar-style = flat
 
@@ -120,7 +111,6 @@ cursor-opacity = 1.0
 # ========================================
 # Ghostty auto-injects shell integration (OSC 133 marks, sudo, ssh wrappers)
 # Ghostty 1.3.x fixed multiline PS1 handling that previously broke oh-my-posh
-shell-integration = detect
 shell-integration-features = no-cursor,no-title
 
 # ========================================
@@ -129,14 +119,8 @@ shell-integration-features = no-cursor,no-title
 # Don't confirm close when at a prompt
 confirm-close-surface = false
 
-# Prevent window title escape sequence injection (CVE-2024-56803)
-title-report = false
-
 # Single instance mode - reuse process for new windows (faster, less RAM)
 gtk-single-instance = true
-
-# Proper emoji and international character widths
-grapheme-width-method = unicode
 
 # Bold text keeps its color instead of becoming bright
 # (default behavior, bold-is-bright was deprecated in 1.2 → use bold-color = bright to enable)
@@ -148,9 +132,6 @@ grapheme-width-method = unicode
 
 # New tabs/splits inherit current directory (also handled by OSC 7)
 working-directory = inherit
-
-# Enable clickable URLs
-link-url = true
 
 # ========================================
 # Additional Customizations
@@ -169,11 +150,6 @@ mouse-scroll-multiplier = precision:1,discrete:1
 # Clipboard & Selection
 # Don't auto-copy selection to clipboard (use Ctrl+Shift+C instead)
 copy-on-select = false
-
-clipboard-read = ask
-clipboard-write = allow
-clipboard-trim-trailing-spaces = true
-clipboard-paste-protection = true
 
 # ========================================
 # Custom Keybindings

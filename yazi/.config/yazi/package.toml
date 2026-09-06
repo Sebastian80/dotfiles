@@ -13,13 +13,6 @@ use = "saumyajyoti/omp"
 rev = "7a0624c"
 hash = "ca913db57342496f96c533725a64ccc4"
 
-# Piper plugin - requires yazi 25.9.15+ (we have 25.5.31)
-# Re-enable when stable yazi updates:
-# [[plugin.deps]]
-# use = "yazi-rs/plugins:piper"
-# rev = "19dc890"
-# hash = "b26d542e75151835d7bc885f6dda74cb"
-
 [[flavor.deps]]
 use = "sanjinso/monokai-vibrant"
 rev = "8b68223"
@@ -34,3 +27,8 @@ hash = "d4c41d713b325710a9dd5ae86c3f8a5f"
 use = "yazi-rs/flavors:dracula"
 rev = "2d73b79"
 hash = "fc6944561718351d70cffde75839211f"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-frappe"
+rev = "20b47bf"
+hash = "ab7c71d442d3a9e16331ea0d95ab36a8"

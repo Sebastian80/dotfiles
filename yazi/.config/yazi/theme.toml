@@ -3,7 +3,7 @@
 # The flavor name should NOT include the .yazi extension
 
 [flavor]
-dark = "catppuccin-mocha"
+dark = "catppuccin-frappe"
 
 # Other themes to try:
 # dark = "dracula"
