@@ -9,8 +9,9 @@ onboarding = false
 [theme]
 # "terminal" reuses the host ANSI palette, so Ghostty's Catppuccin Frappé/Latte
 # auto-switching carries over. Herdr's own "catppuccin" is Mocha; no Frappé variant exists.
-name = "terminal"
+name = "catppuccin"
 
+auto_switch = false
 [update]
 # Homebrew owns upgrades (Brewfile). Keep herdr from advertising `herdr update`,
 # which would install a second binary outside brew.
@@ -57,9 +58,12 @@ directory = "~/workspace/.worktrees"
 tab_bar_right = [{ type = "hostname" }, { type = "datetime", format = "%H:%M" }]
 tab_bar_right_separator = " · "
 
+status_indicators = "symbols"
+show_agent_labels_on_pane_borders = true
+agent_panel_sort = "priority"
 [ui.toast]
 # Desktop notification through Ghostty when a background agent needs attention or finishes
-delivery = "terminal"
+delivery = "herdr"
 
 [experimental]
 # Keep recent pane screen history across full server restarts (reboot, `herdr server stop`)
