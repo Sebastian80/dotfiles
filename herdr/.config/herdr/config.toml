@@ -1,5 +1,5 @@
 # ~/.config/herdr/config.toml - Herdr agent multiplexer (tmux for coding agents)
-# Mirrors ~/.tmux.conf muscle memory: prefix ctrl+b, = / - splits, hjkl panes, alt+1-9 tabs.
+# Mirrors ~/.tmux.conf muscle memory: = / - splits, hjkl panes, alt+1-9 tabs; prefix is ctrl+space.
 # Reload: prefix + r (or `herdr server reload-config`). All defaults: `herdr --default-config`.
 # Docs: https://herdr.dev/docs/configuration/
 
@@ -17,7 +17,11 @@ name = "terminal"
 version_check = false
 
 [keys]
-prefix = "ctrl+b"
+# ctrl+space: one hand, free in bash (set-mark) and Claude Code; tmux muscle memory kept below
+prefix = "ctrl+space"
+
+# Cheat sheet with prefix or plain F1
+help = ["prefix+?", "f1"]
 
 # Splits as in tmux: = side by side, - stacked
 split_vertical = "prefix+="
