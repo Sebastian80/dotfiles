@@ -8,7 +8,7 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
 - **Modern Tooling**: Homebrew packages (see Brewfile) including modern CLI tools and Bitwarden (see Tools section)
-- **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
+- **Catppuccin Frappé Theme**: Consistent theming across Ghostty, tmux, eza, and Yazi
 
 ## Structure
 
