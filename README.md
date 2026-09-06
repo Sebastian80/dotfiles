@@ -230,10 +230,10 @@ The bash configuration is organized into focused modules loaded by `.bashrc`:
 ### Modular Directories
 | Directory | Files | Purpose |
 |-----------|-------|---------|
-| `exports/` | 8 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden, claude) |
-| `functions/` | 10 modules | Custom bash functions organized by category (bitwarden, dev, filesystem, fzf, git, misc, search, system, tools-help, yazi) |
+| `exports/` | 8 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden, jira) |
+| `functions/` | 11 modules | Custom bash functions organized by category (bitwarden, claude, dev, filesystem, fzf, git, misc, search, system, tools-help, yazi) |
 | `integrations/` | 3 modules | Tool initializations (fzf keybindings, yazi, zoxide) |
-| `completions/` | 4 modules | Custom completions (bitwarden, composer, dynamic lazy-loading, ripgrep) |
+| `completions/` | 3 modules | Custom completions (bitwarden, composer, dynamic lazy-loading) |
 
 **Loading Order**: path → exports/* → prompt → aliases → functions/* → bash-completion → completions/* → integrations/* → keybindings → local
 
@@ -370,6 +370,7 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete li
 - **lazygit** - Terminal UI for git commands
 - **gh** - GitHub CLI for working with issues, PRs, repos
 - **glab** - GitLab CLI for self-hosted GitLab (git.netresearch.de)
+- **git-filter-repo** - Rewrite history when something leaked into it
 
 ### Editors
 - **micro** - Modern, intuitive terminal text editor (mouse support!)
@@ -399,6 +400,11 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete li
 - **fnm** - Fast Node.js version manager
 - **uv** - Fast Python package installer and resolver
 - **composer** - PHP dependency manager
+- **php@8.4** - Local PHP for composer and CLI scripts outside Docker
+- **shellcheck** - Shell script linter
+- **mailpit** - SMTP sink with web UI for local mail testing
+- **d2** - Text-to-diagram language
+- **cloudflared** - Cloudflare Tunnel client
 - **bash-completion@2** - Programmable completion for Bash 4.2+
 - **Docker Engine** - Container platform (via apt)
 
