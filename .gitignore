@@ -156,6 +156,9 @@ htop/.config/htop/htop_history
 # Herdr runtime state (sockets, logs, plugins) shares the config dir
 herdr/.config/herdr/*
 !herdr/.config/herdr/config.toml
+!herdr/.config/herdr/plugins/
+herdr/.config/herdr/plugins/*
+!herdr/.config/herdr/plugins/config/
 
 # Ghostty
 ghostty/.config/ghostty/*.backup-*

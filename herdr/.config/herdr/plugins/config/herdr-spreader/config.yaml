@@ -1,0 +1,14 @@
+# herdr-spreader layout: prefix+alt+s (or `herdr plugin action invoke herdr-spreader.apply`)
+# One workspace per project; each gets a claude tab and a lazygit tab.
+workspaces:
+  - name: dotfiles
+    root: ~/dotfiles
+    focus: true
+    tabs:
+      - label: claude
+        panes:
+          - command: claude
+            focus: true
+      - label: lazygit
+        panes:
+          - command: lazygit
