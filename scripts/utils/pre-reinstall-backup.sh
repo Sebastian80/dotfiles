@@ -93,8 +93,9 @@ RSYNC_BASE=(rsync -aH --delete --delete-excluded "${RSYNC_EXCLUDES[@]}")
 # ---------------------------------------------------------------- dry run
 if [[ $DRY_RUN -eq 1 ]]; then
     step "Dry run: transfer statistics for $HOME → $DEST/home"
-    "${RSYNC_BASE[@]}" --dry-run --stats "$HOME/" "$DEST/home/" \
-        | grep -E 'Number of (regular )?files|Total (transferred )?file size'
+    "${RSYNC_BASE[@]}" --dry-run --stats "$HOME/" "$DEST/home/" 2>/dev/null \
+        | grep -E 'Number of (regular )?files|Total (transferred )?file size' \
+        || [[ ${PIPESTATUS[0]} -eq 23 ]]   # 23 = unreadable root-owned paths, reported by the real run
     exit 0
 fi
 
