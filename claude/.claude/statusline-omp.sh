@@ -19,13 +19,12 @@ else
     dir_name="~"
 fi
 
+# Claude Code reports the context figures directly: total_input_tokens already
+# includes input, cache creation and cache read tokens.
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
-input_tokens=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // 0')
-cache_tokens=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_input_tokens // 0')
-
-# Calculate context usage
-total_tokens=$((input_tokens + cache_tokens))
-percent=$((total_tokens * 100 / context_size))
+total_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
+percent=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+[ -z "$percent" ] && percent=0
 
 # Format as K (e.g., 190K/200K)
 tokens_k=$((total_tokens / 1000))

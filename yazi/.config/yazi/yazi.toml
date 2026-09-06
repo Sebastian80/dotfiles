@@ -36,14 +36,14 @@ bizarre_retry = 3          # Retry count for failed tasks
 [plugin]
 prepend_previewers = [
     # ========================================
-    # Markdown - Use rich-preview plugin (compatible with yazi 25.5.31)
+    # Markdown - Use rich-preview plugin (previewer rules use `url =`, yazi 26+)
     # ========================================
     # rich-cli 1.8.0 provides markdown preview with:
     # - Automatic format detection
     # - Syntax highlighting and pretty-printing
     # - Rounded panels with guides
     # Note: piper plugin requires yazi 25.9.15+, so using rich-preview directly
-    { name = "*.md", run = "rich-preview" },
+    { url = "*.md", run = "rich-preview" },
 
     # ========================================
     # Data Formats - Use rich-preview plugin
@@ -52,12 +52,12 @@ prepend_previewers = [
     # - Automatic format detection
     # - Syntax highlighting and pretty-printing
     # - Rounded panels and guides
-    { name = "*.json", run = "rich-preview" },
-    { name = "*.csv", run = "rich-preview" },
-    { name = "*.rst", run = "rich-preview" },
-    { name = "*.ipynb", run = "rich-preview" },
-    { name = "*.xml", run = "rich-preview" },
-    { name = "*.yaml", run = "rich-preview" },
-    { name = "*.yml", run = "rich-preview" },
-    { name = "*.toml", run = "rich-preview" }
+    { url = "*.json", run = "rich-preview" },
+    { url = "*.csv", run = "rich-preview" },
+    { url = "*.rst", run = "rich-preview" },
+    { url = "*.ipynb", run = "rich-preview" },
+    { url = "*.xml", run = "rich-preview" },
+    { url = "*.yaml", run = "rich-preview" },
+    { url = "*.yml", run = "rich-preview" },
+    { url = "*.toml", run = "rich-preview" }
 ]

@@ -81,7 +81,6 @@ EXCLUDES=(
     '.claude/shell-snapshots/'
     '.claude/paste-cache/'
     '.claude.json.tmp.*'
-    '.claude/hook-approvals.log*'
     'snap/*/common/.cache/'
     'snap/core*/'
     'snap/bare/'
