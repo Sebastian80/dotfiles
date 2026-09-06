@@ -68,6 +68,12 @@ type = "plugin_action"
 command = "ray.plugin-manager.open"
 description = "plugin manager popup: install, update, enable, disable, browse the marketplace"
 
+[[keys.command]]
+key = "prefix+alt+w"
+type = "plugin_action"
+command = "herdr-plugin-workspace-manager.apply"
+description = "workspace manager: apply the repo's layout (plugins/config/herdr-plugin-workspace-manager/config.yml) to this workspace"
+
 [worktrees]
 # Under ~/workspace so Claude Code's additionalDirectories cover agent worktrees
 directory = "~/workspace/.worktrees"

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/razajamil/herdr-plugin-workspace-manager/main/schema.json
+# Workspace Manager: applied to every new worktree (any repo, via globalLayout) and on demand
+# with prefix+alt+w in the current workspace. Validate: `herdr plugin action invoke herdr-plugin-workspace-manager.validate`
+layouts:
+  - id: dev
+    tabs:
+      - title: claude
+        panes:
+          - title: claude
+            agent: claude
+      - title: lazygit
+        panes:
+          - title: lazygit
+            command: lazygit
+globalLayout: dev
