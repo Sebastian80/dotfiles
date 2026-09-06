@@ -10,8 +10,9 @@
 #   --dry-run   Show transfer stats only, write nothing.
 #
 # What it copies:
-#   home/    $HOME minus caches, Trash, Ollama models, package-manager stores,
-#            IDE binaries and snap runtime dirs (Thunderbird profile kept).
+#   home/    $HOME minus workspace (except traefik-central), caches, Trash,
+#            Ollama models, package-manager stores, IDE binaries and snap
+#            runtime dirs (Thunderbird profile kept).
 #   system/  root-owned config: NetworkManager connections (VPN, WiFi PSKs),
 #            /etc/hosts, grub kernel params, custom AppArmor/modprobe/sysctl,
 #            local CA certs, apt sources + keyrings. Needs sudo once.
@@ -54,8 +55,17 @@ step() { printf '\033[0;34m→\033[0m %s\n' "$1"; }
 ok()   { printf '\033[0;32m✓\033[0m %s\n' "$1"; }
 warn() { printf '\033[1;33m⚠\033[0m %s\n' "$1"; }
 
+# Workspace projects live in GitLab and are re-cloned. traefik-central is a
+# plain directory (mkcert wildcard certs, tls.yml) and the one thing kept.
+# Includes are evaluated before the excludes below.
+INCLUDES=(
+    'workspace/'
+    'workspace/traefik-central/***'
+)
+
 # Paths relative to $HOME that a fresh install regenerates.
 EXCLUDES=(
+    'workspace/*'
     '.cache/'
     '.local/share/Trash/'
     '.ollama/'
@@ -85,10 +95,11 @@ EXCLUDES=(
     '.xsession-errors*'
     '.Xauthority'
 )
-RSYNC_EXCLUDES=()
-for e in "${EXCLUDES[@]}"; do RSYNC_EXCLUDES+=(--exclude="$e"); done
+RSYNC_FILTERS=()
+for i in "${INCLUDES[@]}"; do RSYNC_FILTERS+=(--include="$i"); done
+for e in "${EXCLUDES[@]}"; do RSYNC_FILTERS+=(--exclude="$e"); done
 
-RSYNC_BASE=(rsync -aH --delete --delete-excluded "${RSYNC_EXCLUDES[@]}")
+RSYNC_BASE=(rsync -aH --delete --delete-excluded "${RSYNC_FILTERS[@]}")
 
 # ---------------------------------------------------------------- dry run
 if [[ $DRY_RUN -eq 1 ]]; then
