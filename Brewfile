@@ -52,6 +52,8 @@ brew "shellcheck"         # Shell script linter
 brew "mailpit"            # SMTP sink with web UI for local mail testing
 brew "d2"                 # Text-to-diagram language
 brew "cloudflared"        # Cloudflare Tunnel client
+brew "go"                 # Builds herdr plugins written in Go (herdr-auto-title)
+brew "rust"               # Builds herdr plugins written in Rust (herdr-spreader)
 
 # Prompt & Shell
 brew "oh-my-posh"   # Prompt theme engine

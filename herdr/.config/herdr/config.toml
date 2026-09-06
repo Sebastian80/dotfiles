@@ -49,6 +49,19 @@ description = "lazygit"
 width = "90%"
 height = "90%"
 
+# Plugins (installed with `herdr plugin install`, state under ~/.config/herdr/plugins/)
+[[keys.command]]
+key = "prefix+alt+r"
+type = "plugin_action"
+command = "persiyanov.reviewr.toggle"
+description = "reviewr: diff review sidebar, send comments back to the agent"
+
+[[keys.command]]
+key = "prefix+alt+s"
+type = "plugin_action"
+command = "herdr-spreader.apply"
+description = "spreader: apply the workspace layout from plugins/config/herdr-spreader/config.yaml"
+
 [worktrees]
 # Under ~/workspace so Claude Code's additionalDirectories cover agent worktrees
 directory = "~/workspace/.worktrees"
