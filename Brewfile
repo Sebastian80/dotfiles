@@ -55,6 +55,11 @@ brew "cloudflared"        # Cloudflare Tunnel client
 brew "go"                 # Builds herdr plugins written in Go (herdr-auto-title)
 brew "rust"               # Builds herdr plugins written in Rust (herdr-spreader)
 
+# Browser in the terminal (Electron, kitty graphics). Ubuntu 24.04 needs the AppArmor userns
+# profile the cask ships; re-run after upgrades, the profile is keyed on the binary path:
+#   sudo bash "$(brew --prefix)/Caskroom/terminal-browser/<ver>/terminal-browser/scripts/apparmor.sh"
+cask "terminal-browser"
+
 # Prompt & Shell
 brew "oh-my-posh"   # Prompt theme engine
 brew "bash-completion@2"  # Programmable completion for Bash 4.2+

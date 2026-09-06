@@ -81,3 +81,5 @@ delivery = "herdr"
 [experimental]
 # Keep recent pane screen history across full server restarts (reboot, `herdr server stop`)
 pane_history = true
+# Pass kitty graphics through to Ghostty so terminal-browser can render inside a pane
+kitty_graphics = true
