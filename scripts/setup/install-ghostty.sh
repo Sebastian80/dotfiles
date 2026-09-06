@@ -54,7 +54,7 @@ fi
 # Choose installation method
 echo -e "${CYAN}Available installation methods:${NC}"
 echo ""
-echo "  1. Ubuntu .deb package (community-maintained, recommended)"
+echo "  1. mkasberg PPA (community-maintained, upgrades via apt, recommended)"
 echo "  2. Snap (official, auto-updates)"
 echo ""
 read -p "Choose installation method (1/2): " -n 1 -r
@@ -63,36 +63,13 @@ echo ""
 
 case "$REPLY" in
     1)
-        step "Installing Ghostty via Ubuntu .deb package..."
+        step "Installing Ghostty via the mkasberg PPA..."
         echo ""
-        info "Downloading latest .deb from community repository..."
-
-        TEMP_DIR=$(mktemp -d)
-        cd "$TEMP_DIR"
-
-        # Release assets carry one .deb per Ubuntu version and architecture
-        # (ghostty_<ver>_amd64_26.04.deb); pick the one built for this system.
-        UBUNTU_VERSION=$(. /etc/os-release && echo "$VERSION_ID")
-        DEB_ARCH=$(dpkg --print-architecture)
-        LATEST_URL=$(curl -s https://api.github.com/repos/mkasberg/ghostty-ubuntu/releases/latest \
-            | grep "browser_download_url.*_${DEB_ARCH}_${UBUNTU_VERSION}\.deb" \
-            | cut -d '"' -f 4 \
-            | head -1)
-
-        if [ -z "$LATEST_URL" ]; then
-            error "Could not find .deb package"
-            exit 1
-        fi
-
-        info "Downloading: $(basename "$LATEST_URL")"
-        curl -L -o ghostty.deb "$LATEST_URL"
-
-        step "Installing package..."
-        sudo apt install -y ./ghostty.deb
-
-        cd - > /dev/null
-        rm -rf "$TEMP_DIR"
-        TEMP_DIR=""
+        # https://github.com/mkasberg/ghostty-ubuntu — the PPA replaces the
+        # per-release .deb downloads and keeps Ghostty current with apt upgrade.
+        sudo add-apt-repository -y ppa:mkasberg/ghostty-ubuntu
+        sudo apt update
+        sudo apt install -y ghostty
         ;;
     2)
         step "Installing Ghostty via Snap..."

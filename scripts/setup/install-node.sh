@@ -21,16 +21,22 @@ cmd() { echo -e "  ${CYAN}$1${NC} - $2"; }
 # ============================================
 # Node.js Versions
 # ============================================
-NODE_DEFAULT="20"
-NODE_VERSIONS=("20" "22")
+NODE_DEFAULT="24"
+NODE_VERSIONS=("22" "24")
 
 # ============================================
 # NPM Global Packages Manifest
 # ============================================
 # Format: "package|command1:desc,command2:desc,..."
 
+# Claude Code is NOT installed via npm: it uses its native installer and self-updates
+# (`curl -fsSL https://claude.ai/install.sh | bash`, binary in ~/.local/bin/claude).
 NPM_GLOBALS=(
-    "@anthropic-ai/claude-code|claude:AI coding assistant CLI"
+    "pnpm|pnpm:Fast, disk-efficient package manager"
+    "@openai/codex|codex:OpenAI Codex CLI (also the codex MCP server for Claude Code)"
+    "@google/gemini-cli|gemini:Google Gemini CLI"
+    "agent-browser|agent-browser:Browser automation CLI for AI agents"
+    "repomix|repomix:Pack a repository into a single AI-friendly file"
 )
 
 echo ""

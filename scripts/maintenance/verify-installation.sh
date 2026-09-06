@@ -104,22 +104,20 @@ verify_symlink() {
     local target="$1"
     local expected="$2"
 
-    if [[ -L "$target" ]]; then
+    # Stow may link the file itself or fold a parent directory (~/bin -> dotfiles/bin/bin),
+    # so compare where the path resolves to, not whether this exact node is a link.
+    if [[ -e "$target" ]]; then
         local actual=$(readlink -f "$target")
         local expected_full=$(readlink -f "$expected")
         if [[ "$actual" == "$expected_full" ]]; then
-            success "✓ $target → $(readlink "$target")"
+            success "✓ $target → ${actual#$HOME/}"
         else
-            error "✗ $target points to wrong location"
+            error "✗ $target is not managed by stow"
             echo "    Expected: $expected_full"
             echo "    Actual: $actual"
         fi
     else
-        if [[ -e "$target" ]]; then
-            error "✗ $target exists but is NOT a symlink"
-        else
-            error "✗ $target does NOT exist"
-        fi
+        error "✗ $target does NOT exist"
     fi
 }
 
@@ -138,14 +136,11 @@ verify_symlink ~/.config/micro "$DOTFILES_DIR/micro/.config/micro"
 verify_symlink ~/.config/htop "$DOTFILES_DIR/htop/.config/htop"
 verify_symlink ~/.config/btop "$DOTFILES_DIR/btop/.config/btop"
 verify_symlink ~/.config/git "$DOTFILES_DIR/git/.config/git"
-verify_symlink ~/.config/gtk-3.0/bookmarks "$DOTFILES_DIR/gtk/.config/gtk-3.0/bookmarks"
 verify_symlink ~/.config/gtk-4.0/gtk.css "$DOTFILES_DIR/gtk/.config/gtk-4.0/gtk.css"
 
 # Tool-specific config symlinks
 verify_symlink ~/.config/eza "$DOTFILES_DIR/eza/.config/eza"
 verify_symlink ~/.config/glow "$DOTFILES_DIR/glow/.config/glow"
-verify_symlink ~/.config/lazygit "$DOTFILES_DIR/lazygit/.config/lazygit"
-verify_symlink ~/.config/lazydocker "$DOTFILES_DIR/lazydocker/.config/lazydocker"
 
 # User utilities (bin/)
 verify_symlink ~/bin/dotfiles-update "$DOTFILES_DIR/bin/bin/dotfiles-update"

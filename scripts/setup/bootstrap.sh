@@ -45,6 +45,15 @@ else
     DOTFILES_DIR="$SCRIPT_DIR"
 fi
 
+# Homebrew refuses to load formulae from third-party taps until they are trusted.
+# The Brewfile pulls bun and bbrew from such taps; trust them before `brew bundle`.
+trust_brewfile_taps() {
+    local tap
+    for tap in $(grep -oE '^brew "[^"]+/[^"]+/' "$DOTFILES_DIR/Brewfile" | sed -E 's/^brew "//; s/\/$//' | sort -u); do
+        brew trust "$tap" >/dev/null 2>&1 || warn "Could not trust tap $tap"
+    done
+}
+
 # Verify we're in the dotfiles directory by checking for Brewfile
 if [[ ! -f "$DOTFILES_DIR/Brewfile" ]]; then
     error "Could not find dotfiles directory"
@@ -161,6 +170,7 @@ if command -v brew &> /dev/null; then
         echo ""
 
         # Install and capture output
+        trust_brewfile_taps
         if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
             echo ""
             info "✓ Homebrew packages installed successfully"
@@ -191,6 +201,7 @@ if command -v brew &> /dev/null && ! brew list bash-completion@2 &> /dev/null; t
     read -p "Do you want to install Homebrew packages now before continuing? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
+        trust_brewfile_taps
         if brew bundle install --file="$DOTFILES_DIR/Brewfile"; then
             info "✓ Homebrew packages installed"
         else

@@ -18,6 +18,7 @@ brew "difftastic"   # Structural diff tool (alternative to delta)
 brew "lazygit"      # Terminal UI for git commands
 brew "gh"           # GitHub CLI
 brew "glab"         # GitLab CLI
+brew "git-filter-repo"  # Rewrite git history (secret/customer-path leaks)
 
 # Password Manager
 brew "bitwarden-cli"  # Bitwarden CLI for password management
@@ -46,6 +47,11 @@ brew "oven-sh/bun/bun"    # JavaScript runtime, bundler, and package manager
 brew "fnm"                # Fast Node.js version manager
 brew "uv"                 # Fast Python package manager
 brew "composer"           # PHP dependency manager
+brew "php@8.4"            # Local PHP for composer and CLI scripts outside Docker
+brew "shellcheck"         # Shell script linter
+brew "mailpit"            # SMTP sink with web UI for local mail testing
+brew "d2"                 # Text-to-diagram language
+brew "cloudflared"        # Cloudflare Tunnel client
 
 # Prompt & Shell
 brew "oh-my-posh"   # Prompt theme engine

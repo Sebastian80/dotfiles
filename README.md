@@ -4,10 +4,10 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 
 ## Features
 
-- **Modular Bash Configuration**: Organized into focused modules (5 top-level files, 8 exports, 10 functions, 3 integrations, 4 completions)
+- **Modular Bash Configuration**: Organized into focused modules (top-level files plus exports, functions, integrations and completions modules)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
-- **Modern Tooling**: 33 Homebrew packages including modern CLI tools and Bitwarden (see Tools section)
+- **Modern Tooling**: Homebrew packages (see Brewfile) including modern CLI tools and Bitwarden (see Tools section)
 - **Catppuccin Frappé Theme**: Consistent theming across Ghostty, eza, and Yazi
 
 ## Structure
@@ -27,13 +27,10 @@ dotfiles/
 │       └── switch-theme
 ├── claude/         # Claude Code AI assistant
 │   └── .claude/
-│       ├── CLAUDE.md       # Global instructions (critical rules, collaboration)
-│       ├── rules/          # Modular topic-specific rules (git, testing, python, ...)
-│       ├── commands/       # Custom slash commands (pr-draft, pr-review, refactor)
-│       ├── skills/         # Custom skills (cco, docs-with-mermaid,
-│       │                   #   ide-index-mcp, python-cosmic, python-sqlalchemy-core,
-│       │                   #   python-sqlalchemy-cosmic)
-│       ├── hooks/          # Event hooks
+│       ├── AGENTS.md       # Global instructions (CLAUDE.md imports it)
+│       ├── rules/          # Modular topic-specific rules (git, gitlab, jira, python, ...)
+│       ├── skills/         # Custom skills (herdr, ide-index-mcp, jetbrains-debugger, mermaid, qa)
+│       ├── hooks/          # Event hooks with their test suites
 │       └── statusline-omp.sh  # oh-my-posh statusline
 ├── git/            # Git configuration
 ├── gtk/            # GTK theme configuration
@@ -347,7 +344,7 @@ git push
 
 ## Tools Included
 
-All CLI tools are installed via **Homebrew** (see `Brewfile` for complete list of 33 packages).
+All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete list).
 
 **🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 

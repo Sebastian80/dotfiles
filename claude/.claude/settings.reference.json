@@ -250,6 +250,28 @@
       "$defaults",
       "gcloud destructive/write subcommands (delete, deployments update, iam) — no established prod-safe carve-out; treat as soft block pending review",
       "Force-pushing or deleting a branch other people build on, and rewriting already-published history — destructive but clearable when the user has asked for it in this conversation"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: Netresearch — internal GitLab at git.netresearch.de (namespaces include coding-ai, orocommerce), Jira at jira.netresearch.de",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: assume private — git.netresearch.de is an internal host and does not resolve to a public owner/repo",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: HashiCorp Vault (VAULT_ADDR marker present) for CI secrets; Bitwarden CLI for local shell secrets (GITHUB_TOKEN, GITLAB_TOKEN, COMPOSER_AUTH via load_bw_secrets)",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Trusted internal domains**: git.netresearch.de, composer.netresearch.de, jira.netresearch.de, pages.nrdev.de",
+      "**Internal package registry**: composer.netresearch.de (Composer/PHP)",
+      "**Trusted cloud buckets**: None configured",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host or container with `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development — PHP/OroCommerce and TYPO3 projects on Docker- and DDEV-based local stacks",
+      "**Org-specific CLIs**: ddev (local dev stack), glab (GitLab CLI for git.netresearch.de), composer (COMPOSER_AUTH sourced from Bitwarden or Vault), uv-run Jira scripts",
+      "**Session scratchpad**: the directory given as the scratchpad in the system prompt (typically /tmp/claude-*/…/scratchpad) holds disposable working copies — throwaway clones, candidate files, logs. Nothing there is shared and it does not survive the session.",
+      "**Version control review boundary**: local git operations (add, commit, reset, checkout, restore, rebase, amend, history rewriting) change nothing another person can observe; push, tag push, branch deletion, merge and package publication do. Gate the second set, not the first."
     ]
   }
 }

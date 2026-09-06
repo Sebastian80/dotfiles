@@ -1,50 +1,24 @@
 # System Setup Reference
 
-## Keyboard Fixes (Ghostty + Bash)
+## Keyboard Encoding (Ghostty + Bash)
 
-### CSI u Compatibility Solution
+Ghostty follows the fixterms spec and sends Ctrl+[ / Ctrl+I / Ctrl+M as CSI u sequences so they stay
+distinguishable from Esc / Tab / Enter. Everything else already arrives as the legacy byte, and apps that
+want more (Claude Code, herdr) switch the terminal into the kitty keyboard protocol themselves.
 
-**Issue**: Ghostty uses CSI u protocol; Bash/readline doesn't support it.
+**Files**:
+- `~/.config/ghostty/config` - five keybind overrides, each commented with its reason
+- `~/.inputrc` - `skip-csi-sequence` so readline swallows CSI sequences bash has no binding for
+  (e.g. Shift+Enter at a bash prompt) instead of inserting them as text
 
-**Files Modified**:
-- `~/.inputrc` - Readline CSI sequence handling
-- `~/.config/ghostty/config` - Terminal keybind overrides
+**Rules of thumb**:
+- Do not add `text:` overrides for Ctrl+letter, Alt+digit or arrow chords: they are byte-identical
+  without one, and inside Claude Code or herdr they hide the modifier from the app (verified 2026-09-06
+  with a raw-key probe in both encodings).
+- fzf does not speak CSI u, which is why the three fixterms keys are mapped back to control bytes.
+- Comments must be on separate lines in Ghostty config, not inline.
 
-**Solution**:
-1. `.inputrc` consumes CSI sequences via `skip-csi-sequence`
-2. Ghostty sends legacy ASCII codes for Ctrl+A-Z
-
-```bash
-# ~/.inputrc
-"\e[": skip-csi-sequence
-"\e]": skip-csi-sequence
-"\e\\": skip-csi-sequence
-```
-
-```toml
-# ~/.config/ghostty/config (example)
-keybind = ctrl+r=text:\x12  # Reverse search
-keybind = ctrl+a=text:\x01  # Beginning of line
-```
-
-**Reload**:
-```bash
-# Reload Ghostty config
-Ctrl+Shift+R
-
-# Reload bash
-exec bash
-```
-
-### Key Behavior
-
-| Key Pattern | Bash | fzf | Terminal Shortcuts |
-|-------------|------|-----|-------------------|
-| Ctrl+A-Z | Works | Works | N/A |
-| Shift+Ctrl+C/V/T | N/A | N/A | Copy/Paste/Tab |
-| Other Shift+Ctrl | Ignored | Shows CSI (expected) | N/A |
-
-**Note**: Comments must be on separate lines in Ghostty config, not inline.
+**Reload**: `Ctrl+Shift+R` in Ghostty, `exec bash` for readline.
 
 ---
 
@@ -55,7 +29,7 @@ exec bash
 | Key | Searches | Action | Preview Toggle |
 |-----|----------|--------|----------------|
 | **Ctrl+T** | Files + Dirs | Insert path | `Ctrl+/` |
-| **Ctrl+R** | Command history | Insert command | `?` |
+| **Ctrl+R** | Command history | Insert command | `Ctrl+/` |
 | **Alt+C** | Directories only | cd to directory | Always on |
 
 ### Preview Details
@@ -157,18 +131,9 @@ bind -v | grep csi
 exec bash
 ```
 
-### Ctrl+R not working
-```bash
-# Reload Ghostty config
-Ctrl+Shift+R (in Ghostty)
-
-# Verify keybind
-grep "ctrl+r" ~/.config/ghostty/config
-```
-
-### fzf shows CSI codes on Shift+Ctrl
-**Expected behavior**: fzf doesn't use readline, receives CSI u directly.
-**Solution**: Don't use Shift+Ctrl combinations in fzf (not needed).
+### fzf shows CSI codes
+fzf does not use readline and cannot parse CSI u. Ctrl+[ / Ctrl+I / Ctrl+M are mapped back to control
+bytes in the Ghostty config; other modified chords have no fzf binding anyway.
 
 ### fzf preview not showing
 ```bash
