@@ -206,161 +206,47 @@ bell-features = audio,title,attention
 bell-audio-volume = 0.3
 
 # ========================================
-# Keyboard Protocol Compatibility Fix
+# Key Encoding Overrides
 # ========================================
-# Problem: Ghostty uses fixterms (CSI u sequences) by default
-# Issue: fzf 0.66.0 does not support CSI u / Kitty keyboard protocol
-# Result: Some key combinations show literal escape sequences (e.g., "109;5u")
+# Ghostty follows the fixterms spec: Ctrl+[ / Ctrl+I / Ctrl+M are sent as CSI u
+# (e.g. \x1b[109;5u) so they stay distinguishable from Esc / Tab / Enter. By
+# design, not a bug (Ghostty discussion #5071). fzf still cannot parse CSI u
+# (fzf issue #3208), so map these three back to their legacy control bytes.
 #
-# Solution: Override fixterms for common Ctrl combinations to use legacy encoding
-# Trade-off: These keys will no longer be distinguishable from their equivalents
-#   (e.g., Ctrl+I = Tab, Ctrl+M = Enter again)
-#
-# References:
-# - fzf Issue #1980: https://github.com/junegunn/fzf/issues/1980
-# - fzf Issue #3208: https://github.com/junegunn/fzf/issues/3208
-# - Ghostty Discussion #5071: https://github.com/ghostty-org/ghostty/discussions/5071
-# - fixterms spec: http://www.leonerd.org.uk/hacks/fixterms/
+# Everything else is deliberately NOT overridden: plain Ctrl+letter already
+# arrives as the legacy byte, readline binds the CSI 1;5D style arrow sequences
+# to word movement, and Claude Code / herdr switch the terminal into the kitty
+# keyboard protocol themselves. A text: override fires before that encoding and
+# would hand them legacy bytes they did not ask for (verified 2026-09-06 with a
+# raw-key probe: Claude Code 2.1.263 handles Shift+Enter, Shift+Space and
+# Ctrl+umlauts natively; herdr takes Alt+1-9 and its Ctrl+B prefix in CSI u form).
 #
 # Format: keybind = <trigger>=text:<hex_escape>
 
-# Ctrl+[ → ESC (0x1B) instead of CSI 91;5u
+# Ctrl+[ → ESC. On a German layout this physical key is Ü, so Ctrl+Ü acts as Esc.
 keybind = ctrl+left_bracket=text:\x1b
 
-# Ctrl+I → TAB (0x09) instead of CSI 105;5u
+# Ctrl+I → TAB
 keybind = ctrl+i=text:\x09
 
-# Ctrl+M → ENTER (0x0D) instead of CSI 109;5u
+# Ctrl+M → ENTER
 keybind = ctrl+m=text:\x0d
 
-# Ctrl+J → LINEFEED (0x0A) instead of CSI 106;5u
-keybind = ctrl+j=text:\x0a
-
-# Ctrl+H → BACKSPACE (0x08) instead of CSI 104;5u
-keybind = ctrl+h=text:\x08
-
-# Additional common Ctrl combinations (expanded fix for bash compatibility)
-# Many of these are printable ASCII control characters that bash expects
-# Comments moved above keybinds to prevent them being included in the action
-
-# Ctrl+A: SOH - Beginning of line / tmux prefix
-keybind = ctrl+a=text:\x01
-# Ctrl+B: STX - Backward char / tmux default prefix
-keybind = ctrl+b=text:\x02
-# Ctrl+C: ETX - Interrupt (SIGINT)
-keybind = ctrl+c=text:\x03
-# Ctrl+D: EOT - Delete char / EOF
-keybind = ctrl+d=text:\x04
-# Ctrl+E: ENQ - End of line
-keybind = ctrl+e=text:\x05
-# Ctrl+F: ACK - Forward char
-keybind = ctrl+f=text:\x06
-# Ctrl+G: BEL - Bell / abort
-keybind = ctrl+g=text:\x07
-# Ctrl+H already defined above (backspace)
-# Ctrl+I already defined above (tab)
-# Ctrl+J already defined above (linefeed)
-# Ctrl+K: VT - Kill line
-keybind = ctrl+k=text:\x0b
-# Ctrl+L: FF - Clear screen
-keybind = ctrl+l=text:\x0c
-# Ctrl+M already defined above (return)
-# Ctrl+N: SO - Next history
-keybind = ctrl+n=text:\x0e
-# Ctrl+O: SI - Operate-and-get-next
-keybind = ctrl+o=text:\x0f
-# Ctrl+P: DLE - Previous history
-keybind = ctrl+p=text:\x10
-# Ctrl+Q: DC1 - Resume (XON)
-keybind = ctrl+q=text:\x11
-# Ctrl+R: DC2 - Reverse search
-keybind = ctrl+r=text:\x12
-# Ctrl+S: DC3 - Suspend (XOFF)
-keybind = ctrl+s=text:\x13
-# Ctrl+T: DC4 - Transpose chars
-keybind = ctrl+t=text:\x14
-# Ctrl+U: NAK - Kill line backward
-keybind = ctrl+u=text:\x15
-# Ctrl+V: SYN - Literal next
-keybind = ctrl+v=text:\x16
-# Ctrl+W: ETB - Kill word backward
-keybind = ctrl+w=text:\x17
-# Ctrl+X: CAN - Prefix key
-keybind = ctrl+x=text:\x18
-# Ctrl+Y: EM - Yank
-keybind = ctrl+y=text:\x19
-# Ctrl+Z: SUB - Suspend (SIGTSTP)
-keybind = ctrl+z=text:\x1a
-
-# ========================================
-# Cursor Movement (Word-wise)
-# ========================================
-# Ctrl+Left: Move cursor one word backward
-keybind = ctrl+left=esc:b
-
-# Ctrl+Right: Move cursor one word forward
-keybind = ctrl+right=esc:f
-
-# Alt+Left: Move cursor one word backward (alternative)
-keybind = alt+left=esc:b
-
-# Alt+Right: Move cursor one word forward (alternative)
-keybind = alt+right=esc:f
-
-# ========================================
-# Word Deletion Keybinds
-# ========================================
-# Alt+Backspace: Delete word backward (Meta-Backspace = \x1b\x7f)
-keybind = alt+backspace=text:\x1b\x7f
-
-# Ctrl+Backspace: Delete word backward (same as Ctrl+W)
-keybind = ctrl+backspace=text:\x17
-
-# Alt+Delete: Delete word forward (Meta-Delete)
-keybind = alt+delete=esc:[3;3~
-
-# Ctrl+Delete: Delete word forward
-keybind = ctrl+delete=esc:[3;5~
-
-# ========================================
-# Claude Code Compatibility
-# ========================================
-# Shift+Space: Just send regular space (not CSI u sequence)
-keybind = shift+space=text:\x20
-
-# Shift+Enter: Insert newline (Claude Code expects \n, not modifyOtherKeys sequence)
-keybind = shift+enter=text:\n
-
-# Ctrl+Enter: Same as Enter (Ghostty sends escape sequence by default)
+# Ctrl+Enter: Ghostty sends nothing for it by default; make it a newline like Shift+Enter
 keybind = ctrl+enter=text:\n
 
-# Note: You can add more overrides as you discover problematic key combinations
-# Format: keybind = ctrl+<key>=text:\x<hex_code>
+# Ctrl+Backspace: delete word backward (default would be a plain backspace)
+keybind = ctrl+backspace=text:\x17
 
 # Close current pane/split (Ghostty-level, not tmux)
 keybind = ctrl+shift+q=close_surface
 
 # ========================================
-# tmux Window Switching (Alt+1-9)
-# ========================================
-# Pass Alt+1-9 to tmux for window switching (when inside tmux)
-# Ghostty tabs still work with Ctrl+Shift+T, Ctrl+Tab, etc.
-keybind = alt+1=text:\x1b1
-keybind = alt+2=text:\x1b2
-keybind = alt+3=text:\x1b3
-keybind = alt+4=text:\x1b4
-keybind = alt+5=text:\x1b5
-keybind = alt+6=text:\x1b6
-keybind = alt+7=text:\x1b7
-keybind = alt+8=text:\x1b8
-keybind = alt+9=text:\x1b9
-
-# ========================================
-# German Keyboard Compatibility (Claude Code)
+# German Keyboard Compatibility
 # ========================================
 # Problem: Ctrl+international_characters (Ä, Ö, Ü, ß) have no legacy ASCII encoding
 # Ghostty sends CSI u sequences like \x1b[196;5u for Ctrl+Ä (196 = Unicode of Ä)
-# Claude Code doesn't understand these sequences and displays them literally
+# Claude Code ignores them natively (kitty keyboard protocol); a plain shell would print them
 #
 # Solution: Ignore these key combinations since they have no standard terminal meaning
 # The CSI u format is: \x1b[<unicode_codepoint>;5u where 5 = ctrl modifier
