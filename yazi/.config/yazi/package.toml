@@ -1,16 +1,16 @@
 [[plugin.deps]]
 use = "AnirudhG07/rich-preview"
-rev = "843c3fa"
-hash = "b4040931f0d2f9670ddb4923e55cd881"
+rev = "02597c4"
+hash = "33982a6e2d6df07619a2a0fc163a0950"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:toggle-pane"
-rev = "9a52857"
-hash = "8a7c58225816a163a6e8730c0adafbc8"
+rev = "4dc7f1b"
+hash = "5b2fbef7d1513ce38ff72623a071a5e"
 
 [[plugin.deps]]
 use = "saumyajyoti/omp"
-rev = "7a0624c"
+rev = "32ae96c"
 hash = "ca913db57342496f96c533725a64ccc4"
 
 [[flavor.deps]]
