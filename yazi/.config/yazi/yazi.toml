@@ -43,7 +43,9 @@ prepend_previewers = [
     # - Syntax highlighting and pretty-printing
     # - Rounded panels with guides
     # Note: piper plugin requires yazi 25.9.15+, so using rich-preview directly
-    { url = "*.md", run = "rich-preview" },
+    # rendered once by glow, cached and paged by faster-piper: instant scrolling.
+    # rich-preview re-ran rich (~450 ms) on every scroll step.
+    { url = "*.md", run = 'faster-piper -- CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"' },
 
     # ========================================
     # Data Formats - Use rich-preview plugin
