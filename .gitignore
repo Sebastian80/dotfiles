@@ -10,6 +10,8 @@
 .env.*
 !.env.example
 *.local
+# the herdr stow package ships a font under ~/.local/share/fonts
+!herdr/.local/
 *_local
 *_secret
 *_private
@@ -60,6 +62,7 @@ bash/.bash/local
 *.woff
 *.woff2
 fonts/
+!herdr/.local/share/fonts/
 
 # Machine-specific configs
 *.local.toml
