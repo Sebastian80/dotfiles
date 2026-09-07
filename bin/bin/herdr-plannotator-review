@@ -26,11 +26,16 @@ if [ "${1:-}" = "--run" ]; then
   if [ -z "$port" ]; then
     echo "plannotator did not start a server:"; cat "$err"; sleep 8; exit 1
   fi
-  # terminal-browser takes over this pane until killed; kill it when the review ends.
-  terminal-browser open "http://$port" --no-merge --no-toolbar &
-  tbpid=$!
-  wait "$rpid" || true
-  kill "$tbpid" 2>/dev/null || true
+  # terminal-browser must run in the foreground to take over this pane (backgrounded it
+  # splits right and prints JSON). A watcher ends it once the review process is gone.
+  (
+    while kill -0 "$rpid" 2>/dev/null; do sleep 0.5; done
+    pkill -f "terminal-browser open http://$port" 2>/dev/null || true
+  ) &
+  watcher=$!
+  terminal-browser open "http://$port" --no-merge --no-toolbar || true
+  wait "$rpid" 2>/dev/null || true
+  kill "$watcher" 2>/dev/null || true
   feedback="$(cat "$out")"; rm -f "$out" "$err"
   clear
   if [ -z "$feedback" ]; then echo "review closed without feedback"; sleep 3; exit 0; fi
