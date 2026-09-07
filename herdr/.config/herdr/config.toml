@@ -196,11 +196,13 @@ description = "theme picker: pick a palette for the herdr UI"
 
 # herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new
 # focused tab (full width; a split is too narrow for three columns plus preview).
+# herdr-yazi-tab (dotfiles bin): opens the plugin tab, names it "yazi" and focuses it;
+# the raw open-tab action leaves the tab with a generated number.
 [[keys.command]]
 key = "prefix+alt+e"
-type = "plugin_action"
-command = "ray.file-explorer.open-tab"
-description = "yazi: file explorer in a new tab"
+type = "shell"
+command = "herdr-yazi-tab"
+description = "yazi: file explorer in a new focused tab named yazi"
 
 [[keys.command]]
 key = "prefix+alt+shift+e"
