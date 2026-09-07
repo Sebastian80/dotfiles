@@ -171,11 +171,3 @@ key = "prefix+alt+y"
 type = "plugin_action"
 command = "herdr-theme-picker.open"
 description = "theme picker: pick a palette for the herdr UI"
-
-# herdr-icon-agent-ui: sidebar agent rows with the harness logo and an animated state
-# line. $state_* tokens come from the plugin (exactly one is set per pane); the logo
-# glyph sits in the same coloured line so herdr draws no "·" separators.
-# Colours: working = Claude orange, done = green, blocked = red, idle/unknown = dim.
-[ui.sidebar.agents.rows_by_agent]
-claude = [["workspace"], [{ token = "$state_working", fg = "#d97757" }, { token = "$state_done", fg = "#a6d189" }, { token = "$state_blocked", fg = "#e78284" }, { token = "$state_idle", fg = "#737994" }, { token = "$state_unknown", fg = "#737994" }], ["terminal_title_stripped"]]
-codex  = [["workspace"], [{ token = "$state_working", fg = "#d97757" }, { token = "$state_done", fg = "#a6d189" }, { token = "$state_blocked", fg = "#e78284" }, { token = "$state_idle", fg = "#737994" }, { token = "$state_unknown", fg = "#737994" }], ["terminal_title_stripped"]]

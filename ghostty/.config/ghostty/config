@@ -31,10 +31,6 @@ palette = 9=#e84d4d
 # JetBrains Mono is built-in and has excellent Nerd Font support
 # Perfect for Oh My Posh icons and powerline symbols
 font-family = "JetBrains Mono"
-# herdr-icon-agent-ui: agent harness logos in the herdr sidebar live in a private-use
-# range of this font (installed via the herdr stow package, ~/.local/share/fonts).
-font-family = "Herdr Agent Icons Max"
-font-codepoint-map = U+E1A0-U+E1B0="Herdr Agent Icons Max"
 font-size = 13
 # font-thicken = true    # macOS only, no effect on Linux
 

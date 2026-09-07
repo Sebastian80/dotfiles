@@ -77,15 +77,6 @@ done
 
 echo ""
 step "Refreshing font cache..."
-# herdr-icon-agent-ui ships the "Herdr Agent Icons Max" font with the plugin; Ghostty
-# maps U+E1A0-U+E1B0 to it (ghostty config) for the agent logos in the herdr sidebar.
-for icon_font in "$HOME"/.config/herdr/plugins/github/*icon-agent-ui*/dist/HerdrAgentIconsMax-Regular.ttf; do
-    if [[ -f "$icon_font" ]]; then
-        cp "$icon_font" "$FONT_DIR/" && info "✓ Herdr Agent Icons Max installed from the herdr plugin"
-        break
-    fi
-done
-
 fc-cache -f "$FONT_DIR"
 
 echo ""
