@@ -1,25 +1,39 @@
 #!/usr/bin/env bash
 # Plannotator code review from a herdr key: opens a "plannotator" tab, runs
-# `plannotator review` on the focused pane's repo (the page opens in the browser),
-# and delivers the returned annotations or approval to the workspace's agent as
-# its next prompt. Usage: herdr-plannotator-review            (bind to a key)
-#                        herdr-plannotator-review --run DIR AGENT_PANE   (internal)
+# `plannotator review` on the focused pane's repo, shows the review page INSIDE that
+# tab via terminal-browser (no Chrome; ESET's loopback relay breaks it there), and
+# delivers the annotations or approval to the workspace's agent as its next prompt.
+# Usage: herdr-plannotator-review                 (bind to a key)
+#        herdr-plannotator-review --run DIR AGENT_PANE   (internal, runs in the tab)
 set -euo pipefail
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
-  sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; exit 0
+  sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0
 fi
 
 if [ "${1:-}" = "--run" ]; then
   dir="$2"; agent="$3"
   cd "$dir"
-  echo "plannotator review in $dir"
-  echo "review page opens in the browser; approve or send feedback there."
-  set +e
-  feedback="$(plannotator review 2>/tmp/herdr-plannotator-review.err)"; rc=$?
-  set -e
-  if [ $rc -ne 0 ] && [ -z "$feedback" ]; then
-    echo "plannotator exited $rc without feedback:"; cat /tmp/herdr-plannotator-review.err; sleep 8; exit $rc
+  out="$(mktemp)"; err="$(mktemp)"
+  PLANNOTATOR_BROWSER=/bin/true plannotator review >"$out" 2>"$err" &
+  rpid=$!
+  port=""
+  for _ in $(seq 1 40); do
+    port="$(ss -ltnp 2>/dev/null | grep "pid=$rpid," | grep -o '127.0.0.1:[0-9]*' | head -1 || true)"
+    [ -n "$port" ] && break
+    kill -0 "$rpid" 2>/dev/null || break
+    sleep 0.25
+  done
+  if [ -z "$port" ]; then
+    echo "plannotator did not start a server:"; cat "$err"; sleep 8; exit 1
   fi
+  # terminal-browser takes over this pane until killed; kill it when the review ends.
+  terminal-browser open "http://$port" --no-merge --no-toolbar &
+  tbpid=$!
+  wait "$rpid" || true
+  kill "$tbpid" 2>/dev/null || true
+  feedback="$(cat "$out")"; rm -f "$out" "$err"
+  clear
+  if [ -z "$feedback" ]; then echo "review closed without feedback"; sleep 3; exit 0; fi
   if [ -n "$agent" ]; then
     herdr agent prompt "$agent" "Plannotator review result for $(basename "$dir"):
 
