@@ -87,9 +87,10 @@ gtk-custom-css = tab-style.css
 # Toolbar style: flat (no shadow) vs raised (with shadow)
 gtk-toolbar-style = flat
 
-# Optional: Disable titlebar to reduce height (uncomment to enable)
-# This makes titlebar not too fat
-# gtk-titlebar = false
+# No header bar: herdr draws its own tabs and sidebar, so the GTK header only cost
+# a row. Ghostty shows a plain tab bar below only while two or more Ghostty tabs
+# are open; ctrl+tab / ctrl+shift+tab still switch them without a bar.
+gtk-titlebar = false
 
 # Merge tabs into titlebar for cleaner look
 gtk-titlebar-style = tabs
@@ -207,6 +208,10 @@ keybind = ctrl+m=text:\x0d
 
 # Ctrl+Enter: Ghostty sends nothing for it by default; make it a newline like Shift+Enter
 keybind = ctrl+enter=text:\n
+
+# Ctrl+Enter took over Ghostty's default fullscreen toggle, so fullscreen moves to F11
+# (hides the header bar with the tabs; herdr gets the whole screen).
+keybind = f11=toggle_fullscreen
 
 # Ctrl+Backspace: delete word backward (default would be a plain backspace)
 keybind = ctrl+backspace=text:\x17

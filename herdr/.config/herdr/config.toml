@@ -7,11 +7,33 @@
 onboarding = false
 
 [theme]
-# "terminal" reuses the host ANSI palette, so Ghostty's Catppuccin Frappé/Latte
-# auto-switching carries over. Herdr's own "catppuccin" is Mocha; no Frappé variant exists.
+# Herdr's "catppuccin" is Mocha and no Frappé variant exists, so the Mocha base is
+# re-tinted below with the Frappé palette Ghostty uses (dark:Catppuccin Frappe).
+# "terminal" would reuse the host ANSI palette instead, but loses the UI accents.
 name = "catppuccin"
 
 auto_switch = false
+
+# Catppuccin Frappé: base #303446, mantle #292c3c, surface0 #414559, surface1 #51576d,
+# accent: Netresearch teal (#2f99a4), the same as the Ghostty tab pills.
+[theme.custom]
+sidebar_bg = "#292c3c"
+panel_bg = "#303446"
+active_row_bg = "#414559"
+selection_bg = "#51576d"
+accent = "#2f99a4"   # Netresearch teal, matches the Ghostty tab CSS
+red = "#e78284"
+green = "#a6d189"
+yellow = "#e5c890"
+blue = "#8caaee"
+# Undocumented but accepted Catppuccin slots (found in the binary's token table).
+# They drive the dim text such as inactive tabs; lifted one step brighter than the
+# palette's own mapping so inactive tabs stay readable: subtext0 -> Frappé subtext1.
+surface0 = "#414559"
+surface1 = "#51576d"
+overlay0 = "#838ba7"
+overlay1 = "#949cbb"
+subtext0 = "#b5bfe2"
 [update]
 # Homebrew owns upgrades (Brewfile). Keep herdr from advertising `herdr update`,
 # which would install a second binary outside brew.
@@ -171,3 +193,16 @@ key = "prefix+alt+y"
 type = "plugin_action"
 command = "herdr-theme-picker.open"
 description = "theme picker: pick a palette for the herdr UI"
+
+# herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, split or tab.
+[[keys.command]]
+key = "prefix+alt+e"
+type = "plugin_action"
+command = "ray.file-explorer.open"
+description = "yazi: file explorer beside the current pane"
+
+[[keys.command]]
+key = "prefix+alt+shift+e"
+type = "plugin_action"
+command = "ray.file-explorer.open-tab"
+description = "yazi: file explorer in a new tab"
