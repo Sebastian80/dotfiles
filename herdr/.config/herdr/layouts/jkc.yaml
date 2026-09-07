@@ -1,43 +1,26 @@
 # herdr-spreader layout for the JKC B2B shop (Magento 2.4.7, docker compose stack).
 # Apply: herdr-spreader apply --file ~/.config/herdr/layouts/jkc.yaml
 # Every apply creates a NEW workspace; close the old one first or you get two.
+#
+# The agent owns the screen; tools appear on demand and vanish:
+#   prefix+alt+g lazygit popup      prefix+alt+d lazydocker popup   prefix+alt+b btop popup
+#   prefix+alt+t Magento log tail   prefix+alt+f floating scratch shell
+#   prefix+alt+r reviewr diff pane  prefix+alt+l annotate the agent's last reply
+# Parallel agents get their own tab (prefix+c), not a split: 108 columns is too
+# narrow for two.
 workspaces:
   - name: jkc
     root: ~/workspace/jkc-magento
     focus: true
     tabs:
-      # 1 · the agent and the diff of what it is doing, side by side.
-      #     --continue picks up the most recent conversation in this repo, or starts
-      #     a fresh one when there is none. lazygit renders diffs through delta.
-      - label: agent
+      # --continue resumes the most recent conversation in this repo, or starts
+      # a fresh one when there is none.
+      - label: claude
         panes:
           - command: claude --continue
             focus: true
-          - split: right
-            ratio: 0.4
-            command: lazygit
-
-      # 2 · independent read-only reviewer; the launch line from rules/codex.md.
-      #     Prompt it with the branch to review; it never writes.
-      - label: review
-        panes:
-          - command: codex -m gpt-6-astra -c model_reasoning_effort=high -s read-only -a never
-
-      # 3 · the compose stack: containers, per-service logs, exec into setup/phpfpm.
-      - label: docker
-        panes:
-          - command: lazydocker
-
-      # 4 · Magento's own logs, the ones lazydocker does not show (bind-mounted var/log).
-      - label: logs
-        panes:
-          - command: tail -n 50 -F var/log/exception.log var/log/system.log
-          - split: down
-            ratio: 0.35
-            command: tail -n 20 -F var/log/debug.log var/log/cron.log
-
-      # 5 · plain shell in the repo root for composer, bin/magento via the setup
-      #     container, magerun2, deployer and the OPSJKC scripts under .claude/.
+      # bin/magento via the setup container, docker compose, magerun2, deployer,
+      # and the incident scripts under .claude/.
       - label: shell
         panes:
           - {}

@@ -49,6 +49,37 @@ description = "lazygit"
 width = "90%"
 height = "90%"
 
+# On-demand tools: the agent keeps the screen, these appear over it and vanish.
+[[keys.command]]
+key = "prefix+alt+d"
+type = "popup"
+command = "lazydocker"
+description = "lazydocker: compose stack, service logs, exec"
+width = "90%"
+height = "90%"
+
+[[keys.command]]
+key = "prefix+alt+b"
+type = "popup"
+command = "btop"
+description = "btop: system monitor"
+width = "90%"
+height = "90%"
+
+# Temporary pane beside the agent; ctrl+c closes it. Magento logs in var/log,
+# works from any pane whose cwd is a Magento root.
+[[keys.command]]
+key = "prefix+alt+t"
+type = "pane"
+command = "tail -n 40 -F var/log/exception.log var/log/system.log var/log/debug.log"
+description = "tail Magento logs (var/log) in a temporary pane"
+
+[[keys.command]]
+key = "prefix+alt+f"
+type = "plugin_action"
+command = "herdr-floax.toggle"
+description = "floax: toggle the floating scratch shell of this workspace"
+
 # Plugins (installed with `herdr plugin install`, state under ~/.config/herdr/plugins/)
 [[keys.command]]
 key = "prefix+alt+r"
@@ -91,8 +122,9 @@ agent_panel_sort = "priority"
 delivery = "herdr"
 
 [experimental]
-# Keep recent pane screen history across full server restarts (reboot, `herdr server stop`)
-pane_history = true
+# Pane screen history across server restarts is OFF: it lands as plaintext in
+# session-history.json and these panes carry prod shell output and credentials.
+pane_history = false
 # Pass kitty graphics through to Ghostty so terminal-browser can render inside a pane
 kitty_graphics = true
 
