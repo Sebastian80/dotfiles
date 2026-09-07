@@ -95,3 +95,37 @@ delivery = "herdr"
 pane_history = true
 # Pass kitty graphics through to Ghostty so terminal-browser can render inside a pane
 kitty_graphics = true
+
+# herdr-annotate (plannotator/herdr-annotate): comment on terminal text, review markdown
+# and agent replies in plannotator-tui, send the notes to the agent. README suggests
+# prefix+a/o; prefix+o is herdr's open_notification_target, so these stay in the
+# prefix+alt namespace with the other plugins.
+[[keys.command]]
+key = "prefix+alt+a"
+type = "plugin_action"
+command = "annotate.capture"
+description = "annotate: comment on selected terminal text"
+
+[[keys.command]]
+key = "prefix+alt+c"
+type = "plugin_action"
+command = "annotate.copy-context"
+description = "annotate: copy all annotations as markdown"
+
+[[keys.command]]
+key = "prefix+alt+m"
+type = "plugin_action"
+command = "annotate.manage"
+description = "annotate: manage annotations"
+
+[[keys.command]]
+key = "prefix+alt+o"
+type = "plugin_action"
+command = "annotate.open"
+description = "annotate: review markdown files in this folder"
+
+[[keys.command]]
+key = "prefix+alt+l"
+type = "plugin_action"
+command = "annotate.last"
+description = "annotate: review the agent's last reply"
