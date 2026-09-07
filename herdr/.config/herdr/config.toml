@@ -162,16 +162,6 @@ type = "plugin_action"
 command = "annotate.last"
 description = "annotate: review the agent's last reply"
 
-# Styling trial (2026-09-07): theme picker maps a terminalcolors.com palette into
-# [theme.custom] below and syncs the ANSI colours to Ghostty via OSC. Nerd-font tab
-# icons run as a watcher started by the plugin; they compete with auto-title for
-# the tab label, see the notes in the trial.
-[[keys.command]]
-key = "prefix+alt+y"
-type = "plugin_action"
-command = "herdr-theme-picker.open"
-description = "theme picker: pick a palette for the herdr UI"
-
 # herdr-icon-agent-ui: sidebar agent rows with the harness logo and an animated state
 # line. $state_* tokens come from the plugin (exactly one is set per pane); the logo
 # glyph sits in the same coloured line so herdr draws no "·" separators.
