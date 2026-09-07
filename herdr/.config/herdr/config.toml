@@ -89,6 +89,14 @@ type = "shell"
 command = "herdr-tool-tab btop btop"
 description = "btop in a tab"
 
+# Plannotator code review of the focused pane's repo: page in the browser, the
+# annotations come back as the workspace agent's next prompt (herdr-plannotator-review).
+[[keys.command]]
+key = "prefix+alt+shift+p"
+type = "shell"
+command = "herdr-plannotator-review"
+description = "plannotator: review this repo's diff, feedback goes to the agent"
+
 # Temporary pane beside the agent; ctrl+c closes it. Magento logs in var/log,
 # works from any pane whose cwd is a Magento root.
 [[keys.command]]

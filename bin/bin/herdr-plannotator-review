@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Plannotator code review from a herdr key: opens a "plannotator" tab, runs
+# `plannotator review` on the focused pane's repo (the page opens in the browser),
+# and delivers the returned annotations or approval to the workspace's agent as
+# its next prompt. Usage: herdr-plannotator-review            (bind to a key)
+#                        herdr-plannotator-review --run DIR AGENT_PANE   (internal)
+set -euo pipefail
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; exit 0
+fi
+
+if [ "${1:-}" = "--run" ]; then
+  dir="$2"; agent="$3"
+  cd "$dir"
+  echo "plannotator review in $dir"
+  echo "review page opens in the browser; approve or send feedback there."
+  set +e
+  feedback="$(plannotator review 2>/tmp/herdr-plannotator-review.err)"; rc=$?
+  set -e
+  if [ $rc -ne 0 ] && [ -z "$feedback" ]; then
+    echo "plannotator exited $rc without feedback:"; cat /tmp/herdr-plannotator-review.err; sleep 8; exit $rc
+  fi
+  if [ -n "$agent" ]; then
+    herdr agent prompt "$agent" "Plannotator review result for $(basename "$dir"):
+
+$feedback" --wait --timeout 15000 >/dev/null 2>&1 || herdr agent send-keys "$agent" enter >/dev/null 2>&1 || true
+    echo "delivered to agent $agent"
+  else
+    echo "no agent in this workspace, result:"; echo "$feedback"; sleep 15
+  fi
+  sleep 3
+  exit 0
+fi
+
+# Key-bound entry: resolve repo and agent from the pane that has UI focus.
+pane_json="$(herdr pane current)"
+pane="$(jq -r '.result.pane.pane_id' <<<"$pane_json")"
+ws="$(jq -r '.result.pane.workspace_id' <<<"$pane_json")"
+dir="$(jq -r '.result.pane.foreground_cwd // .result.pane.cwd' <<<"$pane_json")"
+if ! git -C "$dir" rev-parse --show-toplevel >/dev/null 2>&1; then
+  herdr notification show "Plannotator" --body "not a git repo: $dir" >/dev/null 2>&1 || true
+  exit 1
+fi
+agents="$(herdr agent list)"
+agent="$(jq -r --arg p "$pane" '.result.agents[] | select(.pane_id==$p) | .pane_id' <<<"$agents" | head -1)"
+[ -n "$agent" ] || agent="$(jq -r --arg w "$ws" '.result.agents[] | select(.workspace_id==$w and .agent=="claude") | .pane_id' <<<"$agents" | head -1)"
+exec herdr-tool-tab plannotator "herdr-plannotator-review --run '$dir' '$agent'"
