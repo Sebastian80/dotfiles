@@ -194,15 +194,16 @@ type = "plugin_action"
 command = "herdr-theme-picker.open"
 description = "theme picker: pick a palette for the herdr UI"
 
-# herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, split or tab.
+# herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new
+# focused tab (full width; a split is too narrow for three columns plus preview).
 [[keys.command]]
 key = "prefix+alt+e"
 type = "plugin_action"
-command = "ray.file-explorer.open"
-description = "yazi: file explorer beside the current pane"
+command = "ray.file-explorer.open-tab"
+description = "yazi: file explorer in a new tab"
 
 [[keys.command]]
 key = "prefix+alt+shift+e"
 type = "plugin_action"
-command = "ray.file-explorer.open-tab"
-description = "yazi: file explorer in a new tab"
+command = "ray.file-explorer.open"
+description = "yazi: file explorer beside the current pane"
