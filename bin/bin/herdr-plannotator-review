@@ -16,6 +16,7 @@ if [ "${1:-}" = "--run" ]; then
   out="$(mktemp)"; err="$(mktemp)"
   PLANNOTATOR_BROWSER=/bin/true plannotator review >"$out" 2>"$err" &
   rpid=$!
+  closed_by_user=0
   port=""
   for _ in $(seq 1 40); do
     port="$(ss -ltnp 2>/dev/null | grep "pid=$rpid," | grep -o '127.0.0.1:[0-9]*' | head -1 || true)"
@@ -34,11 +35,20 @@ if [ "${1:-}" = "--run" ]; then
   ) &
   watcher=$!
   terminal-browser open "http://$port" --no-merge --no-toolbar || true
+  # Browser closed first (ctrl+q, q): nobody can answer the review any more, end it.
+  if kill -0 "$rpid" 2>/dev/null; then
+    kill "$rpid" 2>/dev/null || true
+    sleep 0.5
+    kill -9 "$rpid" 2>/dev/null || true
+    closed_by_user=1
+  fi
   wait "$rpid" 2>/dev/null || true
   kill "$watcher" 2>/dev/null || true
   feedback="$(cat "$out")"; rm -f "$out" "$err"
   clear
-  if [ -z "$feedback" ]; then echo "review closed without feedback"; sleep 3; exit 0; fi
+  if [ "${closed_by_user:-0}" = 1 ] || [ -z "$feedback" ]; then
+    echo "review closed without feedback"; sleep 2; exit 0
+  fi
   if [ -n "$agent" ]; then
     herdr agent prompt "$agent" "Plannotator review result for $(basename "$dir"):
 
