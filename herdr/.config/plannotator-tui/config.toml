@@ -1,0 +1,4 @@
+# plannotator-tui inside herdr (annotate plugin): open as a popup over the workspace.
+# Alternatives: "split" beside the agent, "overlay" full tab.
+[herdr]
+placement = "popup"
