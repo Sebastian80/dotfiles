@@ -49,18 +49,18 @@ prepend_previewers = [
     { url = "*.md", run = 'faster-piper -- rich --markdown --force-terminal --width $w "$1"' },
 
     # ========================================
-    # Data Formats - Use rich-preview plugin
+    # Data Formats - rich (auto-detects the format) behind faster-piper's cache
     # ========================================
     # rich-cli 1.8.0 handles structured data formats with:
     # - Automatic format detection
     # - Syntax highlighting and pretty-printing
     # - Rounded panels and guides
-    { url = "*.json", run = "rich-preview" },
-    { url = "*.csv", run = "rich-preview" },
-    { url = "*.rst", run = "rich-preview" },
-    { url = "*.ipynb", run = "rich-preview" },
-    { url = "*.xml", run = "rich-preview" },
-    { url = "*.yaml", run = "rich-preview" },
-    { url = "*.yml", run = "rich-preview" },
-    { url = "*.toml", run = "rich-preview" }
+    { url = "*.json", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.csv", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.rst", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.ipynb", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.xml", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.yaml", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.yml", run = 'faster-piper -- rich --force-terminal --width $w "$1"' },
+    { url = "*.toml", run = 'faster-piper -- rich --force-terminal --width $w "$1"' }
 ]
