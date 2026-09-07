@@ -32,3 +32,10 @@ Below is only what neither skill knows.
 - Re-fetch after every write. Jira DC has a history of silent no-ops.
 - Given a ticket key, read the ticket and every linked MR before touching code, vendor dirs or pipeline traces, then echo scope back in three lines: in scope, out of scope, proof to be produced. Done-state names differ per project (`Fertig` vs `Geschlossen` and the like) and live in that project's auto-memory — never guess one.
 - Release-ticket chaining uses the `Relation` link type.
+- **QA handover is a form, and the hook only sees it by name.** Before any `Send to QA` on an eCom
+  project: load `netresearch-jira` (not only `jira-communication`), add the MR web links, fill UAT
+  (`customfield_10071`), post the summary comment *after* the links, then run
+  `jira-qa-gate.py KEY` and require `QA-GATE-RESULT: pass`. Transition by **name**
+  (`"Send to QA"`), never by id — the PreToolUse gate hook matches the target operand against the
+  gated names, so a numeric id sails past it. (A ticket reached Waiting for QA with an empty UAT
+  field and no MR link that way; the gate found both when run afterwards.)
