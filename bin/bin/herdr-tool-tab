@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Open a tool in a new, focused herdr tab named after it, at the directory of the pane
+# that has UI focus. The tab closes when the tool exits (the shell exits right after).
+#   herdr-tool-tab LABEL COMMAND...      e.g. herdr-tool-tab lazygit lazygit
+# COMMAND is passed to the tab's shell verbatim, so pipes work:
+#   herdr-tool-tab diff 'git diff HEAD | delta --paging=always'
+set -euo pipefail
+if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "usage: herdr-tool-tab LABEL COMMAND...   open COMMAND in a focused herdr tab named LABEL"; exit 0
+fi
+label="$1"; shift; cmd="$*"
+
+dir="$(herdr pane current | jq -r '.result.pane.foreground_cwd // .result.pane.cwd')"
+[ -d "$dir" ] || dir="$HOME"
+out="$(herdr tab create --cwd "$dir" --label "$label" --focus)"
+pane="$(jq -r '.result.root_pane.pane_id // empty' <<<"$out")"
+[ -n "$pane" ] || { echo "herdr-tool-tab: no pane id in response: $out" >&2; exit 1; }
+# Wait for the shell prompt before typing into it; fall back to a short pause.
+herdr pane wait-output "$pane" --match '❯' --timeout 3000 >/dev/null 2>&1 || sleep 1
+herdr pane run "$pane" "clear; $cmd; exit" >/dev/null

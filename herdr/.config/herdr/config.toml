@@ -63,30 +63,31 @@ resize_pane_down = "prefix+shift+j"
 resize_pane_up = "prefix+shift+k"
 resize_pane_right = "prefix+shift+l"
 
+# On-demand tools as focused tabs named after the tool (herdr-tool-tab in dotfiles bin):
+# opened at the focused pane's directory, the tab closes when the tool quits.
 [[keys.command]]
 key = "prefix+alt+g"
-type = "popup"
-command = "lazygit"
-description = "lazygit"
-width = "90%"
-height = "90%"
+type = "shell"
+command = "herdr-tool-tab lazygit lazygit"
+description = "lazygit in a tab"
 
-# On-demand tools: the agent keeps the screen, these appear over it and vanish.
+[[keys.command]]
+key = "prefix+alt+v"
+type = "shell"
+command = "herdr-tool-tab diff 'git diff HEAD | delta --paging=always'"
+description = "working-tree diff vs HEAD through delta, in a tab"
+
 [[keys.command]]
 key = "prefix+alt+d"
-type = "popup"
-command = "lazydocker"
-description = "lazydocker: compose stack, service logs, exec"
-width = "90%"
-height = "90%"
+type = "shell"
+command = "herdr-tool-tab lazydocker lazydocker"
+description = "lazydocker in a tab: compose stack, service logs, exec"
 
 [[keys.command]]
 key = "prefix+alt+b"
-type = "popup"
-command = "btop"
-description = "btop: system monitor"
-width = "90%"
-height = "90%"
+type = "shell"
+command = "herdr-tool-tab btop btop"
+description = "btop in a tab"
 
 # Temporary pane beside the agent; ctrl+c closes it. Magento logs in var/log,
 # works from any pane whose cwd is a Magento root.
@@ -196,13 +197,11 @@ description = "theme picker: pick a palette for the herdr UI"
 
 # herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new
 # focused tab (full width; a split is too narrow for three columns plus preview).
-# herdr-yazi-tab (dotfiles bin): opens the plugin tab, names it "yazi" and focuses it;
-# the raw open-tab action leaves the tab with a generated number.
 [[keys.command]]
 key = "prefix+alt+e"
 type = "shell"
-command = "herdr-yazi-tab"
-description = "yazi: file explorer in a new focused tab named yazi"
+command = "herdr-tool-tab yazi yazi"
+description = "yazi in a tab"
 
 [[keys.command]]
 key = "prefix+alt+shift+e"
