@@ -3,7 +3,8 @@
 # `plannotator review` on the focused pane's repo, shows the review page INSIDE that
 # tab via terminal-browser (no Chrome; ESET's loopback relay breaks it there), and
 # delivers the annotations or approval to the workspace's agent as its next prompt.
-# Usage: herdr-plannotator-review                 (bind to a key)
+# Usage: herdr-plannotator-review                 (bind to a key: opens a tab)
+#        herdr-plannotator-review --popup         (bind to a type = "popup" key)
 #        herdr-plannotator-review --run DIR AGENT_PANE   (internal, runs in the tab)
 set -euo pipefail
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
@@ -11,6 +12,7 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
 fi
 
 if [ "${1:-}" = "--run" ]; then
+  if [ -n "${HERDR_PLANNOTATOR_TRACE:-}" ]; then exec 2>>"$HERDR_PLANNOTATOR_TRACE"; set -x; fi
   dir="$2"; agent="$3"
   cd "$dir"
   out="$(mktemp)"; err="$(mktemp)"
@@ -59,6 +61,24 @@ $feedback" --wait --timeout 15000 >/dev/null 2>&1 || herdr agent send-keys "$age
   fi
   sleep 3
   exit 0
+fi
+
+# --popup: running INSIDE a herdr popup (type = "popup" key command). The popup shell
+# starts in the focused pane's directory and carries HERDR_WORKSPACE_ID; the review
+# renders in the popup itself and feedback goes to the workspace's Claude.
+if [ "${1:-}" = "--popup" ]; then
+  # herdr gives the popup its origin as HERDR_ACTIVE_PANE_ID / _PANE_CWD / _WORKSPACE_ID.
+  if [ -n "${HERDR_PLANNOTATOR_TRACE:-}" ]; then exec 2>>"$HERDR_PLANNOTATOR_TRACE"; set -x; fi
+  dir="${HERDR_ACTIVE_PANE_CWD:-$PWD}"
+  if ! git -C "$dir" rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "not a git repo: $dir"; echo "press the key from a pane inside a repository"; sleep 4; exit 1
+  fi
+  agents="$(herdr agent list)"
+  agent="$(jq -r --arg p "${HERDR_ACTIVE_PANE_ID:-}" '.result.agents[] | select(.pane_id==$p) | .pane_id' <<<"$agents" | head -1)"
+  [ -n "$agent" ] || agent="$(jq -r --arg w "${HERDR_ACTIVE_WORKSPACE_ID:-}" \
+    '.result.agents[] | select(.workspace_id==$w and .agent=="claude") | .pane_id' <<<"$agents" | head -1)"
+  export HERDR_PLANNOTATOR_TRACE
+  exec "$0" --run "$dir" "$agent"
 fi
 
 # Key-bound entry: resolve repo and agent from the pane that has UI focus.

@@ -97,6 +97,9 @@ type = "shell"
 command = "herdr-plannotator-review"
 description = "plannotator: review this repo's diff, feedback goes to the agent"
 
+# No popup variant: herdr popups carry no graphics stream, terminal-browser quits in
+# them and leaves a blank box (tried 2026-09-08 with `herdr-plannotator-review --popup`).
+
 # Temporary pane beside the agent; ctrl+c closes it. Magento logs in var/log,
 # works from any pane whose cwd is a Magento root.
 [[keys.command]]
