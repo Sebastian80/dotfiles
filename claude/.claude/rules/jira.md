@@ -22,8 +22,6 @@ Below is only what neither skill knows.
   every issue type's screen and some projects use their own format — check the project's auto-memory.
 - QA verb status sets (`JIRA_QA_STATUS_NAMES` etc.) are read from the process environment only —
   `~/.bash/exports/jira.bash`, not `~/.env.jira`.
-- Never curl attachment URLs (needs credentials Claude must not read) — `jira-attachment.py` carries
-  auth both ways.
 
 ## Conventions
 
