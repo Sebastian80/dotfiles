@@ -28,9 +28,11 @@ palette = 9=#e84d4d
 # ========================================
 # Font Configuration
 # ========================================
-# JetBrains Mono is built-in and has excellent Nerd Font support
-# Perfect for Oh My Posh icons and powerline symbols
-font-family = "JetBrains Mono"
+# The Nerd Font build of JetBrains Mono from ~/.local/share/fonts (official Ghostty
+# builds embed plain "JetBrains Mono", the distro package does not: naming a family
+# that fontconfig cannot find made Ghostty fall back to DejaVu Sans Mono).
+# Ships the Oh My Posh icons and powerline symbols itself.
+font-family = "JetBrainsMono Nerd Font"
 font-size = 13
 # font-thicken = true    # macOS only, no effect on Linux
 
