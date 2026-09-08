@@ -39,6 +39,8 @@
       "Skill"
     ],
     "deny": [
+      "Agent(ecom-orocommerce-docker:oro-implementer)",
+      "Agent(ecom-orocommerce-docker:oro-qa-reviewer)",
       "Read(.env)",
       "Read(.env.local)",
       "Read(.env.*.local)",
@@ -134,7 +136,7 @@
       "/tmp/claude-1001"
     ]
   },
-  "model": "claude-fable-5-1",
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -173,6 +175,7 @@
       }
     ]
   },
+  "workflowSizeGuideline": "small",
   "statusLine": {
     "type": "command",
     "command": "/bin/bash /home/sebastian/.claude/statusline-omp.sh"
@@ -194,7 +197,8 @@
     "markdown-to-pdf@netresearch-claude-code-marketplace": true,
     "netresearch-branding@netresearch-claude-code-marketplace": true,
     "php-modernization@netresearch-claude-code-marketplace": true,
-    "retro@netresearch-claude-code-marketplace": true
+    "retro@netresearch-claude-code-marketplace": true,
+    "plannotator@plannotator": true
   },
   "extraKnownMarketplaces": {
     "netresearch-claude-code-marketplace": {
@@ -223,12 +227,17 @@
         "source": "github",
         "repo": "obra/superpowers"
       }
+    },
+    "plannotator": {
+      "source": {
+        "source": "github",
+        "repo": "backnotprop/plannotator"
+      }
     }
   },
   "language": "english",
   "feedbackDrafts": "off",
   "effortLevel": "high",
-  "workflowSizeGuideline": "small",
   "autoUpdatesChannel": "latest",
   "plansDirectory": ".claude/plan",
   "tui": "fullscreen",
@@ -251,5 +260,8 @@
       "gcloud destructive/write subcommands (delete, deployments update, iam) — no established prod-safe carve-out; treat as soft block pending review",
       "Force-pushing or deleting a branch other people build on, and rewriting already-published history — destructive but clearable when the user has asked for it in this conversation"
     ]
-  }
+  },
+  "claudeMdExcludes": [
+    "/home/sebastian/dotfiles/claude/.claude/CLAUDE.md"
+  ]
 }
