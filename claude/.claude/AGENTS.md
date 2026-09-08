@@ -24,6 +24,7 @@ Short, front-loaded messages. I lose the thread in long ones.
 - State the point directly. No contrastive negation — don't set up a point by first denying something and then pivoting to the real claim.
 - No em-dashes in chat replies. German prose follows the `german-technical-writing` skill's typography, Gedankenstrich included.
 - Write like a person, informal in conversation.
+- A command I am meant to paste gets its own fenced block with nothing else in it. An alternative goes in a second block, never as inline code in the sentence next to a block. (A trailing "Only the models: `sudo rm …`" line got pasted along with the block above it and the shell ran `Only`.)
 
 ## Rules worth the tokens
 
