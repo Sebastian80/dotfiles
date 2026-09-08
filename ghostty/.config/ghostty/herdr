@@ -7,6 +7,12 @@
 #
 # Launch by hand:  ghostty --config-file=~/.config/ghostty/herdr
 # (the shared ~/.config/ghostty/config is loaded first; this file only overrides)
+#
+# Testing a variant: pass the overrides as a SECOND config file,
+#   ghostty --config-file=~/.config/ghostty/herdr --config-file=/path/override
+# and check `xprop WM_CLASS` before anything else. A --class flag given before a
+# --config-file is overridden by this file's class (includes load after CLI flags),
+# and gtk-single-instance then hands the "test" window to the live Herdr instance.
 
 class = com.mitchellh.ghostty.herdr
 x11-instance-name = herdr

@@ -31,6 +31,19 @@ conflicts, three incidents behind these rules):
 - State the worst-case agent count in the message that launches the workflow, and add a `+Nk` budget
   when the run is unattended.
 
+## Bash tool denials
+
+- A denied compound command ran **none** of its parts. Re-issue the parts you still need as
+  separate calls before continuing. (A denied kill-then-relaunch sequence left a stale Ghostty
+  instance alive; the next test window was silently absorbed into the live Herdr session.)
+
+## Probing Claude Code settings
+
+- A variable set in settings.json `env` beats a shell export: `VAR=x claude -p …` does not
+  override it. Probe with `claude -p --settings '{"env":{"VAR":"x"}}'` and a cheap model.
+- `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`: `0` lifts the limit (nesting allowed), `1` lets the
+  main session spawn but blocks subagents from spawning. Verified live, not in the docs.
+
 ## Task tracking
 
 - Never delete tasks without Sebastian's explicit approval.

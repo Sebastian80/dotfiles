@@ -14,6 +14,8 @@ All tools are installed via Homebrew (`/home/linuxbrew/.linuxbrew/bin/`), except
 - **Git hosting**: `gh` for GitHub, `glab` for GitLab (git.netresearch.de)
 - **Docker**: `docker compose` (v2 syntax, no hyphen). Check if containers are running before exec'ing into them. `docker compose run` consumes the caller's stdin even with `-T` — inside a shell loop reading from a heredoc, feed each run `< /dev/null` or the loop ends after one iteration.
 - **JSON**: `jq` is available for JSON processing in shell pipelines.
+- **`pkill -f` from the Bash tool**: the pattern also matches the tool's own `bash -c …` command line, so it kills the calling shell (exit 144) — anchor it to the executable, `pkill -f '^/usr/bin/ghostty …'`.
+- **Environment listing**: `env` and `printenv` are permission-denied here; list variable names with `compgen -e | grep PREFIX` and read single values with `${VAR}`.
 - **yt-dlp**: "Precondition check failed" + HTTP 400 means the installed binary is stale against YouTube's API; don't debug flags, run `uvx yt-dlp` for the latest.
 - **Locale**: prefix awk/sort/printf pipelines that parse or emit decimal numbers with `LC_ALL=C` — the German locale turns `%.2f` into comma decimals and silently breaks joins/greps on dot-decimal data.
 - **ripgrep in pipelines**: the ripgreprc forces line numbers even on piped output — any `rg` whose output is consumed as data (paths into `head`/loops/`xargs`) needs `-N`, or downstream reads fail on `1:`-prefixed paths.
