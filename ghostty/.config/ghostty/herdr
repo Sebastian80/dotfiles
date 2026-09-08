@@ -22,6 +22,12 @@ gtk-titlebar-style = native
 maximize = true
 window-save-state = never
 
+# Always ask before closing: the shared config skips the prompt, but this window
+# hosts every agent pane. Closing only detaches the client, yet a stray Alt+F4
+# should not do it silently. "always" ignores shell-integration process detection,
+# which is unavailable through the bash wrapper anyway.
+confirm-close-surface = always
+
 # Herdr attaches to its persistent session; when it exits, the window goes with it.
 # Launched from the panel, Ghostty only has the desktop session's environment, and
 # ~/.bashrc bails out for non-interactive shells. An interactive login bash runs the
