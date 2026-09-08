@@ -5,10 +5,6 @@
 - Before acting on a review finding (human, Codex, or subagent), decompose it into independently falsifiable claims — typically arithmetic/logic, external API behavior, and real-world reachability — and test each with the cheapest decisive instrument: unit-level repro against real objects, a direct API probe, a production-data query. Verdicts like "no-ship" often bundle one true claim with refutable ones.
 - For framework-internal mechanisms, a minimal runtime experiment outranks any source-reading chain. Source-reading produces plausible mechanism stories that miss gates elsewhere in the call path (a source-verified UnitOfWork "reachability walk throws" analysis once missed the `commit()` nothing-to-do early return sitting BEFORE the assert — both the original claim and its refutation were part-wrong until a 60-row experiment settled it).
 
-## MCP server design
-
-- MCP resource reads display as a raw escaped-JSON envelope in the Claude Code transcript; tool responses render their text readably. Anything a human should read belongs in a TOOL — use resources only for machine consumption. (Learned building an MCP profiler extension: its panels needed a bridging tool solely because the upstream extension exposed them as resources.)
-
 ## Parallel agents in one checkout
 
 Contract for running several write-agents concurrently in a single working copy
@@ -56,18 +52,12 @@ Measured with a throwaway repo under the scratchpad, after an evening lost to as
 
 ## Workflow fan-out
 
-Nothing in the harness caps the agent count of a Workflow script. Verified against 2.1.261: the
-`workflowSizeGuideline` (small <5, medium <15, large <50) is prompt text, the size warning is a warning
-and is skipped entirely under ultracode, workflow concurrency is `min(16, CPUs-2)` and ignores
-`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`, and the only hard limits are 1000 agents per run and a `+Nk`
-budget directive in the prompt. (A research script asked five sweep agents for "every claim", got 254,
-and scheduled one verifier each; it had to be paused by hand.)
-
-- The number of agents a script can spawn must be a literal or a `slice()` to one — never the length of
-  an agent-produced list. Batch items per topic or file group instead of one agent per item.
+- The number of agents a script can spawn must be a literal or a `slice()` to one — never the length
+  of an agent-produced list. Batch items per topic or file group instead of one agent per item.
+  (A research script asked five sweep agents for "every claim", got 254, and scheduled one verifier
+  each; it had to be paused by hand.)
 - State the worst-case agent count in the message that launches the workflow, and add a `+Nk` budget
   when the run is unattended.
-- Teammates take no subagent concurrency slot either; the 10-agent env cap governs the Agent tool only.
 
 ## Task tracking
 
