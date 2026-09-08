@@ -1,3 +1,0 @@
-# reviewr settings (re-read on every refresh/toggle)
-theme = "catppuccin-frappe"
-default_scope = "uncommitted"

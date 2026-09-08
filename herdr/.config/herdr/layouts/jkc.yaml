@@ -5,7 +5,7 @@
 # The agent owns the screen; tools appear on demand and vanish:
 #   prefix+alt+g lazygit popup      prefix+alt+d lazydocker popup   prefix+alt+b btop popup
 #   prefix+alt+t Magento log tail   prefix+alt+f floating scratch shell
-#   prefix+alt+r reviewr diff pane  prefix+alt+l annotate the agent's last reply
+#   prefix+alt+h hunk diff review    prefix+alt+l annotate the agent's last reply
 # Parallel agents get their own tab (prefix+c), not a split: 108 columns is too
 # narrow for two.
 workspaces:
