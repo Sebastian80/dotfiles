@@ -197,8 +197,7 @@
     "markdown-to-pdf@netresearch-claude-code-marketplace": true,
     "netresearch-branding@netresearch-claude-code-marketplace": true,
     "php-modernization@netresearch-claude-code-marketplace": true,
-    "retro@netresearch-claude-code-marketplace": true,
-    "plannotator@plannotator": true
+    "retro@netresearch-claude-code-marketplace": true
   },
   "extraKnownMarketplaces": {
     "netresearch-claude-code-marketplace": {
@@ -227,12 +226,6 @@
         "source": "github",
         "repo": "obra/superpowers"
       }
-    },
-    "plannotator": {
-      "source": {
-        "source": "github",
-        "repo": "backnotprop/plannotator"
-      }
     }
   },
   "language": "english",
@@ -242,6 +235,9 @@
   "plansDirectory": ".claude/plan",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
+  "claudeMdExcludes": [
+    "/home/sebastian/dotfiles/claude/.claude/CLAUDE.md"
+  ],
   "preferredNotifChannel": "ghostty",
   "teammateMode": "in-process",
   "remoteControlAtStartup": false,
@@ -260,8 +256,5 @@
       "gcloud destructive/write subcommands (delete, deployments update, iam) — no established prod-safe carve-out; treat as soft block pending review",
       "Force-pushing or deleting a branch other people build on, and rewriting already-published history — destructive but clearable when the user has asked for it in this conversation"
     ]
-  },
-  "claudeMdExcludes": [
-    "/home/sebastian/dotfiles/claude/.claude/CLAUDE.md"
-  ]
+  }
 }
