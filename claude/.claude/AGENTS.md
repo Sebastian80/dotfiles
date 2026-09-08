@@ -54,13 +54,13 @@ Things you'd get wrong from first principles, each earned the hard way:
 
 ## Hyperlink references
 
-Linkify references in any output (PR descriptions, commit messages, chat replies, generated docs). Markdown links only — OSC 8 terminal hyperlinks don't render reliably across agents and terminals. Resolve `repo_url` from `git remote get-url origin`, converting SSH (`git@host:org/repo.git`) to HTTPS.
+Linkify references in any output (MR/PR descriptions, commit messages, chat replies, generated docs).
+Markdown links only; OSC 8 terminal hyperlinks don't render reliably across agents and terminals.
 
-| Pattern | Example  | URL template (GitHub)                         |
-|---------|----------|-----------------------------------------------|
-| PR      | #13      | `{repo_url}/pull/13`                          |
-| Issue   | #1234    | `{repo_url}/issues/1234`                      |
-| Commit  | 7c12680  | `{repo_url}/commit/7c12680`                   |
-| Jira    | PROJ-1 | `https://jira.netresearch.de/browse/PROJ-1` |
+**Never write a repo link from memory.** Run `git remote get-url origin` in that repo first and
+convert SSH (`git@host:org/repo.git`) to HTTPS. (Four commit links in one session pointed at a
+guessed org and every one 404'd.) Jira needs no lookup: `https://jira.netresearch.de/browse/KEY`.
 
-GitLab repos use `/-/merge_requests/N`, `/-/issues/N`, `/-/commit/HASH`. Jira comments and descriptions are the exception — they use wiki markup `[text|url]` (see `rules/jira.md`).
+Paths: GitHub `/pull/N`, `/issues/N`, `/commit/HASH`; GitLab `/-/merge_requests/N`, `/-/issues/N`,
+`/-/commit/HASH`. Jira comments and descriptions are the exception — they use wiki markup
+`[text|url]` (see `rules/jira.md`).
