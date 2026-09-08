@@ -1,6 +1,6 @@
 ---
 name: codex-in-herdr
-description: Use this skill WHENEVER running an interactive Codex agent inside a Herdr pane — starting one with `herdr agent start --kind codex`, prompting or reading it, or recovering when it reports agent_not_ready, agent_not_found or blocked. Load it BEFORE sending any keys to a Codex pane. Covers the launch line for astra at high effort, the three startup dialogs that swallow input (update prompt, hooks review, directory trust), fast mode showing up uninvited, and how to brief a security review so the model does not refuse to show its findings. Also use when a Codex pane answers idle but nothing happened, or when a review brief comes back with a cybersecurity refusal.
+description: Use this skill WHENEVER running an interactive Codex agent inside a Herdr pane — starting one with `herdr agent start --kind codex`, prompting or reading it, or recovering when it reports agent_not_ready, agent_not_found or blocked. Load it BEFORE sending any keys to a Codex pane. Covers the launch line for astra at high effort, the three startup dialogs that swallow input (update prompt, hooks review, directory trust), and how to brief a security review so the model does not refuse to show its findings. Also use when a Codex pane answers idle but nothing happened, or when a review brief comes back with a cybersecurity refusal.
 ---
 
 # Interactive Codex in a Herdr pane
@@ -29,11 +29,12 @@ composer, which once produced `//hooks`. `ctrl+u` clears the composer.
 `herdr agent prompt --wait` can return `idle` while a startup dialog is still on screen. Treat the
 first `idle` after a start as unverified until the composer shows "Ask Codex to do anything".
 
-## Fast mode turns itself on
+## Fast mode
 
-The footer may read `gpt-6-astra high fast` after the first turn even though nothing in
-`config.toml` or the launch line asked for it. Fast mode doubles speed and usage. Sebastian wants it
-off for reviews, so check the footer before the first prompt; `/fast` toggles it.
+Sebastian pinned `service_tier = "default"` in `~/.codex/config.toml`, so fast mode is off by
+config and there is nothing to check before a review. If a pane footer ever reads
+`gpt-6-astra high fast` again, that is a regression against the pinned tier, not a setting to
+toggle: say so rather than quietly running the review at double usage.
 
 ## Briefing a security review
 
