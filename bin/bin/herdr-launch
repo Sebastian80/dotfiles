@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Launch Herdr in its chromeless Ghostty window (profile ~/.config/ghostty/herdr) and
+# maximize it. Budgie ignores Ghostty's maximize/fullscreen startup hints on X11, so the
+# window is maximized from outside once it is mapped. A second launch focuses the
+# existing window instead of attaching another client. Target of herdr.desktop.
+#   herdr-launch [-h]
+set -euo pipefail
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  echo "usage: herdr-launch   open (or focus) the maximized Herdr Ghostty window"; exit 0
+fi
+profile="$HOME/.config/ghostty/herdr"
+class="com.mitchellh.ghostty.herdr"
+
+find_window() { xdotool search --onlyvisible --class "$class" 2>/dev/null | tail -1; }
+
+if win="$(find_window)" && [ -n "$win" ]; then
+  wmctrl -i -a "$win"
+  exit 0
+fi
+
+# Started from inside a Herdr pane, these would make the new client refuse to nest.
+unset HERDR_BIN_PATH HERDR_ENV HERDR_PANE_ID HERDR_SOCKET_PATH HERDR_TAB_ID HERDR_WORKSPACE_ID
+setsid ghostty --config-file="$profile" >/dev/null 2>&1 < /dev/null &
+
+for _ in $(seq 1 50); do
+  if win="$(find_window)" && [ -n "$win" ]; then
+    wmctrl -i -r "$win" -b add,maximized_vert,maximized_horz
+    exit 0
+  fi
+  sleep 0.1
+done
+echo "herdr-launch: Ghostty window did not appear within 5s" >&2
+exit 1
