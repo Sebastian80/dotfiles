@@ -63,6 +63,13 @@ resize_pane_down = "prefix+shift+j"
 resize_pane_up = "prefix+shift+k"
 resize_pane_right = "prefix+shift+l"
 
+# Unbound by default. Agent N directly (the alt digits are free even though the
+# alt letters are not), workspaces by number, and tmux's last-pane toggle.
+# previous/next_workspace stay unbound: prefix+w already opens the picker.
+focus_agent = "prefix+alt+1..9"
+switch_workspace = "prefix+shift+1..9"
+last_pane = "prefix+semicolon"
+
 # On-demand tools as focused tabs named after the tool (herdr-tool-tab in dotfiles bin):
 # opened at the focused pane's directory, the tab closes when the tool quits.
 [[keys.command]]
@@ -97,25 +104,6 @@ type = "plugin_action"
 command = "herdr-floax.toggle"
 description = "floax: toggle the floating scratch shell of this workspace"
 
-# Plugins (installed with `herdr plugin install`, state under ~/.config/herdr/plugins/)
-[[keys.command]]
-key = "prefix+alt+s"
-type = "plugin_action"
-command = "herdr-spreader.apply"
-description = "spreader: apply the workspace layout from plugins/config/herdr-spreader/config.yaml"
-
-[[keys.command]]
-key = "prefix+alt+p"
-type = "plugin_action"
-command = "ray.plugin-manager.open"
-description = "plugin manager popup: install, update, enable, disable, browse the marketplace"
-
-[[keys.command]]
-key = "prefix+alt+w"
-type = "plugin_action"
-command = "herdr-plugin-workspace-manager.apply"
-description = "workspace manager: apply the repo's layout (plugins/config/herdr-plugin-workspace-manager/config.yml) to this workspace"
-
 [worktrees]
 # Under ~/workspace so Claude Code's additionalDirectories cover agent worktrees
 directory = "~/workspace/.worktrees"
@@ -139,49 +127,21 @@ pane_history = false
 # Pass kitty graphics through to Ghostty so terminal-browser can render inside a pane
 kitty_graphics = true
 
-# herdr-annotate (plannotator/herdr-annotate): comment on terminal text, review markdown
-# and agent replies in plannotator-tui, send the notes to the agent. README suggests
-# prefix+a/o; prefix+o is herdr's open_notification_target, so these stay in the
-# prefix+alt namespace with the other plugins.
+# Command palette (jt.command-palette): fzf over every action of every installed
+# plugin. Annotate, hunkdiff's other reviews, the theme picker, the plugin manager,
+# spreader and workspace-manager live here instead of holding a key each. The
+# plugin's README suggests prefix+p, which is herdr's own previous_tab; a double
+# tap of the prefix is free and faster. Needs fzf and jq.
 [[keys.command]]
-key = "prefix+alt+a"
+key = "prefix+space"
 type = "plugin_action"
-command = "annotate.capture"
-description = "annotate: comment on selected terminal text"
+command = "jt.command-palette.open"
+description = "command palette: fuzzy-pick any plugin action"
 
-[[keys.command]]
-key = "prefix+alt+c"
-type = "plugin_action"
-command = "annotate.copy-context"
-description = "annotate: copy all annotations as markdown"
-
-[[keys.command]]
-key = "prefix+alt+m"
-type = "plugin_action"
-command = "annotate.manage"
-description = "annotate: manage annotations"
-
-[[keys.command]]
-key = "prefix+alt+o"
-type = "plugin_action"
-command = "annotate.open"
-description = "annotate: review markdown files in this folder"
-
-[[keys.command]]
-key = "prefix+alt+l"
-type = "plugin_action"
-command = "annotate.last"
-description = "annotate: review the agent's last reply"
-
-# Styling trial (2026-09-07): theme picker maps a terminalcolors.com palette into
-# [theme.custom] below and syncs the ANSI colours to Ghostty via OSC. Nerd-font tab
-# icons run as a watcher started by the plugin; they compete with auto-title for
-# the tab label, see the notes in the trial.
-[[keys.command]]
-key = "prefix+alt+y"
-type = "plugin_action"
-command = "herdr-theme-picker.open"
-description = "theme picker: pick a palette for the herdr UI"
+# Styling trial (2026-09-07): the theme picker (palette: "Theme picker") maps a
+# terminalcolors.com palette into [theme.custom] and syncs the ANSI colours to
+# Ghostty via OSC. Nerd-font tab icons run as a watcher started by the plugin;
+# they compete with auto-title for the tab label, see the notes in the trial.
 
 # herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new
 # focused tab (full width; a split is too narrow for three columns plus preview).
@@ -190,32 +150,6 @@ key = "prefix+alt+e"
 type = "shell"
 command = "herdr-tool-tab yazi yazi"
 description = "yazi in a tab"
-
-[[keys.command]]
-key = "prefix+alt+shift+e"
-type = "plugin_action"
-command = "ray.file-explorer.open"
-description = "yazi: file explorer beside the current pane"
-
-# BEGIN jhochenbaum.hunkdiff — managed by `setup-keys`; edit via the plugin, not by hand
-[[keys.command]]
-key = "prefix+shift+s"
-type = "plugin_action"
-command = "jhochenbaum.hunkdiff.send-review"
-description = "hunk: send review to agent"
-
-[[keys.command]]
-key = "prefix+shift+c"
-type = "plugin_action"
-command = "jhochenbaum.hunkdiff.review:commit"
-description = "hunk: review the last commit"
-
-[[keys.command]]
-key = "prefix+shift+a"
-type = "plugin_action"
-command = "jhochenbaum.hunkdiff.review:staged"
-description = "hunk: review staged changes"
-# END jhochenbaum.hunkdiff
 
 [[keys.command]]
 key = "prefix+alt+h"
