@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Herdr
+GenericName=Agent Workspace
+Comment=Herdr terminal workspace for coding agents, in a chromeless Ghostty window
+TryExec=/usr/bin/ghostty
+Exec=/usr/bin/ghostty --config-file=/home/sebastian/.config/ghostty/herdr
+Icon=herdr
+Terminal=false
+Categories=Development;System;TerminalEmulator;
+Keywords=herdr;terminal;agent;claude;codex;
+StartupNotify=true
+StartupWMClass=com.mitchellh.ghostty.herdr

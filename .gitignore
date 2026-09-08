@@ -10,6 +10,7 @@
 .env.*
 !.env.example
 *.local
+!.local/
 *_local
 *_secret
 *_private

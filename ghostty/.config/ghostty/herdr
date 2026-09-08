@@ -1,0 +1,52 @@
+# Ghostty profile for the Herdr launcher (herdr.desktop).
+#
+# Loads the shared config, then strips every piece of Ghostty chrome: Herdr draws
+# its own tabs, splits and sidebar, so the GTK header bar, the window-manager
+# decorations and Ghostty's tab bar only cost rows. Runs as its own GTK instance
+# (separate class) so the panel groups it under herdr.desktop, not under Ghostty.
+#
+# Launch by hand:  ghostty --config-file=~/.config/ghostty/herdr
+# (the shared ~/.config/ghostty/config is loaded first; this file only overrides)
+
+class = com.mitchellh.ghostty.herdr
+x11-instance-name = herdr
+gtk-single-instance = true
+title = Herdr
+
+window-decoration = none
+window-show-tab-bar = never
+gtk-titlebar = false
+# The shared config merges the tab bar into the header bar (tabs style); that header
+# survives window-decoration = none. Native style lets the decoration setting drop it.
+gtk-titlebar-style = native
+maximize = true
+window-save-state = never
+
+# Herdr attaches to its persistent session; when it exits, the window goes with it.
+command = /home/linuxbrew/.linuxbrew/bin/herdr
+
+# Escape hatch for moving or resizing the window by its title bar.
+keybind = ctrl+shift+d=toggle_window_decorations
+
+# Ghostty tabs and splits would each start a second herdr client attached to the
+# same session. Unbind them so the keys reach Herdr, which owns tabs and splits.
+keybind = ctrl+shift+t=unbind
+keybind = ctrl+shift+n=unbind
+keybind = ctrl+shift+w=unbind
+keybind = ctrl+shift+o=unbind
+keybind = ctrl+shift+e=unbind
+keybind = ctrl+tab=unbind
+keybind = ctrl+shift+tab=unbind
+keybind = ctrl+page_up=unbind
+keybind = ctrl+page_down=unbind
+keybind = ctrl+shift+arrow_left=unbind
+keybind = ctrl+shift+arrow_right=unbind
+keybind = alt+1=unbind
+keybind = alt+2=unbind
+keybind = alt+3=unbind
+keybind = alt+4=unbind
+keybind = alt+5=unbind
+keybind = alt+6=unbind
+keybind = alt+7=unbind
+keybind = alt+8=unbind
+keybind = alt+9=unbind
