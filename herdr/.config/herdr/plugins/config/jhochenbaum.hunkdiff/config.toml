@@ -1,0 +1,5 @@
+# herdr-hunk-diff: review agent diffs in hunk, send inline comments back to the agent.
+# Tools live in tabs here (agent keeps the full screen); untracked files (.claude/) stay out.
+[review]
+placement         = "tab"
+exclude_untracked = true
