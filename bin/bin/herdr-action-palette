@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Fuzzy-pick and run any herdr plugin action. Bound to prefix+space as a
+# type = "popup" command in ~/.config/herdr/config.toml, so it runs in a
+# session-modal overlay and the overlay closes when this script exits.
+#
+#   herdr-action-palette          open the picker
+#
+# Ranking matters here: jt.command-palette passes --no-sort to fzf, so its list
+# stays in alphabetical order and the query only filters. Typing "hunk" matched
+# "herdr-plUgiN-worKspace-manager" and put its `apply` action — which destroys
+# the workspace's first tab — on the preselected row. Scoring is left on below,
+# with --tiebreak=begin,index so a match at the start of the id wins.
+set -uo pipefail
+
+case "${1:-}" in
+  -h | --help)
+    echo "usage: herdr-action-palette   fuzzy-pick and run a herdr plugin action"
+    exit 0
+    ;;
+esac
+
+# The overlay closes the moment this script exits, so an error has to hold the
+# pane open long enough to be read.
+die() {
+  printf '%s\n' "$*" >&2
+  printf '\nPress any key to close…' >&2
+  read -r -n1 _ 2>/dev/null || sleep 3
+  exit 1
+}
+
+herdr_bin="${HERDR_BIN_PATH:-herdr}"
+command -v fzf >/dev/null 2>&1 || die "herdr-action-palette: fzf is not on PATH."
+command -v jq >/dev/null 2>&1 || die "herdr-action-palette: jq is not on PATH."
+
+# Field 1 is the id we invoke, field 2 is what fzf shows and matches against.
+lines="$(
+  "$herdr_bin" plugin action list 2>/dev/null |
+    jq -r '
+      .result.actions[]
+      | (.plugin_id + "." + .action_id) as $qid
+      | [ $qid, ($qid + "  " + .title) ]
+      | @tsv
+    ' 2>/dev/null
+)"
+[ -n "$lines" ] || die "herdr-action-palette: no plugin actions available."
+
+choice="$(
+  printf '%s\n' "$lines" |
+    fzf --delimiter=$'\t' \
+      --with-nth=2 \
+      --tiebreak=begin,index \
+      --prompt='herdr action ▸ ' \
+      --header='↑↓ select · enter run · esc cancel' \
+      --reverse \
+      --cycle \
+      --no-multi
+)" || true
+[ -n "$choice" ] || exit 0
+
+action_id="${choice%%$'\t'*}"
+
+# `plugin action invoke` returns once the action is DISPATCHED, so exit 0 only
+# means "accepted"; the action's own command can still fail afterwards.
+resp="$("$herdr_bin" plugin action invoke "$action_id" 2>&1)" ||
+  die "herdr-action-palette: could not invoke ${action_id}
+${resp}"
+
+# Take the plugin id from the response rather than splitting the action id: both
+# halves can contain dots (ray.file-explorer) and colons (hunkdiff review:commit).
+log_id="$(printf '%s' "$resp" | jq -r '.result.log.log_id // empty' 2>/dev/null)"
+plugin_id="$(printf '%s' "$resp" | jq -r '.result.log.plugin_id // empty' 2>/dev/null)"
+[ -n "$log_id" ] && [ -n "$plugin_id" ] || exit 0
+
+# Poll that run to a terminal state so a failure is shown instead of the overlay
+# vanishing on a silent no-op. Still running at the deadline is treated as a
+# healthy long-running action and left alone.
+for _ in $(seq 1 25); do
+  entry="$(
+    "$herdr_bin" plugin log list --plugin "$plugin_id" --limit 20 2>/dev/null |
+      jq -c --arg id "$log_id" '.result.logs[]? | select(.log_id == $id)' 2>/dev/null
+  )"
+  case "$(printf '%s' "$entry" | jq -r '.status // empty' 2>/dev/null)" in
+    succeeded) exit 0 ;;
+    failed)
+      code="$(printf '%s' "$entry" | jq -r '.exit_code // "?"' 2>/dev/null)"
+      err="$(printf '%s' "$entry" | jq -r '.stderr // empty' 2>/dev/null)"
+      die "herdr-action-palette: ${action_id} failed (exit ${code})
+${err}"
+      ;;
+  esac
+  sleep 0.2
+done
