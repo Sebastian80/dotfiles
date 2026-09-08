@@ -30,6 +30,8 @@ command = /bin/bash -lic "exec herdr"
 
 # Escape hatch for moving or resizing the window by its title bar.
 keybind = ctrl+shift+d=toggle_window_decorations
+# maximize = true is not honoured by Budgie on X11; toggle by hand (Super+Up also works).
+keybind = ctrl+shift+m=toggle_maximize
 
 # Ghostty tabs and splits would each start a second herdr client attached to the
 # same session. Unbind them so the keys reach Herdr, which owns tabs and splits.
