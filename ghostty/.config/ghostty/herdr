@@ -23,7 +23,10 @@ maximize = true
 window-save-state = never
 
 # Herdr attaches to its persistent session; when it exits, the window goes with it.
-command = /home/linuxbrew/.linuxbrew/bin/herdr
+# Launched from the panel, Ghostty only has the desktop session's environment, and
+# ~/.bashrc bails out for non-interactive shells. An interactive login bash runs the
+# full profile (PATH, fnm, aliases) and hands its environment to herdr via exec.
+command = /bin/bash -lic "exec herdr"
 
 # Escape hatch for moving or resizing the window by its title bar.
 keybind = ctrl+shift+d=toggle_window_decorations
