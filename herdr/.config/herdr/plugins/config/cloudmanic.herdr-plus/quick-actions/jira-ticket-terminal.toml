@@ -1,0 +1,13 @@
+# Same ticket, rendered inside herdr instead of Chrome. terminal-browser takes
+# over whatever pane it is started in, so it goes through herdr-tool-tab: a
+# focused tab named after the ticket, gone again when the browser is closed.
+# The popup only issues the herdr API calls to create that tab; the browser
+# itself lives in the tab, out of reach of the popup's teardown.
+name = "Open Jira ticket in terminal"
+description = "Type a ticket key and open it in a terminal browser tab"
+type = "form"
+command = "herdr-tool-tab {{.Value}} 'terminal-browser open https://jira.netresearch.de/browse/{{.Value}}'"
+
+[form]
+prompt = "Ticket key"
+placeholder = "e.g. HMKG-1234"
