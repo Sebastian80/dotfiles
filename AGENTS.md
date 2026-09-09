@@ -43,4 +43,14 @@ Open migration item — **xclip is X11-only** and flaky under Wayland/XWayland c
 
 Fix direction: install `wl-clipboard` and branch on `$WAYLAND_DISPLAY` (wl-copy/wl-paste, xclip fallback).
 
+Second migration item — **the display and window scripts are X11-only and should
+be dropped, not ported.** `bin/display-scale` (xrandr transform on the external
+monitor) and `bin/window-to-screen` (wmctrl/xdotool) exist because X11 has one
+global scale and cannot render a monitor denser than native, and because the
+herdr Ghostty window has no title bar to drag. Plasma on Wayland has per-monitor
+fractional scaling natively, so the transform becomes a display setting. The
+dconf shortcuts in `system/dconf/media-keys.ini` are also GNOME-specific
+(`org.gnome.settings-daemon`) and have no meaning under KDE; re-create them in
+Plasma's shortcut editor.
+
 GTK stow package (`gtk.css` + bookmarks) is harmless on KDE, but don't add a `settings.ini` to it — Plasma's `kde-gtk-config` owns `~/.config/gtk-3.0/settings.ini`.
