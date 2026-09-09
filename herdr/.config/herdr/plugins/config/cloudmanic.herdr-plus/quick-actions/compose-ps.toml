@@ -1,5 +1,11 @@
 # Read-only: shows what is actually running before you go looking for logs.
+#
+# Runs in a tab, not in the picker. herdr-plus executes a quick action inside
+# the popup pane and tears that pane down the moment the picker exits, so a
+# command whose whole point is its output would flash and vanish. Fire-and-
+# forget actions (open a URL) are fine there; anything you need to read is not.
+# The tab stays until you press a key.
 name = "Docker: stack status"
-description = "docker compose ps in this directory"
+description = "docker compose ps, in a tab that stays open"
 type = "command"
-command = "docker compose ps"
+command = "herdr-tool-tab compose-ps 'docker compose ps; printf \"\\n[any key closes]\"; read -rsn1'"
