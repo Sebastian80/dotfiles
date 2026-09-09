@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# Move a window to another monitor, without needing a title bar to drag.
+#
+#   window-to-screen                 move the focused window to the next monitor
+#   window-to-screen next|prev       explicit direction
+#   window-to-screen DisplayPort-1   name a monitor (see `xrandr --listmonitors`)
+#   window-to-screen -l              list monitors and the focused window
+#   window-to-screen --window ID …   act on a specific window instead of the focused one
+#
+# The herdr Ghostty profile sets window-decoration = none, so the window has no
+# frame to grab and Budgie's Super+Shift+arrow does not always move it. This
+# drives the window manager directly instead.
+set -euo pipefail
+
+usage() {
+  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+  exit "${1:-0}"
+}
+
+command -v xrandr >/dev/null || { echo "window-to-screen: xrandr not found" >&2; exit 1; }
+command -v wmctrl >/dev/null || { echo "window-to-screen: wmctrl not found" >&2; exit 1; }
+command -v xdotool >/dev/null || { echo "window-to-screen: xdotool not found" >&2; exit 1; }
+
+win=""
+target="next"
+list=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h | --help) usage 0 ;;
+    -l | --list) list=1; shift ;;
+    --window) win="$2"; shift 2 ;;
+    *) target="$1"; shift ;;
+  esac
+done
+
+# "name x y w h" per connected monitor, in left-to-right order.
+monitors() {
+  xrandr --listmonitors | tail -n +2 | awk '{
+    name = $NF
+    geo = $3                      # e.g. 5120/597x2880/336+2880+0
+    sub(/\/[0-9]+x/, "x", geo); sub(/\/[0-9]+\+/, "+", geo)
+    split(geo, a, /[x+]/)
+    print name, a[3], a[4], a[1], a[2]
+  }' | sort -k2 -n
+}
+
+[ -n "$win" ] || win=$(xdotool getactivewindow)
+eval "$(xdotool getwindowgeometry --shell "$win")"   # X, Y, WIDTH, HEIGHT
+
+if [ "$list" = 1 ]; then
+  echo "monitors (name x y w h):"; monitors | sed 's/^/  /'
+  echo "focused window: id=$win at ${X},${Y} ${WIDTH}x${HEIGHT}"
+  exit 0
+fi
+
+mapfile -t mons < <(monitors)
+[ "${#mons[@]}" -gt 1 ] || { echo "window-to-screen: only one monitor" >&2; exit 1; }
+
+# Which monitor holds the window's centre right now?
+cx=$((X + WIDTH / 2)); cy=$((Y + HEIGHT / 2)); cur=0
+for i in "${!mons[@]}"; do
+  read -r _ mx my mw mh <<<"${mons[$i]}"
+  if [ "$cx" -ge "$mx" ] && [ "$cx" -lt "$((mx + mw))" ] && [ "$cy" -ge "$my" ] && [ "$cy" -lt "$((my + mh))" ]; then
+    cur=$i
+  fi
+done
+
+case "$target" in
+  next) idx=$(((cur + 1) % ${#mons[@]})) ;;
+  prev) idx=$(((cur - 1 + ${#mons[@]}) % ${#mons[@]})) ;;
+  *)
+    idx=-1
+    for i in "${!mons[@]}"; do
+      read -r name _ _ _ _ <<<"${mons[$i]}"
+      [ "$name" = "$target" ] && idx=$i
+    done
+    [ "$idx" -ge 0 ] || { echo "window-to-screen: no monitor named '$target'" >&2; monitors >&2; exit 1; }
+    ;;
+esac
+
+read -r name mx my mw mh <<<"${mons[$idx]}"
+
+# A maximized or fullscreen window ignores a move until the state is dropped;
+# maximization is restored afterwards so the window looks the same on the far side.
+state=$(xprop -id "$win" _NET_WM_STATE 2>/dev/null || true)
+was_max=0
+case "$state" in *_NET_WM_STATE_MAXIMIZED_HORZ*) was_max=1 ;; esac
+case "$state" in *_NET_WM_STATE_FULLSCREEN*) wmctrl -i -r "$win" -b remove,fullscreen ;; esac
+[ "$was_max" = 1 ] && wmctrl -i -r "$win" -b remove,maximized_vert,maximized_horz
+
+# Keep the window inside the target monitor; shrink only if it does not fit.
+w=$((WIDTH < mw ? WIDTH : mw)); h=$((HEIGHT < mh ? HEIGHT : mh))
+x=$((mx + (mw - w) / 2)); y=$((my + (mh - h) / 2))
+wmctrl -i -r "$win" -e "0,${x},${y},${w},${h}"
+
+[ "$was_max" = 1 ] && wmctrl -i -r "$win" -b add,maximized_vert,maximized_horz
+echo "moved window $win to ${name} (${w}x${h} at ${x},${y})"

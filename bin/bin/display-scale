@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Scale the external monitor down so its UI roughly matches the laptop panel.
+#
+#   display-scale            apply the default factor (1.5)
+#   display-scale 1.25       apply another factor
+#   display-scale 1          native resolution, no transform
+#
+# Why: this is a mixed-DPI X11 setup. The eDP panel is 2880x1920 in 285mm (~257
+# dpi); the external is 2560x1440 in 597mm (~109 dpi). X11 has one global scale,
+# so the external gets an xrandr transform instead: it renders a larger
+# framebuffer and bilinear-filters it down, which shrinks the UI at some cost in
+# sharpness. Anything above 1 trades crispness for desktop area.
+#
+# mutter stores its own per-monitor scaling in ~/.config/monitors.xml and does
+# not know about this transform, so a display change through the settings panel
+# will undo it; run this again afterwards.
+set -euo pipefail
+
+output="${DISPLAY_SCALE_OUTPUT:-DisplayPort-1}"
+factor="${1:-1.5}"
+
+case "${1:-}" in
+  -h | --help)
+    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+    exit 0
+    ;;
+esac
+
+command -v xrandr >/dev/null || { echo "display-scale: xrandr not found" >&2; exit 1; }
+
+# Nothing to do when the external is not plugged in; this runs at login too.
+if ! xrandr --query | grep -q "^${output} connected"; then
+  exit 0
+fi
+
+xrandr --output "$output" --auto --scale "${factor}x${factor}" --right-of eDP
+
+# Report what the server ended up with rather than what was asked for.
+xrandr --listmonitors | awk -v o="$output" '$NF == o { print "display-scale: " o " -> " $3 }'
