@@ -1,7 +1,7 @@
 # Dotfiles Makefile - GNU Stow Management
 # Usage: make help
 
-.PHONY: help install uninstall update link unlink list test clean
+.PHONY: help install uninstall update link unlink list test clean shortcuts dump-shortcuts
 
 # Colors
 GREEN  := \033[0;32m
@@ -125,6 +125,18 @@ install-system: ## Install system-level configurations (requires sudo)
 	@sudo visudo -c
 	@echo "$(GREEN)✓ System configuration installed$(NC)"
 	@echo "Homebrew tools now work with sudo"
+
+# Desktop shortcuts live in dconf, not in files, so stow cannot reach them.
+shortcuts: ## Restore the desktop keyboard shortcuts (dconf)
+	@echo "$(GREEN)Loading keyboard shortcuts into dconf...$(NC)"
+	@dconf load /org/gnome/settings-daemon/plugins/media-keys/ < system/dconf/media-keys.ini
+	@echo "$(GREEN)✓ Shortcuts restored$(NC)"
+	@dconf dump /org/gnome/settings-daemon/plugins/media-keys/ | grep -E '^binding' || true
+
+dump-shortcuts: ## Capture the current desktop keyboard shortcuts into the repo
+	@dconf dump /org/gnome/settings-daemon/plugins/media-keys/ > system/dconf/media-keys.ini
+	@echo "$(GREEN)✓ Wrote system/dconf/media-keys.ini$(NC)"
+	@git diff --stat -- system/dconf/media-keys.ini
 
 .PHONY: verify-auth
 verify-auth:  ## Verify authentication setup

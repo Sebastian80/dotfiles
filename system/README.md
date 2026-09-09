@@ -23,6 +23,35 @@ This is safe because:
 3. Standard practice for systems using Homebrew
 4. Maintains sudo's security model
 
+## dconf/media-keys.ini
+
+Desktop keyboard shortcuts live in dconf, not in files, so stow cannot reach them
+and a reinstall loses them. This dump carries the custom shortcuts:
+
+| Shortcut | Action |
+|----------|--------|
+| `Super+L` | Lock the screen (`dm-tool lock`) |
+| `Super+Shift+S` | Flameshot region screenshot |
+| `Super+Shift+M` | Move the focused window to the next screen (`window-to-screen`) |
+
+**Restore them:**
+```bash
+make shortcuts
+```
+
+**Capture them again after adding one:**
+```bash
+make dump-shortcuts
+```
+
+`Super+Shift+M` exists because mutter evacuates windows off an external monitor
+when it sleeps and never moves them back (GNOME/mutter issues #1419 and #761),
+and the herdr Ghostty window has no title bar to drag it with.
+
+Not covered here: `~/.config/autostart/display-scale.desktop`, which applies the
+external monitor's xrandr transform at login. It is still untracked, like
+`fix-mouse-accel.desktop`.
+
 ## Installation via Stow
 
 The sudoers file should be manually installed (not stowed) because:
