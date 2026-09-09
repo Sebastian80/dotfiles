@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scale the external monitor down so its UI roughly matches the laptop panel.
 #
-#   display-scale            apply the default factor (1.5)
+#   display-scale            apply the default factor (1.75)
 #   display-scale 1.25       apply another factor
 #   display-scale 1          native resolution, no transform
 #
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 output="${DISPLAY_SCALE_OUTPUT:-DisplayPort-1}"
-factor="${1:-1.5}"
+factor="${1:-1.75}"
 
 case "${1:-}" in
   -h | --help)
