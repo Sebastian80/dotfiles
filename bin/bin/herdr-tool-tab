@@ -10,11 +10,17 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 label="$1"; shift; cmd="$*"
 
-dir="$(herdr pane current | jq -r '.result.pane.foreground_cwd // .result.pane.cwd')"
+current="$(herdr pane current)"
+dir="$(jq -r '.result.pane.foreground_cwd // .result.pane.cwd' <<<"$current")"
 [ -d "$dir" ] || dir="$HOME"
+# Herdr focuses a neighbouring tab when a tab closes, not the one you came from, so the
+# tool's shell hands focus back to the origin tab itself before it exits.
+origin="$(jq -r '.result.pane.tab_id // empty' <<<"$current")"
 out="$(herdr tab create --cwd "$dir" --label "$label" --focus)"
 pane="$(jq -r '.result.root_pane.pane_id // empty' <<<"$out")"
 [ -n "$pane" ] || { echo "herdr-tool-tab: no pane id in response: $out" >&2; exit 1; }
 # Wait for the shell prompt before typing into it; fall back to a short pause.
 herdr pane wait-output "$pane" --match '❯' --timeout 3000 >/dev/null 2>&1 || sleep 1
-herdr pane run "$pane" "clear; $cmd; exit" >/dev/null
+back=""
+[ -n "$origin" ] && back="herdr tab focus '$origin' >/dev/null 2>&1; "
+herdr pane run "$pane" "clear; $cmd; ${back}exit" >/dev/null
