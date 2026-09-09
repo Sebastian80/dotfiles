@@ -1,0 +1,16 @@
+name = "OpenMage"
+description = "OpenMage (Magento 1) — ddev, PHP 8.4, docroot public_test"
+group = "Magento"
+working_dir = "~/workspace/openmage"
+
+[[tabs]]
+name = "claude"
+command = "claude --continue"
+
+[[tabs]]
+name = "shell"
+
+# ddev logs defaults to the web service.
+[[tabs]]
+name = "logs"
+command = "ddev logs -f --tail=100"
