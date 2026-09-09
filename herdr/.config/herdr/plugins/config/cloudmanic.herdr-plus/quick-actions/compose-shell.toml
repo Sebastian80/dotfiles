@@ -1,0 +1,6 @@
+# bash where the image has it, sh otherwise (nginx/alpine images).
+name = "Compose: shell into service"
+description = "Interactive shell in a running compose service, in a tab"
+type = "select"
+options_command = "docker compose config --services"
+command = '''herdr-tool-tab '{{.Value}}' "docker compose exec {{.Value}} sh -c 'command -v bash >/dev/null 2>&1 && exec bash; exec sh'"'''

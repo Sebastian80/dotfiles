@@ -1,0 +1,4 @@
+name = "GitLab: pipeline of current branch"
+description = "Live pipeline status in a tab (Ctrl+C closes it)"
+type = "command"
+command = "herdr-tool-tab pipeline 'glab ci status --live'"

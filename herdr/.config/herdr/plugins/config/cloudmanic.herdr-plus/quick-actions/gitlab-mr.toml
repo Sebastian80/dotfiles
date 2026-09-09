@@ -1,0 +1,6 @@
+# glab resolves the MR from the current branch; the URL goes through the plugin's
+# opener rather than glab --web so the browser survives the popup pane's teardown.
+name = "GitLab: MR of current branch"
+description = "Open the merge request for the current branch in the browser"
+type = "command"
+command = '''url=$(glab mr view --output json | jq -r '.web_url // empty'); if [ -n "$url" ]; then {{opener}} "$url"; else notify-send "herdr quick action" "No MR for branch $(git branch --show-current)"; fi'''

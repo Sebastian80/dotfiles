@@ -1,0 +1,5 @@
+# The ticket key is the first KEY-123 in the current branch name.
+name = "Jira: ticket of current branch"
+description = "Open the ticket named in the branch in the browser"
+type = "command"
+command = '''key=$(git branch --show-current | grep -oE '[A-Z][A-Z0-9]+-[0-9]+' | head -1); if [ -n "$key" ]; then {{opener}} "https://jira.netresearch.de/browse/$key"; else notify-send "herdr quick action" "No ticket key in branch $(git branch --show-current)"; fi'''

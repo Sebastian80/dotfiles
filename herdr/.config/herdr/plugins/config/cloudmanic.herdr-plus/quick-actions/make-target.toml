@@ -1,0 +1,7 @@
+# Targets are read from make's database (-qp runs nothing); pattern and
+# variable lines are filtered out.
+name = "Make: run a target"
+description = "Pick a Makefile target and run it in a tab"
+type = "select"
+options_command = '''make -qp 2>/dev/null | awk -F: '/^[a-zA-Z0-9][^$#\/\t=]*:([^=]|$)/ {print $1}' | grep -vE '^(Makefile|.*__)$' | sort -u'''
+command = '''herdr-tool-tab 'make {{.Value}}' 'make {{.Value}}; printf "\n[any key closes]"; read -rsn1''''

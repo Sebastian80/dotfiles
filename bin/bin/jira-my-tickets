@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Print my unresolved Jira tickets, most recently updated first, one per line as
+#   KEY<TAB>summary [status]
+# herdr-plus select actions read that as value<TAB>description, so the key is what
+# the chosen command receives. Uses the jira-integration plugin's search script,
+# located through Claude Code's plugin registry so a plugin upgrade cannot break it.
+#   jira-my-tickets [MAX]   default 40
+set -euo pipefail
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  sed -n '2,7p' "$0"; exit 0
+fi
+registry="$HOME/.claude/plugins/installed_plugins.json"
+plugin_dir="$(jq -r '.plugins["jira-integration@netresearch-claude-code-marketplace"][0].installPath' "$registry")"
+search="$plugin_dir/skills/jira-communication/scripts/core/jira-search.py"
+uv run "$search" --json --quiet query \
+  "assignee = currentUser() AND resolution = Unresolved ORDER BY updated DESC" \
+  -n "${1:-40}" -f key,summary,status \
+  | jq -r '.[] | "\(.key)\t\(.fields.summary) [\(.fields.status.name)]"'

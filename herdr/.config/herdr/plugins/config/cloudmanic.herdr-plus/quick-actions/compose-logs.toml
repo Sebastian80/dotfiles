@@ -1,0 +1,6 @@
+# Services come from the compose files in the directory you launched from.
+name = "Compose: follow service logs"
+description = "docker compose logs -f for one service, in a tab"
+type = "select"
+options_command = "docker compose config --services"
+command = "herdr-tool-tab 'logs {{.Value}}' 'docker compose logs -f --tail 200 {{.Value}}'"

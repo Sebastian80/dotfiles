@@ -1,0 +1,6 @@
+# List comes from jira-my-tickets (dotfiles bin): KEY<TAB>summary [status].
+name = "Jira: my open tickets"
+description = "Pick one of your unresolved tickets and open it in the browser"
+type = "select"
+options_command = "jira-my-tickets"
+command = "{{opener}} https://jira.netresearch.de/browse/{{.Value}}"
