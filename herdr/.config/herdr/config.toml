@@ -128,10 +128,10 @@ pane_history = false
 kitty_graphics = true
 
 # Command palette (herdr-action-palette in dotfiles bin): fzf over every action of
-# every installed plugin. Annotate, hunkdiff's other reviews, the theme picker, the
-# plugin manager, spreader and workspace-manager live here instead of holding a key
-# each. prefix+p would collide with herdr's own previous_tab, so this is a double
-# tap of the prefix. Needs fzf and jq.
+# every installed plugin. Annotate, hunkdiff's other reviews, the plugin manager and
+# the file explorer live here instead of holding a key each. prefix+p would collide
+# with herdr's own previous_tab, so this is a double tap of the prefix. Needs fzf
+# and jq.
 [[keys.command]]
 key = "prefix+space"
 type = "popup"
@@ -155,8 +155,9 @@ description = "theme picker: pick a palette for the herdr UI"
 # plugins/config/cloudmanic.herdr-plus/projects (symlinked into the dotfiles
 # package); picking one builds a whole workspace with its tabs and commands.
 # Quick Actions are one-off commands from quick-actions/, run in the directory
-# you launched from. Its worktree auto-layout stays off: that needs files in
-# ~/.config/herdr-plus/worktrees/, and workspace-manager already owns that event.
+# you launched from. Its worktree auto-layout is unused: that needs files in
+# ~/.config/herdr-plus/worktrees/, and worktrees here are created by hand outside
+# herdr, so herdr never fires the event that would drive it.
 [[keys.command]]
 key = "prefix+alt+p"
 type = "plugin_action"
