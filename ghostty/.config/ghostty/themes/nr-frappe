@@ -1,0 +1,33 @@
+# Catppuccin Frappé with this setup's two deliberate deviations.
+#
+# Ghostty scans ~/.config/ghostty/themes before its own resources, so this file
+# wins over the shipped "Catppuccin Frappe". It is that file verbatim except for
+# palette 1 and 9: Frappé's red (#e78284) is a washed-out salmon, so both reds
+# are the clear red used everywhere else in this setup.
+#
+# This palette is what every program *inside* a pane resolves its colors
+# against, including herdr's plugin TUIs. herdr's own chrome is separate and
+# lives in ~/.config/herdr/config.toml under [theme.custom]; the two have to be
+# kept in agreement by hand, because herdr never reads this file.
+palette = 0=#51576d
+palette = 1=#ff5858
+palette = 2=#a6d189
+palette = 3=#e5c890
+palette = 4=#8caaee
+palette = 5=#f4b8e4
+palette = 6=#81c8be
+palette = 7=#a5adce
+palette = 8=#626880
+palette = 9=#e84d4d
+palette = 10=#8ec772
+palette = 11=#d9ba73
+palette = 12=#7b9ef0
+palette = 13=#f2a4db
+palette = 14=#5abfb5
+palette = 15=#b5bfe2
+background = #303446
+foreground = #c6d0f5
+cursor-color = #f2d5cf
+cursor-text = #303446
+selection-background = #626880
+selection-foreground = #c6d0f5

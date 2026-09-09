@@ -8,12 +8,13 @@
 # ========================================
 # Theme & Colors
 # ========================================
-# Auto-switch between Catppuccin Frappe (dark) and Latte (light)
-theme = dark:Catppuccin Frappe,light:Catppuccin Latte
-
-# Match Claude Code's red (#ff5858) — clear red, not Frappe's washed-out pink
-palette = 1=#ff5858
-palette = 9=#e84d4d
+# Auto-switch between Catppuccin Frappe (dark) and Latte (light).
+# nr-frappe lives in themes/ next to this file: Catppuccin Frappe with both reds
+# swapped for the clear red, since Frappe's own is a washed-out salmon. Keeping
+# it in a theme file rather than as palette overrides here means one file owns
+# the palette, and every TUI inside a pane inherits it — including the herdr-plus
+# pickers, which style themselves from ANSI indices.
+theme = dark:nr-frappe,light:Catppuccin Latte
 
 # Alternative popular themes to try:
 # theme = TokyoNight
