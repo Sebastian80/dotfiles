@@ -20,6 +20,12 @@ background; the harness re-invokes the session when the wait exits.
 ## The pattern
 
 ```bash
+# 0. Workers are full sessions, not subagents: CLAUDE_CODE_SUBAGENT_MODEL does not reach
+#    them and they read `model` (Fable) from settings.json. Pin the model on the pane.
+#    ANTHROPIC_MODEL outranks the settings key; verified live 2026-09-10.
+herdr pane split --current --direction right --cwd "$PWD" --env ANTHROPIC_MODEL=opus --no-focus
+herdr agent start worker --kind claude --pane <returned-pane-id>
+
 # 1. Fire without waiting. Returns as soon as the prompt is delivered.
 herdr agent prompt worker "Run the full test suite and report pass/fail counts."
 
