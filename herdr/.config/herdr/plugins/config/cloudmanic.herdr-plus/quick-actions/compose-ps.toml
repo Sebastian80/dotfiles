@@ -1,0 +1,5 @@
+# Read-only: shows what is actually running before you go looking for logs.
+name = "Docker: stack status"
+description = "docker compose ps in this directory"
+type = "command"
+command = "docker compose ps"

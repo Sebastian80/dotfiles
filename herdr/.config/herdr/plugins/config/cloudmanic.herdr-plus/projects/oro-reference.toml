@@ -1,0 +1,15 @@
+name = "Oro Reference"
+description = "OroCommerce Enterprise reference checkout"
+group = "Oro"
+working_dir = "~/workspace/oro-commerce-enterprise-reference"
+
+[[tabs]]
+name = "claude"
+command = "claude --continue"
+
+[[tabs]]
+name = "shell"
+
+[[tabs]]
+name = "logs"
+command = "make log"

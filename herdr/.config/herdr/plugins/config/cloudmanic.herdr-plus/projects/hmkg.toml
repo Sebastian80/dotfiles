@@ -1,0 +1,17 @@
+name = "HMKG"
+description = "OroCommerce project — docker compose via make"
+group = "Oro"
+working_dir = "~/workspace/hmkg"
+
+[[tabs]]
+name = "claude"
+command = "claude --continue"
+
+[[tabs]]
+name = "shell"
+
+# make log = ${COMPOSE_BIN} logs -f --tail=100, so it carries the project's own
+# compose override flags. message-queue is where Oro fails silently.
+[[tabs]]
+name = "logs"
+command = "make log"

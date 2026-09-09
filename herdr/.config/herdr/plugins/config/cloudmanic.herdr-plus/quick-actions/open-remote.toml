@@ -1,0 +1,6 @@
+# Never write a repo URL from memory: derive it from the remote and convert
+# SSH (git@host:org/repo.git) to HTTPS. Runs in the directory you launched from.
+name = "Open this repo's remote"
+description = "Open origin in the browser, derived from git remote"
+type = "command"
+command = "git remote get-url origin | sed -E 's#^git@([^:]+):#https://\\1/#; s#\\.git$##' | xargs {{opener}}"

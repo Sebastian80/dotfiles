@@ -1,0 +1,16 @@
+name = "JKC"
+description = "JKC B2B shop — Magento 2.4.7, docker compose stack"
+group = "Magento"
+working_dir = "~/workspace/jkc-magento"
+
+[[tabs]]
+name = "claude"
+command = "claude --continue"
+
+[[tabs]]
+name = "shell"
+
+# Stack is not started here; the tab attaches to whatever is already running.
+[[tabs]]
+name = "logs"
+command = "docker compose logs -f --tail=100"

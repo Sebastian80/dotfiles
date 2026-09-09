@@ -151,6 +151,24 @@ type = "plugin_action"
 command = "herdr-theme-picker.open"
 description = "theme picker: pick a palette for the herdr UI"
 
+# herdr-plus (cloudmanic.herdr-plus): Projects are workspace templates in
+# plugins/config/cloudmanic.herdr-plus/projects (symlinked into the dotfiles
+# package); picking one builds a whole workspace with its tabs and commands.
+# Quick Actions are one-off commands from quick-actions/, run in the directory
+# you launched from. Its worktree auto-layout stays off: that needs files in
+# ~/.config/herdr-plus/worktrees/, and workspace-manager already owns that event.
+[[keys.command]]
+key = "prefix+alt+p"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.projects"
+description = "herdr-plus: open a project as a new workspace"
+
+[[keys.command]]
+key = "prefix+alt+q"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.quick-actions"
+description = "herdr-plus: run a quick action here"
+
 # herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new
 # focused tab (full width; a split is too narrow for three columns plus preview).
 [[keys.command]]

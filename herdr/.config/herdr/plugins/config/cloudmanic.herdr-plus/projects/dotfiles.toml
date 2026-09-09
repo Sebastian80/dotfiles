@@ -1,0 +1,15 @@
+name = "Dotfiles"
+description = "This machine's config: herdr, ghostty, claude, bash"
+group = "Personal"
+working_dir = "~/dotfiles"
+
+[[tabs]]
+name = "claude"
+command = "claude --continue"
+
+[[tabs]]
+name = "shell"
+
+[[tabs]]
+name = "lazygit"
+command = "lazygit"

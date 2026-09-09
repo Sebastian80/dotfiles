@@ -1,0 +1,9 @@
+# Jira needs no lookup: the browse URL is stable per key.
+name = "Open Jira ticket"
+description = "Type a ticket key and open it"
+type = "form"
+command = "{{opener}} https://jira.netresearch.de/browse/{{.Value}}"
+
+[form]
+prompt = "Ticket key"
+placeholder = "e.g. HMKG-1234"

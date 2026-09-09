@@ -1,0 +1,16 @@
+name = "DHL Magento 2"
+description = "DHL shipping module — ddev stack"
+group = "Magento"
+working_dir = "~/workspace/dhl-magento2"
+
+[[tabs]]
+name = "claude"
+command = "claude --continue"
+
+[[tabs]]
+name = "shell"
+
+# ddev logs defaults to the web service, which is the one worth watching.
+[[tabs]]
+name = "logs"
+command = "ddev logs -f --tail=100"
