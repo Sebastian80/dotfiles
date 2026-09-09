@@ -67,7 +67,7 @@ subtext0 = "#a9b1d6"       # fg_dark
 # palette. Only these four are real tokens: reload-config rejects lavender/maroon/pink/sky.
 mauve = "#c0caf5"    # key names. Same value as text: the sheet already carries teal structure, and a second hue for keys just competes. Bold weight carries the distinction instead
 peach = "#ff9e64"    # Storm's orange
-teal = "#73daca"     # Storm's green1, a true teal; accent above stays the brand hue
+teal = "#9ece6a"     # herdr paints the DONE state icon with this token; green so done reads as done. The brand teal lives in accent, not here
 text = "#c0caf5"
 [update]
 # Homebrew owns upgrades (Brewfile). Keep herdr from advertising `herdr update`,
