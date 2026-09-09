@@ -167,7 +167,21 @@ accent = "#6ccfdb"
 # tells two workspaces with the same name apart (cod-flake vs claude). Keeping it
 # on its own second row leaves the workspace name the full sidebar width, so
 # nothing truncates.
-rows = [["state_icon", "workspace"], ["agent"]]
+# $icon replaces state_icon: a Nerd Font glyph per state published by the
+# nr.state-icons plugin in herdr-plugins/. The glyph is the token's value, so
+# the rules below colour it by matching that value. Swap a glyph in the plugin
+# and its rule here together. herdr puts its " · " separator between two custom
+# values, which is why the row reads "<icon> · workspace".
+rows = [
+  [{ token = "$icon", rules = [
+      { equals = "", fg = "#e0af68" },  # working: cog, amber
+      { equals = "", fg = "#ff7874", bold = true },  # blocked: bell, red
+      { equals = "", fg = "#6ccfdb" },  # done: check, teal
+      { equals = "", fg = "#737aa2" },  # idle: hollow circle, dim
+      { equals = "", fg = "#737aa2" },  # unknown: question-circle, dim
+  ] }, "workspace"],
+  ["agent"],
+]
 
 # row_gap defaults to 0, which packs entries with no separation and runs the rows
 # of one agent into the next. 1 puts a blank line between entries, so each agent
