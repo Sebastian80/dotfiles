@@ -34,6 +34,16 @@ surface1 = "#51576d"
 overlay0 = "#838ba7"
 overlay1 = "#949cbb"
 subtext0 = "#b5bfe2"
+
+# The base theme is Mocha, so every token NOT overridden here still renders in
+# Mocha's brighter, more saturated hues against a Frappé background — that is
+# where the vivid purple in the keybinds sheet came from. These complete the
+# palette with Frappé's own values. Accent and red stay deliberately non-Frappé.
+# Only these four are real tokens: reload-config rejects lavender/maroon/pink/sky.
+mauve = "#ca9ee6"
+peach = "#ef9f76"
+teal = "#81c8be"
+text = "#c6d0f5"
 [update]
 # Homebrew owns upgrades (Brewfile). Keep herdr from advertising `herdr update`,
 # which would install a second binary outside brew.
