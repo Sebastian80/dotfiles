@@ -1,0 +1,8 @@
+# Both pickers default to a full-screen takeover (projects: zoomed, quick
+# actions: overlay), which leaves most of the screen empty for a five-item list.
+# popup floats a small window and leaves the tiled layout untouched.
+[projects]
+placement = "popup"
+
+[quick_actions]
+placement = "popup"
