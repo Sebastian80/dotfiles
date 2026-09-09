@@ -151,6 +151,12 @@ type = "plugin_action"
 command = "herdr-theme-picker.open"
 description = "theme picker: pick a palette for the herdr UI"
 
+# herdr-plus runs from a LINKED LOCAL FORK at ~/workspace/herdr-plus (branch
+# teal-theme), not from the marketplace: both pickers hardcode magenta and a
+# lavender title bar, which herdr cannot override because plugin panes never see
+# its theme (herdr discussion #1796). A linked plugin is never auto-updated, so
+# pull upstream by hand and rebuild with `sh scripts/build.sh`.
+#
 # herdr-plus (cloudmanic.herdr-plus): Projects are workspace templates in
 # plugins/config/cloudmanic.herdr-plus/projects (symlinked into the dotfiles
 # package); picking one builds a whole workspace with its tabs and commands.
