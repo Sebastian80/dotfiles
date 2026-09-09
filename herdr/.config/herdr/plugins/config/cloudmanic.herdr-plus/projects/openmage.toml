@@ -1,5 +1,9 @@
+# Not a checkout: this is a composer-installed OpenMage (Magento LTS) whose
+# purpose is running the DHL Versenden M1 module. The module is the only real
+# git repo here, installed from source under vendor/; magento-lts itself is a
+# dist install with no .git, and the project root is not a repo at all.
 name = "OpenMage"
-description = "OpenMage (Magento 1) — ddev, PHP 8.4, docroot public_test"
+description = "DHL Versenden M1 test shop — OpenMage on ddev, PHP 8.4"
 group = "Magento"
 working_dir = "~/workspace/openmage"
 
@@ -9,6 +13,11 @@ command = "claude --continue"
 
 [[tabs]]
 name = "shell"
+
+[[tabs]]
+name = "module"
+working_dir = "vendor/dhl/module-versenden-m1"
+command = "lazygit"
 
 # ddev logs defaults to the web service.
 [[tabs]]
