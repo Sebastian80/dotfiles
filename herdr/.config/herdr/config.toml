@@ -7,43 +7,68 @@
 onboarding = false
 
 [theme]
-# Herdr's "catppuccin" is Mocha and no Frappé variant exists, so the Mocha base is
-# re-tinted below with the Frappé palette Ghostty uses (dark:Catppuccin Frappe).
-# "terminal" would reuse the host ANSI palette instead, but loses the UI accents.
+# Herdr's own themes are all Catppuccin; there is no TokyoNight base, so the
+# Mocha base is re-tinted below with the Storm palette Ghostty uses
+# (dark:nr-tokyonight). "terminal" would reuse the host ANSI palette instead,
+# but loses the UI accents.
 name = "catppuccin"
 
 auto_switch = false
 
-# Catppuccin Frappé: base #303446, mantle #292c3c, surface0 #414559, surface1 #51576d,
-# accent: Netresearch teal (#2f99a4), the same as the Ghostty tab pills.
+# TokyoNight Storm, chosen on measurement rather than taste: of every dark theme
+# Ghostty ships, Storm has the narrowest APCA band for the colours you actually
+# read (Lc 47-72, span 24.5; nr-frappe spanned 40.9). A wide band is what makes a
+# dark theme tiring -- the eye re-adapts on every glance between a bright glyph
+# and a dim one. Moving the background cannot fix that: swept from Y=0.014 to
+# Y=0.054, the span stayed 67.1 at every step, so only the colours can compress it.
+#
+# Canonical Storm values (folke/tokyonight.nvim, lua/tokyonight/colors/storm.lua):
+# bg #24283b, bg_highlight #292e42, fg_gutter #3b4261, terminal_black #414868,
+# dark3 #545c7e, dark5 #737aa2, fg_dark #a9b1d6, fg #c0caf5.
 [theme.custom]
-sidebar_bg = "#292c3c"
-panel_bg = "#303446"
-active_row_bg = "#414559"
-selection_bg = "#51576d"
-accent = "#2f99a4"   # Netresearch teal, matches the Ghostty tab CSS
-red = "#ff5858"      # Frappé red is a washed-out salmon; this is the same clear red the Ghostty palette overrides ANSI 1 with
-green = "#a6d189"
-yellow = "#e5c890"
-blue = "#8caaee"
-# Undocumented but accepted Catppuccin slots (found in the binary's token table).
-# They drive the dim text such as inactive tabs; lifted one step brighter than the
-# palette's own mapping so inactive tabs stay readable: subtext0 -> Frappé subtext1.
-surface0 = "#414559"
-surface1 = "#51576d"
-overlay0 = "#838ba7"
-overlay1 = "#949cbb"
-subtext0 = "#b5bfe2"
+# sidebar_bg is deliberately Storm's own bg, so the herdr sidebar and the shell
+# inside a pane share one ground and panels sit visibly above it.
+#
+# The two fills below are the accent composited over that ground at low alpha,
+# the sRGB blend CSS rgba() would produce. A terminal cell has no alpha channel,
+# so this is pre-computed rather than applied at draw time -- which is exactly
+# equivalent here, because the ground under them never varies. Structure stays
+# neutral (panel_bg is Storm's own bg_highlight) and only interaction carries the
+# accent tint, so a selected row reads as selected rather than merely lighter.
+sidebar_bg = "#24283b"
+panel_bg = "#292e42"       # bg_highlight, neutral: structure, not state
+active_row_bg = "#314658"  # accent @ 18%, 2.60x the ground
+selection_bg = "#385768"   # accent @ 28%, 3.92x -- one clear step above the row
+# Netresearch teal (#2f99a4) is a colour for white paper: it measures Lc 33-40 on
+# every dark background tested, below the Lc 60 floor for large text, which is why
+# the accent read as a dark smudge next to Lc 76 body text. Relit in OKLab to
+# L=0.80 with hue and chroma held, so it is the same brand hue at Lc 65.4.
+accent = "#6ccfdb"
+red = "#ff7874"            # clear red relit to L=0.78; Storm's own #f7768e leans pink
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+# Documented in the config reference under theme.custom, despite reading like internals.
+# They drive the dim text such as inactive tabs; mapped onto Storm's own
+# de-emphasis ramp so inactive tabs stay readable without joining the bright band.
+surface0 = "#3b4261"       # fg_gutter
+surface1 = "#414868"       # terminal_black
+surface_dim = "#1f2335"    # bg_dark. The 19th documented token; unset it stayed on the Mocha base
+# Storm's own dark3/dark5 measure Lc 15.9 and 29.3 on this ground, which put the
+# branch names and agent sub-lines below the threshold for readable text. Relit in
+# OKLab with Storm's hue held, back to the lift the Frappe mapping had (Lc 36.8/45.6).
+overlay0 = "#888fb8"       # dark5 relit to L=0.66, Lc 39.5
+overlay1 = "#949cc5"       # dark5 relit to L=0.70, Lc 46.1
+subtext0 = "#a9b1d6"       # fg_dark
 
 # The base theme is Mocha, so every token NOT overridden here still renders in
-# Mocha's brighter, more saturated hues against a Frappé background — that is
+# Mocha's brighter, more saturated hues against a Storm background -- that is
 # where the vivid purple in the keybinds sheet came from. These complete the
-# palette with Frappé's own values. Accent and red stay deliberately non-Frappé.
-# Only these four are real tokens: reload-config rejects lavender/maroon/pink/sky.
-mauve = "#c6d0f5"    # key names. Same value as text: the sheet already carries teal structure, and a second hue for keys just competes. Bold weight carries the distinction instead
-peach = "#ef9f76"
-teal = "#81c8be"
-text = "#c6d0f5"
+# palette. Only these four are real tokens: reload-config rejects lavender/maroon/pink/sky.
+mauve = "#c0caf5"    # key names. Same value as text: the sheet already carries teal structure, and a second hue for keys just competes. Bold weight carries the distinction instead
+peach = "#ff9e64"    # Storm's orange
+teal = "#73daca"     # Storm's green1, a true teal; accent above stays the brand hue
+text = "#c0caf5"
 [update]
 # Homebrew owns upgrades (Brewfile). Keep herdr from advertising `herdr update`,
 # which would install a second binary outside brew.
@@ -123,9 +148,37 @@ directory = "~/workspace/.worktrees"
 tab_bar_right = [{ type = "hostname" }, { type = "datetime", format = "%H:%M" }]
 tab_bar_right_separator = " · "
 
-status_indicators = "dots"
+# "dots" separates five states by colour and fill alone (hollow ring = idle,
+# filled = working or done-unseen). "symbols" gives each state its own shape, so
+# blocked/working/done/idle/unknown are distinguishable without relying on fill.
+status_indicators = "symbols"
 show_agent_labels_on_pane_borders = true
 agent_panel_sort = "spaces"
+
+# Distinct from theme.custom.accent: this one drives highlights, borders and the
+# navigate UI, and defaults to the bare name "cyan". Pinned to the same relit
+# Netresearch teal so there is one accent rather than three.
+accent = "#6ccfdb"
+
+[ui.sidebar.agents]
+# Default is [["state_icon","workspace","tab"],["agent"]]. "tab" is dropped because
+# tabs here are named after the agent, so it rendered "* claude" on nearly every
+# row. "agent" stays: it carries the reported session name, the only field that
+# tells two workspaces with the same name apart (cod-flake vs claude). Keeping it
+# on its own second row leaves the workspace name the full sidebar width, so
+# nothing truncates.
+rows = [["state_icon", "workspace"], ["agent"]]
+
+# row_gap defaults to 0, which packs entries with no separation and runs the rows
+# of one agent into the next. 1 puts a blank line between entries, so each agent
+# reads as one block rather than a wall of lines.
+row_gap = 1
+
+[ui.sidebar.spaces]
+# Layout left at the default: the second row carries the branch, which is real
+# information rather than a repeat of the first. Only the spacing changes.
+row_gap = 1
+
 [ui.toast]
 # Desktop notification through Ghostty when a background agent needs attention or finishes
 delivery = "herdr"

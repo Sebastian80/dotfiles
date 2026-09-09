@@ -8,13 +8,15 @@
 # ========================================
 # Theme & Colors
 # ========================================
-# Auto-switch between Catppuccin Frappe (dark) and Latte (light).
-# nr-frappe lives in themes/ next to this file: Catppuccin Frappe with both reds
-# swapped for the clear red, since Frappe's own is a washed-out salmon. Keeping
-# it in a theme file rather than as palette overrides here means one file owns
-# the palette, and every TUI inside a pane inherits it — including the herdr-plus
-# pickers, which style themselves from ANSI indices.
-theme = dark:nr-frappe,light:Catppuccin Latte
+# Auto-switch between TokyoNight Storm (dark) and Catppuccin Latte (light).
+# nr-tokyonight lives in themes/ next to this file: TokyoNight Storm with both
+# reds swapped for the clear red and both cyans for Netresearch teal. Storm was
+# picked on measurement, not taste: of every dark theme Ghostty ships it has the
+# narrowest APCA band for the colours you actually read. Keeping it in a theme
+# file rather than as palette overrides here means one file owns the palette, and
+# every TUI inside a pane inherits it — including the herdr-plus pickers, which
+# style themselves from ANSI indices.
+theme = dark:nr-tokyonight,light:Catppuccin Latte
 
 # Alternative popular themes to try:
 # theme = TokyoNight

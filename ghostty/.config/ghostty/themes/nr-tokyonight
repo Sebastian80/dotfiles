@@ -1,0 +1,46 @@
+# TokyoNight Storm with this setup's one deliberate deviation.
+#
+# Ghostty scans ~/.config/ghostty/themes before its own resources, so this file
+# wins over the shipped "TokyoNight Storm". It is that file verbatim except for
+# palette 1/9 and 6/14. Storm's red (#f7768e) leans pink, so both reds are this
+# setup's clear red, relit in OKLab to L=0.78 (#ff7874) so it keeps the hue and
+# still lands inside the palette's luminance band (APCA Lc 48.7 on #24283b,
+# against Storm's own floor of 47.3). The unrelit #ff5858 measured Lc 41.3 and
+# would have been the one dark outlier the switch to Storm was meant to remove.
+#
+# Cyan is Netresearch teal instead of Storm's #7dcfff, relit in OKLab to L=0.80
+# so it survives a dark ground (Lc 65.4). Storm's cyan is a sky blue; every TUI
+# that draws an accent reaches for ANSI 6, so leaving it blue meant herdr's own
+# chrome and the plugins running inside it disagreed about what the accent is.
+#
+# Why Storm: measured across every dark theme Ghostty ships, Storm has the
+# narrowest luminance band for the colours you actually read (Lc 47-72, span
+# 24.5). The old nr-frappe spanned 40.9 and carried a Lc 38.8 accent, so the eye
+# had to re-adapt on every glance. See herdr's [theme.custom] for the other half.
+#
+# This palette is what every program *inside* a pane resolves its colors
+# against, including herdr's plugin TUIs. herdr's own chrome is separate and
+# lives in ~/.config/herdr/config.toml under [theme.custom]; the two have to be
+# kept in agreement by hand, because herdr never reads this file.
+palette = 0=#1d202f
+palette = 1=#ff7874
+palette = 2=#9ece6a
+palette = 3=#e0af68
+palette = 4=#7aa2f7
+palette = 5=#bb9af7
+palette = 6=#6ccfdb
+palette = 7=#a9b1d6
+palette = 8=#4e5575
+palette = 9=#ff7874
+palette = 10=#9ece6a
+palette = 11=#e0af68
+palette = 12=#7aa2f7
+palette = 13=#bb9af7
+palette = 14=#6ccfdb
+palette = 15=#c0caf5
+background = #24283b
+foreground = #c0caf5
+cursor-color = #c0caf5
+cursor-text = #1d202f
+selection-background = #364a82
+selection-foreground = #c0caf5
