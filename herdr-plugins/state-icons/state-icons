@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish "<glyph> <workspace>" per agent as the $line pane token.
+"""Publish a Nerd Font glyph per agent state as the $icon pane token.
 
   state-icons            refresh every agent pane
   state-icons --clear    remove the token
@@ -18,12 +18,12 @@ HERDR = os.environ.get("HERDR_BIN_PATH", "herdr")
 SOURCE = "state-icons"
 
 # Option A: cog, bell, check, hollow circle, question-circle.
-GLYPH = {  # written as escapes: literal private-use glyphs get stripped by some tool layers
-    "working": "\uf013",  # cog
-    "blocked": "\uf0f3",  # bell
-    "done":    "\uf00c",  # check
-    "idle":    "\uf10c",  # hollow circle
-    "unknown": "\uf059",  # question-circle
+GLYPH = {
+    "working": "",
+    "blocked": "",
+    "done":    "",
+    "idle":    "",
+    "unknown": "",
 }
 
 
@@ -44,28 +44,14 @@ def state_of(agent):
     return status if status in GLYPH else "unknown"
 
 
-def workspace_labels():
-    p = subprocess.run([HERDR, "workspace", "list"], capture_output=True, text=True)
-    if p.returncode != 0:
-        return {}
-    return {w["workspace_id"]: w.get("label") or w["workspace_id"]
-            for w in json.loads(p.stdout).get("result", {}).get("workspaces", [])}
-
-
 def main():
     clear = "--clear" in sys.argv[1:]
     if "-h" in sys.argv or "--help" in sys.argv:
         print(__doc__)
         return 0
-    # Glyph and workspace name share one token. herdr puts " . " between any
-    # two custom values on a row, and only its own state_icon gets a bare
-    # space, so two tokens would read "<glyph> . name". One token loses the
-    # separator; the rules in config.toml colour it with starts_with.
-    labels = workspace_labels()
     n = 0
     for a in agents():
-        line = f"{GLYPH[state_of(a)]} {labels.get(a.get('workspace_id'), a.get('workspace_id'))}"
-        args = ["--clear-token", "line", "--clear-token", "icon"] if clear else ["--token", f"line={line}"]
+        args = ["--clear-token", "icon"] if clear else ["--token", f"icon={GLYPH[state_of(a)]}"]
         subprocess.run([HERDR, "pane", "report-metadata", a["pane_id"], "--source", SOURCE, *args],
                        capture_output=True)
         n += 1

@@ -167,22 +167,19 @@ accent = "#6ccfdb"
 # tells two workspaces with the same name apart (cod-flake vs claude). Keeping it
 # on its own second row leaves the workspace name the full sidebar width, so
 # nothing truncates.
-# $line replaces state_icon and the workspace token together: "<glyph> <name>",
-# published by the nr.state-icons plugin in herdr-plugins/. One token rather
-# than two because herdr puts " · " between two custom values on a row and only
-# its own state_icon gets a bare space. The rules colour the whole line by the
-# glyph it starts with, so swap a glyph in the plugin and its rule here together.
-# Written as \u escapes: these are private-use codepoints and literal ones get
-# stripped by some editors and tool layers, and an empty starts_with matches
-# everything.
+# $icon replaces state_icon: a Nerd Font glyph per state published by the
+# nr.state-icons plugin in herdr-plugins/. The glyph is the token's value, so
+# the rules below colour it by matching that value. Swap a glyph in the plugin
+# and its rule here together. herdr puts its " · " separator between two custom
+# values, which is why the row reads "<icon> · workspace".
 rows = [
-  [{ token = "$line", bold = true, rules = [
-      { starts_with = "", fg = "#e0af68" },  # working: cog, amber
-      { starts_with = "", fg = "#ff7874" },  # blocked: bell, red
-      { starts_with = "", fg = "#9ece6a" },  # done: check, green
-      { starts_with = "", fg = "#a9b1d6" },  # idle: hollow circle, subtext
-      { starts_with = "", fg = "#737aa2" },  # unknown: question-circle, dim
-  ] }],
+  [{ token = "$icon", rules = [
+      { equals = "", fg = "#e0af68" },  # working: cog, amber
+      { equals = "", fg = "#ff7874", bold = true },  # blocked: bell, red
+      { equals = "", fg = "#6ccfdb" },  # done: check, teal
+      { equals = "", fg = "#737aa2" },  # idle: hollow circle, dim
+      { equals = "", fg = "#737aa2" },  # unknown: question-circle, dim
+  ] }, "workspace"],
   ["agent"],
 ]
 
