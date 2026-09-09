@@ -40,7 +40,7 @@ subtext0 = "#b5bfe2"
 # where the vivid purple in the keybinds sheet came from. These complete the
 # palette with Frappé's own values. Accent and red stay deliberately non-Frappé.
 # Only these four are real tokens: reload-config rejects lavender/maroon/pink/sky.
-mauve = "#babbf1"    # herdr styles key names from this slot. Frappé mauve (#ca9ee6) has red 44 above green, which reads pink; lavender is the same family with no pink cast
+mauve = "#c6d0f5"    # key names. Same value as text: the sheet already carries teal structure, and a second hue for keys just competes. Bold weight carries the distinction instead
 peach = "#ef9f76"
 teal = "#81c8be"
 text = "#c6d0f5"
