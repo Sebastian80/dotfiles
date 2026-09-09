@@ -1,0 +1,20 @@
+# Working directory -> group label, rendered as $group on each Space row.
+#
+# Seeded from the herdr-plus project TOMLs, which carry the same grouping for
+# the project picker. They are not read directly: their working_dir has drifted
+# from the checkouts actually in use (hmkg.toml points at ~/workspace/hmkg while
+# the live workspace is ~/workspace/hmkg-61.docker.local, and oro-ci has no
+# project entry at all), so two of five would silently go untagged. Patterns
+# tolerate that drift; a stale exact path does not.
+#
+# Matched against the absolute path with fnmatch, so * crosses directory
+# separators. The longest matching pattern wins, so a specific path beats a
+# general one.
+[groups]
+"~/workspace/hmkg*"     = "Oro"
+"~/workspace/oro-*"     = "Oro"
+"~/workspace/jkc-*"     = "Magento"
+"~/workspace/dhl-*"     = "Magento"
+"~/workspace/openmage*" = "Magento"
+"~/dotfiles"            = "Personal"
+"~"                     = "Personal"

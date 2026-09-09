@@ -175,8 +175,14 @@ rows = [["state_icon", "workspace"], ["agent"]]
 row_gap = 1
 
 [ui.sidebar.spaces]
-# Layout left at the default: the second row carries the branch, which is real
-# information rather than a repeat of the first. Only the spacing changes.
+# Default layout plus $group, a custom token reported by the nr.space-groups
+# plugin in herdr-plugins/. herdr has no grouped tree for these panels, so the
+# group rides along on the detail row instead of becoming a header. A token with
+# no value renders nothing, separator included, so an untagged Space just shows
+# its branch.
+rows = [["state_icon", "workspace"], ["branch", "git_status", "$group"]]
+
+# row_gap 1 puts a blank line between entries, so each Space reads as one block.
 row_gap = 1
 
 [ui.toast]
