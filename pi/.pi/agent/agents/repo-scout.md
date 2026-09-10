@@ -4,7 +4,7 @@ description: Read-only codebase recon on a cheap Codex model. Reports files, ent
 advertise: true
 tools: read, grep, find, ls
 model: openai-codex/gpt-5.6-luna
-fallbackModels: openai-codex/gpt-5.4-mini, openai-codex/gpt-5.5
+fallbackModels: openai-codex/gpt-5.5
 thinking: low
 systemPromptMode: replace
 inheritProjectContext: true
