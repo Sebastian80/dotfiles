@@ -1,0 +1,40 @@
+{
+  "enabled": true,
+  "network": {
+    "allowedDomains": [
+      "github.com",
+      "*.github.com",
+      "raw.githubusercontent.com",
+      "codeload.github.com",
+      "git.netresearch.de",
+      "jira.netresearch.de",
+      "registry.npmjs.org",
+      "*.npmjs.org",
+      "packagist.org",
+      "*.packagist.org",
+      "pypi.org",
+      "files.pythonhosted.org"
+    ],
+    "deniedDomains": []
+  },
+  "filesystem": {
+    "denyRead": [
+      "~/.ssh",
+      "~/.aws",
+      "~/.gnupg",
+      "~/.codex",
+      "~/.pi/agent/auth.json"
+    ],
+    "allowWrite": [
+      ".",
+      "/tmp"
+    ],
+    "denyWrite": [
+      ".env",
+      ".env.local",
+      "~/.ssh",
+      "~/.codex",
+      "~/.pi"
+    ]
+  }
+}

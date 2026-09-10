@@ -219,7 +219,7 @@ echo ""
 step "Checking for conflicts..."
 
 # List of packages to install (all stow packages)
-PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr)
+PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi)
 
 # Check for conflicts
 CONFLICTS=0
