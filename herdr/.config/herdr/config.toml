@@ -239,13 +239,12 @@ height = "60%"
 command = "~/workspace/herdr-plus/bin/herdr-plus projects-ui"
 description = "herdr-plus: open a project as a new workspace"
 
-# Stays a plugin action: the actions template against the launch context
-# (HERDR_PLUS_CTX, cwd and session) that only a plugin action injects; as a
-# popup command the picker lists but every action breaks. Size is herdr's default.
 [[keys.command]]
 key = "prefix+alt+q"
-type = "plugin_action"
-command = "cloudmanic.herdr-plus.quick-actions"
+type = "popup"
+width = "60%"
+height = "50%"
+command = "~/workspace/herdr-plus/bin/herdr-plus quick-actions-ui"
 description = "herdr-plus: run a quick action here"
 
 # herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new
