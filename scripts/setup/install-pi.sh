@@ -74,5 +74,6 @@ if ! npm audit --prefix "$EXT_DIR/sandbox" --audit-level=high >>"$LOG" 2>&1; the
 	printf 'WARNING: npm audit reports advisories in the sandbox extension.\n  log: %s\n' "$LOG" >&2
 fi
 
+info "settings.json stays untracked; pi rewrites it at runtime."
 info "Done. Config comes from the 'pi' stow package; credentials stay in $AGENT_DIR/auth.json."
 info "Log: $LOG"
