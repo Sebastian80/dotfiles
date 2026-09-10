@@ -22,6 +22,11 @@ Read the ticket, its sub-tasks and every linked merge request: description, diff
 pipeline. Note the implementer and every MR author. If you are one of them, stop
 and say so; a self-review is not a review.
 
+Record who they are. `--implementer` and `--mr-author` are not optional
+bookkeeping: with nobody recorded the self-review gate cannot prove anything and
+fails closed. If the ticket genuinely does not say who implemented it, that is a
+finding to report, not a blank to leave.
+
 ## 2. Declare the scope contract
 
 Reply with exactly three lines plus the path globs, and wait for "confirmed":

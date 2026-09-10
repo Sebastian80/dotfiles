@@ -143,6 +143,12 @@ def check_self_review(data: dict, report: Report) -> None:
         return
     implementer = (data.get("implementer") or "").strip()
     authors = [a.strip() for a in (data.get("mr_authors") or []) if a]
+    if not implementer and not authors:
+        # Unknown is not innocent. This check exists to prove somebody else
+        # wrote the code; with nobody recorded it proves nothing, so it fails.
+        report.bad("self-review", "neither an implementer nor an MR author was "
+                                  "recorded; cannot prove this is not a self-review")
+        return
     if reviewer == implementer:
         report.bad("self-review", f"{reviewer} implemented this ticket")
         return

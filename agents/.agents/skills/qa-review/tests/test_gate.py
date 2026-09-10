@@ -175,6 +175,17 @@ class GateMatrix(unittest.TestCase):
     def test_reviewer_missing(self):
         self.assertVerdict("fail", ledger(reviewer=""))
 
+    def test_implementer_unknown_fails_closed(self):
+        # Found by a dry run against a real ticket: the reviewer left the
+        # implementer blank and the gate passed, on a check whose only job is
+        # proving somebody else wrote the code. Unknown is not innocent.
+        self.assertVerdict("fail", ledger(implementer="", mr_authors=[]))
+
+    def test_implementer_unknown_but_mr_author_known(self):
+        # An MR author other than the reviewer is enough to prove peer review,
+        # even when the ticket does not name an implementer.
+        self.assertVerdict("pass", ledger(implementer="", mr_authors=["colleague"]))
+
     # --- evidence trail -----------------------------------------------------
 
     def test_missing_pipeline_id(self):
