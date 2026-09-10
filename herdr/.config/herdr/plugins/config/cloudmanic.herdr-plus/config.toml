@@ -1,8 +1,14 @@
 # Both pickers default to a full-screen takeover (projects: zoomed, quick
 # actions: overlay), which leaves most of the screen empty for a five-item list.
 # popup floats a small window and leaves the tiled layout untouched.
+#
+# A popup carries the pane title on its border, and herdr refuses an empty pane
+# title, so the heading the pickers draw inside would show twice. title_bar
+# hides the inner one (fork option, teal-theme branch of ~/workspace/herdr-plus).
 [projects]
 placement = "popup"
+title_bar = false
 
 [quick_actions]
 placement = "popup"
+title_bar = false
