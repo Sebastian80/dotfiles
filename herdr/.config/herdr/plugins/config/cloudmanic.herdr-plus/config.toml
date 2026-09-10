@@ -12,3 +12,15 @@ title_bar = false
 [quick_actions]
 placement = "popup"
 title_bar = false
+
+# Plugin panes never receive herdr's theme (herdr discussion #1796), so the
+# pickers are coloured here (fork option). Values mirror the [theme.custom]
+# tokens in ~/.config/herdr/config.toml; keep the two in step when retheming.
+# Each accepts an ANSI index ("6"), a 256-colour index or a hex value.
+[theme]
+accent = "#7aa2f7"      # theme.custom.accent
+accent_soft = "#a9b1d6" # theme.custom.subtext0: tab names in the detail card
+muted = "#888fb8"       # theme.custom.overlay0, Lc 39.5 on the ground
+match = "#e0af68"       # theme.custom.yellow: fuzzy-match highlights
+error = "#ff7874"       # theme.custom.red
+header_bg = "#1f2335"   # theme.custom.surface_dim
