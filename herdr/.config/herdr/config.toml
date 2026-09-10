@@ -227,16 +227,24 @@ description = "theme picker: pick a palette for the herdr UI"
 # you launched from. Its worktree auto-layout is unused: that needs files in
 # ~/.config/herdr-plus/worktrees/, and worktrees here are created by hand outside
 # herdr, so herdr never fires the event that would drive it.
+# Sized popup: `plugin pane open` has no size flag, so the plugin's own
+# popup placement is always herdr's default ~80%. A popup command runs the
+# picker's UI entry directly and takes width/height. The fork resolves its
+# managed config dir itself, so it needs no plugin environment.
 [[keys.command]]
 key = "prefix+alt+p"
-type = "plugin_action"
-command = "cloudmanic.herdr-plus.projects"
+type = "popup"
+width = "70%"
+height = "60%"
+command = "~/workspace/herdr-plus/bin/herdr-plus projects-ui"
 description = "herdr-plus: open a project as a new workspace"
 
 [[keys.command]]
 key = "prefix+alt+q"
-type = "plugin_action"
-command = "cloudmanic.herdr-plus.quick-actions"
+type = "popup"
+width = "60%"
+height = "50%"
+command = "~/workspace/herdr-plus/bin/herdr-plus quick-actions-ui"
 description = "herdr-plus: run a quick action here"
 
 # herdr-yazi (ray.file-explorer): yazi at the focused pane's directory, in a new

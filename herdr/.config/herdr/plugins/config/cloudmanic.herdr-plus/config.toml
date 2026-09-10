@@ -2,16 +2,18 @@
 # actions: overlay), which leaves most of the screen empty for a five-item list.
 # popup floats a small window and leaves the tiled layout untouched.
 #
-# A popup carries the pane title on its border, and herdr refuses an empty pane
-# title, so the heading the pickers draw inside would show twice. title_bar
-# hides the inner one (fork option, teal-theme branch of ~/workspace/herdr-plus).
+# Both pickers are bound as herdr popup *commands* (config.toml [[keys.command]]
+# type = "popup", the only placement that takes width/height), which run the
+# UI entry points directly. Such a popup's border reads a fixed "popup", so the
+# pickers keep their own title bar (title_bar, a fork option) to name themselves.
+# placement only applies when the pickers are opened as plugin actions.
 [projects]
 placement = "popup"
-title_bar = false
+title_bar = true
 
 [quick_actions]
 placement = "popup"
-title_bar = false
+title_bar = true
 
 # Plugin panes never receive herdr's theme (herdr discussion #1796), so the
 # pickers are coloured here (fork option). Values mirror the [theme.custom]
