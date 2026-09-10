@@ -43,14 +43,6 @@ selection_bg = "#3c4a70"   # accent @ 28%, one clear step above the row
 # Netresearch teal (#6ccfdb, Lc 65.4) once herdr-plus could be themed: one quiet
 # accent across herdr and its pickers beats a brand hue that only herdr showed.
 accent = "#7aa2f7"
-# Active tab on its own tokens (local herdr build from ~/workspace/herdr-src,
-# branch tab-active-tokens, after discussion #2215). The stock binary ignores
-# these two keys and paints the tab with accent as before.
-tab_active_bg = "#333e5d"  # accent @ 18%, the same lift as the active sidebar row
-tab_active_fg = "#c0caf5"  # text: the state icon carries the colour, the label stays quiet
-tab_inactive_bg = "#292e42" # bg_highlight, the panel ground
-tab_inactive_fg = "#888fb8" # overlay0
-tab_blocked_bg = "#4b3645"  # red @ 18%: a blocked agent's tab, focused or not
 red = "#ff7874"            # clear red relit to L=0.78; Storm's own #f7768e leans pink
 green = "#9ece6a"
 yellow = "#e0af68"
@@ -159,9 +151,6 @@ tab_bar_right_separator = " · "
 # filled = working or done-unseen). "symbols" gives each state its own shape, so
 # blocked/working/done/idle/unknown are distinguishable without relying on fill.
 status_indicators = "symbols"
-# Coloured agent state icon in front of each agent tab (local build, see the
-# tab_active_* tokens). The glyph comes from [ui.status_icons] below.
-tab_status_icon = true
 show_agent_labels_on_pane_borders = true
 agent_panel_sort = "spaces"
 
@@ -170,13 +159,6 @@ agent_panel_sort = "spaces"
 # blue so there is one accent rather than three.
 accent = "#7aa2f7"
 
-# Nerd Font glyphs per state, drawn in the state colour everywhere the icon
-# appears. Unset states keep the "symbols" preset.
-[ui.status_icons]
-working = "\U000f0451" # nf-md-progress_clock
-blocked = "\U000f0026" # nf-md-alert
-done    = "\U000f012c" # nf-md-check_bold
-idle    = "\U000f0765" # nf-md-sleep
 
 [ui.sidebar.agents]
 # Default is [["state_icon","workspace","tab"],["agent"]]. "tab" is dropped because
