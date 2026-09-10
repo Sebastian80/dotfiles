@@ -13,7 +13,7 @@ title_bar = true
 
 [quick_actions]
 placement = "popup"
-title_bar = true
+title_bar = false
 
 # Plugin panes never receive herdr's theme (herdr discussion #1796), so the
 # pickers are coloured here (fork option). Values mirror the [theme.custom]
