@@ -222,9 +222,10 @@ step "Checking for conflicts..."
 PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome)
 
 # Claude Code, pi and herdr write sessions, credentials, logs and sockets into ~/.claude, ~/.pi/agent
-# and ~/.config/herdr. Created as real directories before any stow call: a missing one would be
-# folded into a symlink into this repo and that state would land here. herdr's directory is private.
-mkdir -p "$HOME/.claude" "$HOME/.pi/agent" "$HOME/.config/herdr" && chmod 700 "$HOME/.config/herdr"
+# and ~/.config/herdr, and pi's extensions directory receives the sandbox copy plus herdr's generated
+# state reporter. Created as real directories before any stow call: a missing one would be folded
+# into a symlink into this repo and that state would land here. herdr's directory is private.
+mkdir -p "$HOME/.claude" "$HOME/.pi/agent/extensions" "$HOME/.config/herdr" && chmod 700 "$HOME/.config/herdr"
 
 # Check for conflicts
 CONFLICTS=0
@@ -363,36 +364,6 @@ if [[ ! -f "$HOME/.bash/local.bash" ]]; then
     echo "# This file is git-ignored" >> "$HOME/.bash/local.bash"
 fi
 
-# pi, its packages and its sandbox extension are installed rather than stowed (see install-pi.sh).
-# This runs after stowing, since install-pi.sh reads the package list from the stowed settings.json,
-# and before the herdr integrations, so `herdr integration install pi` finds pi.
-echo ""
-step "pi coding agent"
-if ! command -v npm >/dev/null; then
-    warn "npm not found, skipping pi. Install Node first (scripts/setup/install-node.sh), then: make install-pi"
-else
-    read -p "Install pi, its packages and the sandbox extension now? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if "$DOTFILES_DIR/scripts/setup/install-pi.sh"; then
-            info "✓ pi installed with its sandbox extension"
-        else
-            warn "pi installation failed. Retry later with: make install-pi"
-        fi
-    else
-        warn "Skipping pi. Without it pi's bash runs unsandboxed. Install later with: make install-pi"
-    fi
-fi
-
-# herdr's agent integrations make each agent report its own state. Without them herdr guesses from
-# the screen, reports pi as idle while it works, and `lane` misjudges when a worker has finished.
-# They are generated files, so they are installed here rather than stowed.
-if command -v herdr >/dev/null; then
-    for agent in claude codex pi; do
-        herdr integration install "$agent" || warn "herdr integration for $agent failed"
-    done
-fi
-
 # Install system configuration
 echo ""
 step "System Configuration"
@@ -524,6 +495,62 @@ else
     echo "  ~/dotfiles/scripts/setup/install-docker.sh"
 fi
 
+# Install Node.js via fnm
+echo ""
+step "Node.js (fnm)"
+echo ""
+info "Node comes from fnm, not Homebrew: the global npm CLIs live under fnm's default version."
+echo "Installs Node 22 and 24 (default 24) plus the base npm globals (pnpm)."
+echo ""
+read -p "Install Node.js now? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ -x "$DOTFILES_DIR/scripts/setup/install-node.sh" ]]; then
+        if "$DOTFILES_DIR/scripts/setup/install-node.sh"; then
+            info "✓ Node.js installed"
+        else
+            warn "Node.js installation encountered issues. Check output above."
+            echo "You can install it later with:"
+            echo "  ~/dotfiles/scripts/setup/install-node.sh"
+        fi
+    else
+        error "Node installation script not found at: scripts/setup/install-node.sh"
+    fi
+else
+    warn "Skipping Node.js installation."
+    echo "You can install it later with:"
+    echo "  ~/dotfiles/scripts/setup/install-node.sh"
+fi
+
+# Install AI agent tooling (needs Node from the step above)
+echo ""
+step "AI Agent Tooling"
+echo ""
+info "Optional: the AI agent CLIs, pi, and herdr's agent integrations."
+echo ""
+echo "What you get:"
+echo "  • Codex, Gemini and agent-browser CLIs, plus repomix"
+echo "  • pi with its sandbox extension (without it, pi's bash runs unsandboxed)"
+echo "  • herdr agent integrations for claude, codex and pi"
+echo ""
+warn "Needs Node.js from the previous step. Claude Code is installed separately."
+echo ""
+read -p "Install AI agent tooling now? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if make -C "$DOTFILES_DIR" install-ai; then
+        info "✓ AI agent tooling installed"
+    else
+        warn "AI agent tooling installation encountered issues. Check output above."
+        echo "You can install it later with:"
+        echo "  cd ~/dotfiles && make install-ai"
+    fi
+else
+    warn "Skipping AI agent tooling."
+    echo "You can install it later with:"
+    echo "  cd ~/dotfiles && make install-ai"
+fi
+
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║${NC}  ${SPARKLE} ${BOLD}Installation Complete!${NC}                                ${GREEN}║${NC}"
@@ -545,6 +572,12 @@ if fc-list | grep -q "NerdFont" 2>/dev/null; then
 fi
 if command -v docker &> /dev/null; then
     echo -e "  ${CHECK} Docker Engine + docker-compose"
+fi
+if command -v fnm &> /dev/null && fnm list 2>/dev/null | grep -q default; then
+    echo -e "  ${CHECK} Node.js via fnm"
+fi
+if [[ -d "$HOME/.pi/agent/extensions/sandbox/node_modules" ]]; then
+    echo -e "  ${CHECK} AI agent tooling (CLIs, pi + sandbox, herdr integrations)"
 fi
 echo ""
 echo -e "${BOLD}${BLUE}Next Steps:${NC}"
@@ -572,6 +605,14 @@ fi
 if ! command -v docker &> /dev/null; then
     echo -e "  🐳 Install Docker Engine (if skipped):"
     echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-docker.sh${NC}"
+fi
+if ! command -v fnm &> /dev/null || ! fnm list 2>/dev/null | grep -q default; then
+    echo -e "  ${PACKAGE} Install Node.js via fnm (if skipped):"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}~/dotfiles/scripts/setup/install-node.sh${NC}"
+fi
+if [[ ! -d "$HOME/.pi/agent/extensions/sandbox/node_modules" ]]; then
+    echo -e "  🤖 Install AI agent tooling (if skipped):"
+    echo -e "    ${CYAN}→${NC} ${MAGENTA}cd ~/dotfiles && make install-ai${NC}"
 fi
 echo -e "  🔐 Configure authentication (Bitwarden):"
 echo -e "    ${CYAN}→${NC} See ${MAGENTA}INSTALLATION.md${NC} Step 7 or ${MAGENTA}SECRET_MANAGEMENT.md${NC}"

@@ -29,7 +29,7 @@ make test
 Or manually:
 ```bash
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 ```
 
 **What to look for**:
@@ -86,7 +86,7 @@ make install
 Install all packages:
 ```bash
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 ```
 
 Or install selectively:
@@ -530,9 +530,17 @@ After completing installation:
    ```bash
    ./scripts/setup/install-node.sh
    ```
-   Installs Node.js 20 (default) + 22 via fnm, plus Claude Code CLI.
+   Installs Node.js 22 and 24 (default 24) via fnm, plus the base globals (pnpm).
+   Claude Code is not included: it uses its own installer and self-updates.
 
-7. **Consider future enhancements**:
+7. **Install AI agent tooling** (optional):
+   ```bash
+   make install-ai
+   ```
+   Codex, Gemini and agent-browser CLIs plus repomix, pi with its sandbox extension,
+   and herdr's agent integrations. Needs Node.js from step 6.
+
+8. **Consider future enhancements**:
    - Add pre-commit hooks for secret scanning
    - Set up GitHub Actions for testing
    - Add more tool configs (nvim, etc.)

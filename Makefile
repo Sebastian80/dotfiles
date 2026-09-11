@@ -36,7 +36,8 @@ install: ## Install all dotfiles (create symlinks)
 	@echo ""
 	@echo "$(YELLOW)Manual step required:$(NC)"
 	@echo "  Install system config: make install-system"
-	@echo "  Install pi and its sandbox: make install-pi"
+	@echo "  Install Node.js: scripts/setup/install-node.sh"
+	@echo "  Install AI agent tooling: make install-ai"
 	@echo "  Then reload shell: source ~/.bashrc"
 
 uninstall: ## Uninstall all dotfiles (remove symlinks)
@@ -134,6 +135,17 @@ install-system: ## Install system-level configurations (requires sudo)
 # pi itself, its packages and the sandbox extension are installed, not stowed: see install-pi.sh.
 install-pi: ## Install pi, its packages and the sandbox extension (needs Node: install-node.sh)
 	@scripts/setup/install-pi.sh
+
+# The single definition of the AI tooling sequence; bootstrap runs this target rather than repeating
+# it. Each script loads fnm itself, so the CLIs land under fnm's default Node, not Homebrew's.
+install-ai: ## Install AI agent tooling: Codex/Gemini CLIs, pi + sandbox, herdr agent integrations
+	@scripts/setup/install-node.sh --ai
+	@scripts/setup/install-pi.sh
+	@if command -v herdr >/dev/null 2>&1; then \
+		for agent in claude codex pi; do \
+			herdr integration install $$agent || echo "  herdr integration for $$agent skipped"; \
+		done; \
+	fi
 
 # Desktop shortcuts live in dconf, not in files, so stow cannot reach them.
 shortcuts: ## Restore the desktop keyboard shortcuts (dconf)

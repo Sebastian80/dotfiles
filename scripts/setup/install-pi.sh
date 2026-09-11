@@ -33,6 +33,13 @@ case "${1:-}" in
 		;;
 esac
 
+# Load fnm into this shell, so pi lands under fnm's default Node. Homebrew ships an npm too (pulled
+# in by bitwarden-cli), and a global install through that one would be invisible to the fnm Node
+# every shell actually uses.
+if command -v fnm >/dev/null; then
+	eval "$(fnm env --shell bash)"
+fi
+
 info() { printf '  %s\n' "$1"; }
 fail() {
 	printf 'FAILED: %s\n  log: %s\n' "$1" "$LOG" >&2

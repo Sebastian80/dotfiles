@@ -23,7 +23,8 @@ dotfiles/
 │   │   ├── install-docker.sh  # Docker Engine installation
 │   │   ├── install-fonts.sh   # Nerd Fonts installation
 │   │   ├── install-ghostty.sh # Ghostty terminal installation
-│   │   ├── install-node.sh    # Node.js + npm globals
+│   │   ├── install-node.sh    # Node.js + npm globals (--ai for the AI agent CLIs)
+│   │   ├── install-pi.sh      # pi coding agent + its sandbox extension
 │   │   └── uninstall.sh       # Remove all dotfiles and installed components
 │   │
 │   ├── maintenance/
@@ -172,24 +173,53 @@ cd ~/dotfiles
 **Purpose:** Install Node.js via fnm and global npm packages
 
 **What it does:**
-1. Installs Node.js 20 (default) and 22 via fnm
-2. Sets Node 20 as default version
-3. Installs global npm packages with detailed output
+1. Loads `fnm env`, so npm is fnm's and not Homebrew's
+2. Installs Node.js 22 and 24 via fnm
+3. Sets Node 24 as default version
+4. Installs the base global npm packages with detailed output
 
 **Usage:**
 ```bash
 cd ~/dotfiles
-./scripts/setup/install-node.sh
+./scripts/setup/install-node.sh        # Node versions + base globals
+./scripts/setup/install-node.sh --ai   # only the AI agent CLIs
 ```
 
 **Installed:**
-- Node.js v20 (default)
+- Node.js v24 (default)
 - Node.js v22
 
 **NPM Global Packages:**
-| Package | Command | Description |
-|---------|---------|-------------|
-| @anthropic-ai/claude-code | `claude` | AI coding assistant CLI |
+| Package | Command | Description | Set |
+|---------|---------|-------------|-----|
+| pnpm | `pnpm` | Fast, disk-efficient package manager | base |
+| @openai/codex | `codex` | OpenAI Codex CLI, also the codex MCP server | `--ai` |
+| @google/gemini-cli | `gemini` | Google Gemini CLI | `--ai` |
+| agent-browser | `agent-browser` | Browser automation CLI for AI agents | `--ai` |
+| repomix | `repomix` | Pack a repository into a single AI-friendly file | `--ai` |
+
+Claude Code is not installed here: it uses its own installer
+(`curl -fsSL https://claude.ai/install.sh | bash`) and self-updates.
+
+---
+
+#### install-pi.sh
+**Purpose:** Install the pi coding agent and provision its sandbox extension
+
+**What it does:**
+1. Installs `@earendil-works/pi-coding-agent` globally under fnm's Node
+2. Installs every pi package listed in the stowed `settings.json`
+3. Copies the sandbox extension out of pi's own examples and pins
+   `@anthropic-ai/sandbox-runtime` forward, past a critical `shell-quote` advisory
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/setup/install-pi.sh          # install / re-provision
+./scripts/setup/install-pi.sh --check  # report what is installed, change nothing
+```
+
+Usually run through `make install-ai`, which adds the AI CLIs and the herdr agent integrations.
 
 ---
 
@@ -568,6 +598,8 @@ dotfiles/
 | Install Docker | `./scripts/setup/install-docker.sh` |
 | Install fonts | `./scripts/setup/install-fonts.sh` |
 | Install Node.js | `./scripts/setup/install-node.sh` |
+| Install AI agent tooling | `make install-ai` |
+| Install pi only | `./scripts/setup/install-pi.sh` |
 | Uninstall all | `./scripts/setup/uninstall.sh` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
 | Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |

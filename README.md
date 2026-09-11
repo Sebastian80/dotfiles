@@ -83,13 +83,17 @@ cd ~/dotfiles
 # - Optionally install Homebrew
 # - Check for conflicts and offer backup/adopt options
 # - Install all dotfiles packages (including ~/bin utilities)
-# - Optionally install pi, its packages and its sandbox extension (needs Node)
+# - Optionally install Node.js via fnm
+# - Optionally install AI agent tooling (Codex/Gemini CLIs, pi + sandbox, herdr integrations)
 # - Verify symlinks
 
 # Install system configurations (requires sudo)
 make install-system
 
-# Install pi on its own later, or re-provision its sandbox extension
+# Install AI agent tooling later (Codex/Gemini CLIs, pi + sandbox, herdr integrations)
+make install-ai
+
+# Or just pi on its own, to re-provision its sandbox extension
 make install-pi
 ```
 

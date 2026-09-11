@@ -82,12 +82,17 @@ fi
 # 3. Check Stow Packages
 section "Stow Packages"
 
-PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr)
+PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome)
 
 for package in "${PACKAGES[@]}"; do
     if [[ -d "$package" ]]; then
-        # Check if package is stowed (has symlinks pointing to it)
-        if find ~ ~/.config -maxdepth 2 -type l -lname "*dotfiles/$package/*" 2>/dev/null | grep -q .; then
+        # A package counts as stowed when one of its own files resolves back into the repo. The
+        # path is derived from the package tree instead of a fixed search depth, which missed links
+        # further down (~/.pi/agent/settings.json, ~/.agents/skills/qa-review) and files reached
+        # through a folded parent directory (~/bin -> dotfiles/bin/bin).
+        sample=$(find "$package" -type f | head -1)
+        target="$HOME/${sample#"$package"/}"
+        if [[ -n "$sample" && -e "$target" && "$(readlink -f "$target")" == "$(readlink -f "$sample")" ]]; then
             success "Package '$package' is stowed"
         else
             error "Package '$package' exists but is NOT stowed"
@@ -107,8 +112,9 @@ verify_symlink() {
     # Stow may link the file itself or fold a parent directory (~/bin -> dotfiles/bin/bin),
     # so compare where the path resolves to, not whether this exact node is a link.
     if [[ -e "$target" ]]; then
-        local actual=$(readlink -f "$target")
-        local expected_full=$(readlink -f "$expected")
+        local actual expected_full
+        actual=$(readlink -f "$target")
+        expected_full=$(readlink -f "$expected")
         if [[ "$actual" == "$expected_full" ]]; then
             success "✓ $target → ${actual#$HOME/}"
         else
@@ -223,9 +229,9 @@ fi
 
 # Check if ~/bin is in PATH
 if echo "$PATH" | grep -q "$HOME/bin"; then
-    success "~/bin is in PATH (user utilities available)"
+    success "$HOME/bin is in PATH (user utilities available)"
 else
-    warn "~/bin is NOT in PATH"
+    warn "$HOME/bin is NOT in PATH"
 fi
 
 # 9. Security Check
