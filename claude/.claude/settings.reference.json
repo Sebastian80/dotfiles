@@ -136,7 +136,6 @@
       "/tmp/claude-1001"
     ]
   },
-  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -178,7 +177,7 @@
   "workflowSizeGuideline": "small",
   "statusLine": {
     "type": "command",
-    "command": "/bin/bash /home/sebastian/.claude/statusline-omp.sh"
+    "command": "/bin/bash /home/sebastian/.claude/statusline.sh"
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
