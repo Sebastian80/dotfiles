@@ -27,27 +27,33 @@ background child, and that session gets its MCP servers from the project (see
 
 ## Ask it headless (your default)
 
-Always as a background Bash task; a crawl outlives the foreground timeout. The parent is a cheap
-model whose only tool is `subagent`; the crawler does the work.
+One pi process in the project. No parent, no subagent, no script: the agent file supplies the
+prompt, so there is still one copy of it. Always as a background Bash task; a crawl outlives the
+foreground timeout.
 
 ```bash
 cd /abs/project/root && HERDR_ENV= pi -p -a -ns \
-  --model openai-codex/gpt-5.6-luna --thinking low --tools subagent \
-  'Call the subagent tool once with agent "crawler" and async set to true, then bg_wait for that
-run, then print the child answer verbatim and nothing else.
-
-Project root: /abs/project/root
+  --model openai-codex/gpt-5.6-terra --thinking medium -xt write,edit,bash \
+  --append-system-prompt "$(sed -n '/^You are a read-only code crawler/,$p' ~/.pi/agent/agents/crawler.md)" \
+  'Project root: /abs/project/root
 First-party code: src/, vendor/acme/*
 Question: <one precise question>' </dev/null > <scratchpad>/crawl-<topic>.md 2>&1
 ```
 
-- **`async: true` is not optional.** The crawler's tools are MCP tools, and only a background
-  child loads the ambient adapter. A foreground launch fails with a diagnostic and no answer.
-- **`bg_wait` is what makes print mode wait.** Without it the parent exits with a run id and the
-  answer lands in the artifact instead: newest
-  `~/.pi/agent/sessions/--<slug of project path>--/subagent-artifacts/*_crawler_output.md`.
+- `-xt write,edit,bash` drops the mutating builtins, which is shorter and safer than allowlisting
+  53 tools; the IDE and Mate tools come from the project's `.pi/mcp.json`.
+- The answer is on stdout. No run ids, no artifacts, no waiting.
 - Spot-check one or two `file:line` claims before building on them; the last line lists the tools
   it used.
+
+## When a pi session already exists (the agent)
+
+In the pane orchestrator or Sebastian's own pi, delegate instead of starting a second process:
+`subagent` with agent `crawler`, **`async: true`** — the crawler's tools are MCP tools and only a
+background child loads the ambient adapter, so a foreground launch fails with a diagnostic and no
+answer. An interactive session waits for the child itself; a `pi -p` parent needs `bg_wait`, or the
+answer lands only in the newest
+`~/.pi/agent/sessions/--<slug of project path>--/subagent-artifacts/*_crawler_output.md`.
 
 ## Let the user watch (pane)
 
