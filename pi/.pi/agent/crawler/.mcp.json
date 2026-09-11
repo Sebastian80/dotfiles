@@ -23,15 +23,7 @@
       "cwd": "${CRAWL_PROJECT}",
       "env": { "PWD": "${CRAWL_PROJECT}" },
       "lifecycle": "eager",
-      "directTools": true,
-      "includeTools": [
-        "oro_datagrid_list", "oro_datagrid_get",
-        "oro_entity_list", "oro_entity_get", "oro_entity_field_get",
-        "oro_config_get", "oro_enum_options",
-        "oro_workflow_list", "oro_workflow_get",
-        "oro_service_list", "symfony-service-detail",
-        "oro_url_resolve", "oro_acl_check", "oro_website_list", "oro_translation_get"
-      ]
+      "directTools": true
     }
   }
 }

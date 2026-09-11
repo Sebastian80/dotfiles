@@ -14,6 +14,10 @@ say so and answer from the index.
   application. Compiled container, service decorators, entity config including extend fields,
   merged datagrids, system config, workflows. Prefer it for wiring and configuration questions: the
   index does not follow YAML service ids to their classes.
+- Oro Mate's data tools: read-only SQL, product and customer snapshots, workflow items, logs,
+  profiler, message queue, jobs and search indexes. They settle "how many", "which records" and
+  "what happened at runtime" questions that code cannot. They need the project's stack running;
+  if one fails because a service is down, say which and continue from code and config.
 - `read`: file contents by absolute path.
 
 All vendor code is in scope. Follow a flow into Oro, Symfony, Doctrine or any other package

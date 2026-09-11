@@ -8,8 +8,8 @@ description: Use this skill WHENEVER a code question needs broad exploration of 
 A pre-configured pi agent in `~/.pi/agent/crawler/` answers one code question from the PhpStorm
 index and, in Oro projects, from Oro Mate's code and config tools. It reads a lot so you don't:
 typically 25-45k characters of tool output condense into an answer of 30-40 lines with `file:line`
-evidence, in 20-120 s. It runs on a Codex model with `read` plus read-only IDE and Mate tools: no
-shell, no edits, no web, no production data.
+evidence, in 20-120 s. It runs on a Codex model with `read`, read-only IDE tools and every Oro Mate
+tool (all read-only, including SQL, logs and the profiler): no shell, no edits, no web.
 
 Everything about the agent lives in that folder: `.pi/settings.json` (model, thinking, packages),
 `.pi/APPEND_SYSTEM.md` (its prompt), `.mcp.json` (servers, with `${CRAWL_PROJECT}` for the project)
@@ -54,7 +54,9 @@ stays open for the user's follow-ups.
 
 ## Rules
 
-- Never add Oro Mate's data tools (`oro_sql_query`, `oro_env_get`, `oro_customer_snapshot`, log
-  tools) to `.mcp.json` or `tools.txt`, and never run the crawler from a project directory.
+- Point it only at local stacks loaded with PII-stripped dumps: Mate's data tools send database
+  rows, log lines and env values to OpenAI. Never run the crawler from a project directory.
+- Mate's data tools (SQL, logs, profiler, queue, search indexes) need the project's stack running;
+  code and config tools work with it down.
 - One question per crawl. Several independent questions: several background crawls in parallel.
 - The crawler answers; you decide. Its `(inferred)` marks are guesses, not findings.
