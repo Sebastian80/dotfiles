@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+#
+# crawl - Ask a read-only pi crawler one question about a PHP codebase; prints a compact answer.
+#
+# Usage:
+#   crawl [-C DIR] [--index-only] "question"
+#   crawl --tui [-C DIR] [--index-only] ["question"]
+#   crawl -h
+#
+#   -C DIR        Project root (default: git toplevel of the current directory)
+#   --index-only  Skip Oro Mate even when the project's stack runs it
+#   --tui         Open the same crawler as an interactive pi session in this terminal, to watch it
+#                 work and ask follow-ups; the question is optional
+#
+# The crawler is a pi agent on a Codex model that answers from the PhpStorm index and, for Docker
+# projects with a `mate` compose service and a running `db`, from Oro Mate's code and config tools.
+# It never sees production data: Oro Mate's SQL, env, log and customer tools stay unexposed because
+# the model runs on OpenAI's side. It has no shell and cannot edit.
+#
+# pi runs from a private directory under ~/.cache/crawl/<project>, never from the project itself:
+# the MCP adapter merges the working directory's .mcp.json, and a project's own config may expose
+# every Oro Mate tool. Model, thinking level and system prompt come from
+# ~/.pi/agent/crawler/idx-scout.md.
+#
+# Prints the answer on stdout; the run log stays in ~/.cache/crawl/<project>/runs/.
+# Exit: 0 answered, 1 crawler failed, 2 usage error, 3 PhpStorm not reachable.
+# A crawl takes one to three minutes, so callers with a short timeout run it in the background.
+#
+set -euo pipefail
+
+AGENT_FILE="$HOME/.pi/agent/crawler/idx-scout.md"
+IDE_URL="http://127.0.0.1:29175/index-mcp/streamable-http"
+ADAPTER="npm:pi-mcp-adapter@2.33.0"
+
+# Read-only navigation tools; the IDE's refactoring and lifecycle tools stay off.
+IDE_TOOLS=(ide_project_status ide_index_status ide_find_implementations ide_find_references
+	ide_find_definition ide_find_super_methods ide_type_hierarchy ide_call_hierarchy ide_find_class
+	ide_find_symbol ide_find_file ide_symbol_info ide_file_structure ide_search_text ide_read_file
+	ide_diagnostics)
+# Code and configuration only. Never add oro_sql_query, oro_env_get, oro_customer_snapshot or the
+# log tools: the crawler's model is not allowed to see production data.
+MATE_TOOLS=(oro_datagrid_list oro_datagrid_get oro_entity_list oro_entity_get oro_entity_field_get
+	oro_config_get oro_enum_options oro_workflow_list oro_workflow_get oro_service_list
+	symfony-service-detail oro_url_resolve oro_acl_check oro_website_list oro_translation_get)
+
+usage() {
+	sed -n '3,28p' "$0" | sed 's/^# \{0,1\}//'
+	exit "${1:-0}"
+}
+
+root="" index_only=false tui=false question=""
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		-h | --help) usage ;;
+		-C) root="${2:-}"; shift 2 ;;
+		--index-only) index_only=true; shift ;;
+		--tui) tui=true; shift ;;
+		-*) echo "crawl: unknown option $1" >&2; usage 2 ;;
+		*) question="$1"; shift ;;
+	esac
+done
+$tui || [[ -n "$question" ]] || usage 2
+root="$(realpath "${root:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}")"
+[[ -d "$root" ]] || { echo "crawl: no such directory: $root" >&2; exit 2; }
+
+# The endpoint antivirus fakes a successful connect on dead local ports, so curl's exit code says
+# nothing; only a real HTTP status proves PhpStorm is listening.
+if [[ "$(curl -s -o /dev/null -m 2 -w '%{http_code}' "http://127.0.0.1:29175/" || true)" == 000 ]]; then
+	echo "crawl: PhpStorm is not running (no index MCP on port 29175). Open PhpStorm, then retry." >&2
+	exit 3
+fi
+
+# The mate service usually sits behind a compose profile, which plain `config --services` omits.
+mate=false
+if ! $index_only &&
+	(cd "$root" && docker compose --profile mate config --services 2>/dev/null | grep -qx mate) &&
+	(cd "$root" && docker compose ps --status running --services 2>/dev/null | grep -qx db); then
+	mate=true
+fi
+
+slug="$(basename "$root" | tr -c 'A-Za-z0-9\n' '-')"
+home="${XDG_CACHE_HOME:-$HOME/.cache}/crawl/$slug"
+stamp="$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$home/.pi" "$home/runs"
+[[ -f "$home/.pi/settings.json" ]] || jq -n --arg a "$ADAPTER" '{packages: [$a]}' >"$home/.pi/settings.json"
+
+# The Oro Mate server name carries the project so each project keeps its own tool-metadata cache
+# entry; the tools themselves stay unprefixed. PWD is pinned because stdio children inherit the
+# caller's environment, and a stale PWD breaks docker compose's project resolution.
+jq -n --arg url "$IDE_URL" --arg root "$root" --arg mate_name "oro-mate-$slug" --argjson mate "$mate" \
+	--argjson n "${#IDE_TOOLS[@]}" --args '$ARGS.positional as $t | {
+		settings: {disableProxyTool: true, toolPrefix: "none"},
+		mcpServers: ({
+			"phpstorm-index": {type: "http", url: $url, directTools: true, includeTools: $t[:$n]}
+		} + (if $mate then {($mate_name): {
+			command: "docker", args: ["compose", "run", "--rm", "-T", "mate"],
+			cwd: $root, env: {PWD: $root}, lifecycle: "eager",
+			directTools: true, includeTools: $t[$n:]
+		}} else {} end))
+	}' "${IDE_TOOLS[@]}" "${MATE_TOOLS[@]}" >"$home/.mcp.json"
+
+# First-party code: the project's source dirs plus the team's own packages, recognised by a source
+# URL on the company GitLab or GitHub org. A vendor prefix whose packages are all first-party
+# collapses to vendor/<prefix>/*, so the list stays a single line.
+own=()
+for dir in src app/code; do [[ -d "$root/$dir" ]] && own+=("$dir/"); done
+if [[ -f "$root/vendor/composer/installed.json" ]]; then
+	own+=("$(jq -r '(.packages // .) as $all
+		| [$all[] | select(((.source.url // "") + " " + (.dist.url // ""))
+			| test("git\\.netresearch\\.de|github\\.com[:/]netresearch"; "i")) | .name] as $own
+		| [($own | map(split("/")[0]) | unique)[] as $p
+			| ([$all[] | select(.name | startswith($p + "/"))] | length) as $total
+			| [$own[] | select(startswith($p + "/"))] as $mine
+			| if ($mine | length) == $total then "vendor/\($p)/*" else ($mine[] | "vendor/\(.)") end]
+		| join(", ")' "$root/vendor/composer/installed.json")")
+fi
+
+own_list="$(printf '%s, ' "${own[@]}")"
+
+# The project context goes into the system prompt, so follow-up questions in --tui keep it.
+model="$(awk '/^---$/ {n++; next} n == 1 && sub(/^model: */, "")' "$AGENT_FILE")"
+thinking="$(awk '/^---$/ {n++; next} n == 1 && sub(/^thinking: */, "")' "$AGENT_FILE")"
+{
+	awk '/^---$/ && n < 2 {n++; next} n >= 2' "$AGENT_FILE"
+	printf '\n## This project\n\n- Project root: %s\n- First-party code: %s\n- Oro Mate: %s\n' \
+		"$root" "${own_list%, }" "$($mate && echo available || echo "not available, answer from the index only")"
+} >"$home/system.md"
+
+tools=(read "${IDE_TOOLS[@]}")
+$mate && tools+=("${MATE_TOOLS[@]}")
+pi_args=(-a -nc -ns -np --model "$model" --thinking "$thinking"
+	--tools "$(IFS=,; echo "${tools[*]}")" --append-system-prompt "$home/system.md")
+
+if $tui; then
+	cd "$home"
+	exec pi "${pi_args[@]}" ${question:+-- "$question"}
+fi
+
+answer="$home/runs/$stamp.md"
+log="$home/runs/$stamp.log"
+start=$SECONDS
+rc=0
+# HERDR_* is dropped so pi's herdr bridge never reports into the caller's pane.
+(cd "$home" && env -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID -u HERDR_SOCKET_PATH \
+	timeout 900 pi -p "${pi_args[@]}" -- "$question" </dev/null >"$answer" 2>"$log") || rc=$?
+
+if [[ $rc -ne 0 || ! -s "$answer" ]]; then
+	echo "crawl: crawler failed (exit $rc) after $((SECONDS - start)) s. Log: $log" >&2
+	exit 1
+fi
+cat "$answer"
+echo "(crawl: $((SECONDS - start)) s, $model:$thinking, oro-mate=$mate, answer: $answer)" >&2
