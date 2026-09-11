@@ -1,0 +1,2 @@
+# pi installs the project package (pi-mcp-adapter) here on the first trusted run.
+.pi/npm/

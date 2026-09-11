@@ -1,0 +1,11 @@
+{
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-terra",
+  "defaultThinkingLevel": "medium",
+  "defaultTools": ["read"],
+  "packages": [
+    { "source": "npm:pi-mcp-adapter@2.33.0", "skills": [] },
+    { "source": "npm:pi-web-access", "extensions": [], "skills": [], "prompts": [] },
+    { "source": "npm:pi-subagents", "extensions": [], "skills": [], "prompts": [] }
+  ]
+}
