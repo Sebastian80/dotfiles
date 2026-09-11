@@ -1,6 +1,6 @@
 # Toolchain
 
-All tools are installed via Homebrew (`/home/linuxbrew/.linuxbrew/bin/`), except Docker and yt-dlp (system packages), Node (fnm) and npm-global CLIs such as `codex` (live under fnm's Node).
+All tools are installed via Homebrew (`/home/linuxbrew/.linuxbrew/bin/`), except Docker (system package), Node (fnm) and npm-global CLIs such as `codex` (live under fnm's Node).
 
 ## Package managers — use the right one
 
@@ -16,6 +16,6 @@ All tools are installed via Homebrew (`/home/linuxbrew/.linuxbrew/bin/`), except
 - **JSON**: `jq` is available for JSON processing in shell pipelines.
 - **`pkill -f` from the Bash tool**: the pattern also matches the tool's own `bash -c …` command line, so it kills the calling shell (exit 144) — anchor it to the executable, `pkill -f '^/usr/bin/ghostty …'`.
 - **Environment listing**: `env` and `printenv` are permission-denied here; list variable names with `compgen -e | grep PREFIX` and read single values with `${VAR}`.
-- **yt-dlp**: "Precondition check failed" + HTTP 400 means the installed binary is stale against YouTube's API; don't debug flags, run `uvx yt-dlp` for the latest.
+- **yt-dlp**: comes from brew; the apt copy in `/usr/bin` is stale and only PATH order keeps it shadowed. pi-web-access calls `yt-dlp` from PATH for YouTube frames, so it breaks if that order changes. "Precondition check failed" + HTTP 400 means the binary is stale against YouTube's API; don't debug flags, run `brew upgrade yt-dlp` (or `uvx yt-dlp` for a one-off).
 - **Locale**: prefix awk/sort/printf pipelines that parse or emit decimal numbers with `LC_ALL=C` — the German locale turns `%.2f` into comma decimals and silently breaks joins/greps on dot-decimal data.
 - **ripgrep in pipelines**: the ripgreprc forces line numbers even on piped output — any `rg` whose output is consumed as data (paths into `head`/loops/`xargs`) needs `-N`, or downstream reads fail on `1:`-prefixed paths.

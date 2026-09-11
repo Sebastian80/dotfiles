@@ -37,6 +37,7 @@ brew "micro"        # Modern terminal text editor
 brew "lazydocker"   # Terminal UI for docker commands
 brew "xclip"        # X11 clipboard utility (required for clipboard ops in terminals)
 brew "moor"         # Nice pager for humans (better less)
+brew "yt-dlp"       # YouTube downloader; pi-web-access calls it from PATH for video frames, shadows the stale /usr/bin copy
 brew "Valkyrie00/homebrew-bbrew/bbrew"  # Terminal UI for managing Homebrew packages
 
 # MCP Tools
