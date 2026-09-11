@@ -44,7 +44,7 @@ MATE_TOOLS=(oro_datagrid_list oro_datagrid_get oro_entity_list oro_entity_get or
 	symfony-service-detail oro_url_resolve oro_acl_check oro_website_list oro_translation_get)
 
 usage() {
-	sed -n '3,28p' "$0" | sed 's/^# \{0,1\}//'
+	awk 'NR > 2 && !/^#/ {exit} NR > 2 {sub(/^# ?/, ""); print}' "$0"
 	exit "${1:-0}"
 }
 
