@@ -42,8 +42,9 @@ if git -C "$cwd" rev-parse --git-dir >/dev/null 2>&1; then
         else
             git_icon=" ✓"
         fi
-        ahead=$(git -C "$cwd" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
-        behind=$(git -C "$cwd" rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
+        # @{u} is git's upstream shorthand, quoted so the shell leaves the braces alone.
+        ahead=$(git -C "$cwd" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+        behind=$(git -C "$cwd" rev-list --count 'HEAD..@{u}' 2>/dev/null || echo 0)
         [ "$ahead" -gt 0 ] 2>/dev/null && git_status+=" ⇡$ahead"
         [ "$behind" -gt 0 ] 2>/dev/null && git_status+=" ⇣$behind"
     fi

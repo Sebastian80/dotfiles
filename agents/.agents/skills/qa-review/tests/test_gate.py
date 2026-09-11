@@ -71,7 +71,7 @@ class GateMatrix(unittest.TestCase):
             env = dict(os.environ, QA_REVIEW_STATE_DIR=state)
             proc = subprocess.run(
                 [sys.executable, str(GATE), key],
-                capture_output=True, text=True, env=env,
+                capture_output=True, text=True, env=env, check=False,
             )
         out = proc.stdout + proc.stderr
         for line in out.splitlines():
@@ -211,7 +211,7 @@ class GateMatrix(unittest.TestCase):
             (Path(state) / "PROJ-123.json").write_text("{not json")
             env = dict(os.environ, QA_REVIEW_STATE_DIR=state)
             proc = subprocess.run([sys.executable, str(GATE), "PROJ-123"],
-                                  capture_output=True, text=True, env=env)
+                                  capture_output=True, text=True, env=env, check=False)
         self.assertIn("QA-REVIEW-RESULT: fail", proc.stdout + proc.stderr)
         self.assertEqual(1, proc.returncode)
 

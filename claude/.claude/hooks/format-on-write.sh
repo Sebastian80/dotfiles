@@ -38,6 +38,7 @@ bash_targets() {  # command cwd
   {
     printf '%s' "$cmd" | grep -oE '(^|[^0-9&])>{1,2} *[^ ;&|)>]+' | sed -E 's/^.*>{1,2} *//'
     printf '%s' "$cmd" | grep -oE '(^|[ ;|&(])tee( +-[a-z]+)* +[^ ;&|)]+' | sed -E 's/^.*tee( +-[a-z]+)* +//'
+    # shellcheck disable=SC2020  # each separator character becomes a newline, which is the intent
     printf '%s' "$cmd" | tr ';|&' '\n\n\n' | grep -E '(^|[[:space:]])sed[[:space:]]+.*-i' | awk '{print $NF}'
   } 2>/dev/null | sed -E "s/^['\"]//; s/['\"]\$//" | grep -v '^/dev/' | while read -r t; do
     [ -n "$t" ] || continue

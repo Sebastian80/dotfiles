@@ -226,7 +226,7 @@ run_cmd() {
 }
 
 # 1. Unstow dotfiles
-if [[ " ${FOUND_ITEMS[@]} " =~ " stowed_dotfiles " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" stowed_dotfiles "* ]]; then
     step "Unstowing dotfiles..."
 
     if [[ -d "$DOTFILES_DIR" ]]; then
@@ -247,7 +247,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " stowed_dotfiles " ]]; then
 fi
 
 # 2. Remove Homebrew
-if [[ " ${FOUND_ITEMS[@]} " =~ " homebrew " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" homebrew "* ]]; then
     step "Uninstalling Homebrew..."
 
     if command -v brew &>/dev/null && [[ "$DRY_RUN" == false ]]; then
@@ -265,7 +265,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " homebrew " ]]; then
 fi
 
 # 3. Remove Ghostty
-if [[ " ${FOUND_ITEMS[@]} " =~ " ghostty " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" ghostty "* ]]; then
     step "Removing Ghostty..."
 
     case "$GHOSTTY_METHOD" in
@@ -319,7 +319,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " ghostty " ]]; then
 fi
 
 # 4. Remove Nerd Fonts
-if [[ " ${FOUND_ITEMS[@]} " =~ " nerd_fonts " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" nerd_fonts "* ]]; then
     step "Removing Nerd Fonts..."
 
     removing "Removing font files..."
@@ -335,7 +335,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " nerd_fonts " ]]; then
 fi
 
 # 5. Remove remaining config directories
-if [[ " ${FOUND_ITEMS[@]} " =~ " config_dirs " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" config_dirs "* ]]; then
     step "Cleaning up configuration directories..."
 
     for dir in "${CONFIG_DIRS[@]}"; do
@@ -348,7 +348,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " config_dirs " ]]; then
 fi
 
 # 6. Remove system configuration
-if [[ " ${FOUND_ITEMS[@]} " =~ " system_config " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" system_config "* ]]; then
     step "Removing system configuration..."
 
     removing "Removing Homebrew sudoers configuration (requires sudo)..."
@@ -359,7 +359,7 @@ if [[ " ${FOUND_ITEMS[@]} " =~ " system_config " ]]; then
 fi
 
 # 7. Remove machine-specific config
-if [[ " ${FOUND_ITEMS[@]} " =~ " bash_local " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" bash_local "* ]]; then
     step "Removing machine-specific config..."
 
     removing "Removing ~/.bash/local.bash..."
@@ -409,7 +409,7 @@ info "System defaults restored"
 echo ""
 
 # 10. Report on backup directories
-if [[ " ${FOUND_ITEMS[@]} " =~ " backups " ]]; then
+if [[ " ${FOUND_ITEMS[*]} " == *" backups "* ]]; then
     step "Backup directories..."
 
     warn "Backup directories are kept for manual review:"

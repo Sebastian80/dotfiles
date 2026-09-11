@@ -208,7 +208,7 @@ def main(argv: list[str]) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main(sys.argv))
-    except Exception as exc:  # fail closed: an exception is never a pass
+    except Exception as exc:  # noqa: BLE001 - fail closed: an exception is never a pass
         print(f"FAIL  internal    gate raised: {exc.__class__.__name__}: {exc}")
         print("QA-REVIEW-RESULT: fail")
         sys.exit(1)

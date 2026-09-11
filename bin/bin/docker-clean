@@ -37,6 +37,7 @@ echo ""
 RUNNING=$(docker ps -q | wc -l)
 if [[ $RUNNING -gt 0 ]]; then
     warn "Stopping $RUNNING running container(s)..."
+    # shellcheck disable=SC2046  # the container ids must word-split into separate arguments
     docker stop $(docker ps -q) 2>/dev/null || true
 fi
 
