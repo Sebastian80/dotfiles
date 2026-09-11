@@ -29,6 +29,7 @@ dotfiles/
 │   │   └── uninstall.sh       # Remove all dotfiles and installed components
 │   │
 │   ├── maintenance/
+│   │   ├── lint-scripts.sh         # shellcheck + ruff + codespell over all scripts
 │   │   ├── verify-installation.sh  # Verify dotfiles installation
 │   │   ├── verify-auth.sh          # Verify authentication setup
 │   │   └── claude-settings-sync.sh # Sync live Claude settings to the tracked reference
@@ -243,6 +244,26 @@ cd ~/dotfiles
 ```
 
 Usually run through `make install-ai`, which adds the AI CLIs and the herdr agent integrations.
+
+---
+
+#### lint-scripts.sh
+**Purpose:** Lint and spellcheck every tracked script
+
+**What it does:**
+1. Collects tracked scripts by extension, plus the extensionless ones in `bin/` by shebang
+2. Runs `bash -n` and shellcheck over the shell scripts, ruff over the Python ones,
+   codespell over both
+3. Fails on errors only; the known tail of warnings and notes is printed but does not fail
+
+**Usage:**
+```bash
+make lint                                    # every tracked script
+./scripts/maintenance/lint-scripts.sh FILE   # just these files
+```
+
+Excluded by design: `bash/.bash/completions/composer.bash` (vendored Symfony), `SC1090`/`SC1091`
+(sources that cannot be followed statically) and the word "Offen" (a German Jira status).
 
 ---
 
@@ -625,6 +646,7 @@ dotfiles/
 | Install pi only | `./scripts/setup/install-pi.sh` |
 | Install Claude Code only | `./scripts/setup/install-claude.sh` |
 | Uninstall all | `./scripts/setup/uninstall.sh` |
+| Lint all scripts | `make lint` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
 | Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |
 | Manual backup | `./scripts/utils/manual-backup.sh` |

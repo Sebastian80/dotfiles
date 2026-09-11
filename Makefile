@@ -1,7 +1,7 @@
 # Dotfiles Makefile - GNU Stow Management
 # Usage: make help
 
-.PHONY: help install uninstall update link unlink list test clean shortcuts dump-shortcuts dock
+.PHONY: help install uninstall update link unlink list lint test clean shortcuts dump-shortcuts dock
 
 # Colors
 GREEN  := \033[0;32m
@@ -59,6 +59,9 @@ unlink: uninstall ## Alias for uninstall
 list: ## List all stow packages
 	@echo "$(GREEN)Available packages:$(NC)"
 	@ls -d */ | grep -v '.git' | sed 's|/||' | awk '{print "  - " $$1}'
+
+lint: ## Lint and spellcheck all tracked scripts (shellcheck, ruff, codespell)
+	@scripts/maintenance/lint-scripts.sh
 
 test: ## Test stow (dry run, shows what would be created)
 	@echo "$(YELLOW)Dry run - showing what would be created:$(NC)"
