@@ -25,8 +25,12 @@ help: ## Show this help message
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-15s$(NC) %s\n", $$1, $$2}'
 	@echo ""
 
+# Claude Code, pi and herdr write sessions, credentials, logs and sockets into ~/.claude, ~/.pi/agent
+# and ~/.config/herdr. Created as real directories before stowing: a missing one would be folded into
+# a symlink into this repo and that state would land here. herdr's directory is private.
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
+	@mkdir -p ~/.claude ~/.pi/agent ~/.config/herdr && chmod 700 ~/.config/herdr
 	@stow -v $(PACKAGES)
 	@echo "$(GREEN)✓ Installation complete$(NC)"
 	@echo ""

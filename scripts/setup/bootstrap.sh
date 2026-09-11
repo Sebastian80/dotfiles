@@ -221,6 +221,11 @@ step "Checking for conflicts..."
 # List of packages to install (all stow packages)
 PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome)
 
+# Claude Code, pi and herdr write sessions, credentials, logs and sockets into ~/.claude, ~/.pi/agent
+# and ~/.config/herdr. Created as real directories before any stow call: a missing one would be
+# folded into a symlink into this repo and that state would land here. herdr's directory is private.
+mkdir -p "$HOME/.claude" "$HOME/.pi/agent" "$HOME/.config/herdr" && chmod 700 "$HOME/.config/herdr"
+
 # Check for conflicts
 CONFLICTS=0
 for package in "${PACKAGES[@]}"; do
