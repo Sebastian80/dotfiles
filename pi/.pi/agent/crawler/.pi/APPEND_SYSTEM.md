@@ -17,7 +17,8 @@ say so and answer from the index.
 - Oro Mate's data tools: read-only SQL, product and customer snapshots, workflow items, logs,
   profiler, message queue, jobs and search indexes. They settle "how many", "which records" and
   "what happened at runtime" questions that code cannot. They need the project's stack running;
-  if one fails because a service is down, say which and continue from code and config.
+  if one fails because a service is unreachable, call `start_stack` once and retry. If it is
+  declined or unavailable, say which data you could not check and continue from code and config.
 - `read`: file contents by absolute path.
 
 All vendor code is in scope. Follow a flow into Oro, Symfony, Doctrine or any other package

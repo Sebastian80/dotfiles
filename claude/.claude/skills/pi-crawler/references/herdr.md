@@ -33,3 +33,6 @@ herdr agent read "$N" --source recent-unwrapped --lines 200
   `pi: current`). Without it, every pi reads idle and step 3 returns early.
 - A `--timeout` that fires first means the crawl is still running, not failed: read the pane and
   wait again.
+- `blocked` means the crawler's `start_stack` dialog is waiting (a data tool found the stack
+  down). Tell the user to answer it in the pane, then `herdr agent wait "$N" --until idle` in the
+  background. Unanswered, it counts as a no after 5 minutes.

@@ -51,3 +51,4 @@ oro_profiler_diff
 oro_profiler_query_explain
 symfony-profiler-list
 server-info
+start_stack

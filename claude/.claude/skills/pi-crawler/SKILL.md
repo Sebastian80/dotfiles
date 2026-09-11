@@ -57,6 +57,8 @@ stays open for the user's follow-ups.
 - Point it only at local stacks loaded with PII-stripped dumps: Mate's data tools send database
   rows, log lines and env values to OpenAI. Never run the crawler from a project directory.
 - Mate's data tools (SQL, logs, profiler, queue, search indexes) need the project's stack running;
-  code and config tools work with it down.
+  code and config tools work with it down. In a pane the crawler asks the user through its
+  `start_stack` tool (`make up`/`make start` if the Makefile has one, else `docker compose up -d`).
+  Headless it cannot ask and reports the stack down: ask the user yourself, then rerun.
 - One question per crawl. Several independent questions: several background crawls in parallel.
 - The crawler answers; you decide. Its `(inferred)` marks are guesses, not findings.
