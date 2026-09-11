@@ -5,7 +5,7 @@ advertise: true
 model: openai-codex/gpt-5.6-terra
 fallbackModels: openai-codex/gpt-5.5
 thinking: medium
-tools: read, mcp:phpstorm-index, mcp:symfony-ai-mate
+tools: read, start_stack, mcp:phpstorm-index, mcp:symfony-ai-mate
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: false

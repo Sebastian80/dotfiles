@@ -1,12 +1,13 @@
 /**
- * start_stack: when an Oro Mate data tool cannot reach a service, the crawler asks the user in the
+ * start_stack: when an Oro Mate data tool cannot reach a service, the agent asks the user in the
  * pi TUI whether to start the project's Docker stack. On yes it runs `make up` (or `make start`)
  * when the project's Makefile defines that target, else `docker compose up -d`, and waits until no
- * container is still starting. The project root comes from CRAWL_PROJECT.
+ * container is still starting.
  *
- * Headless runs (`pi -p`) have no UI, so the tool only reports the stack down there. herdr's pi
- * integration listens for `herdr:blocked`; emitting it around the dialog makes the pane read as
- * blocked, so an orchestrator waiting on the crawler notices the question.
+ * The project is the working directory pi runs in; CRAWL_PROJECT overrides it for a session
+ * started elsewhere. Runs with no UI (`pi -p`, and any background child) only report the stack
+ * down: herdr's pi integration listens for `herdr:blocked`, so emitting it around the dialog makes
+ * the pane read as blocked and an orchestrator waiting on the agent notices the question.
  */
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -72,8 +73,7 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	async function askAndStart(reason: string, signal: AbortSignal | undefined, ctx: any, onUpdate: any): Promise<string> {
-		const root = process.env.CRAWL_PROJECT;
-		if (!root) throw new Error("CRAWL_PROJECT is not set, so there is no project stack to start.");
+		const root = process.env.CRAWL_PROJECT ?? process.cwd();
 
 		const target = await makeTarget(root);
 		const [cmd, args] = target ? ["make", [target]] : ["docker", ["compose", "up", "-d"]];
