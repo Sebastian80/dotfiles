@@ -91,6 +91,9 @@ done
 if [[ "$kind" == pi ]]; then
 	model="${model:-openai-codex/gpt-5.6-terra}" effort="${effort:-medium}"
 	cli_args=(--model "$model" --thinking "$effort")
+	# A project with its own pi files makes pi ask for trust at startup, and that dialog swallows
+	# the task. Project files stay ignored unless the caller passes -a.
+	[[ " ${extra[*]} " =~ \ (-a|--approve)\  ]] || cli_args+=(-na)
 else
 	model="${model:-opus}" effort="${effort:-high}"
 	cli_args=(--model "$model" --effort "$effort")
@@ -186,6 +189,13 @@ else
 		break
 	done
 	herdr agent read "$target" --source recent-unwrapped --lines 400 >"$out/screen.txt" 2>/dev/null || true
+	# herdr matches a permission dialog line by line, and in a narrow pane the agent wraps it into
+	# fragments ("Esc / to / can / cel") that no rule sees, so herdr reports idle. Matching the
+	# screen with all whitespace removed finds the dialog however it wrapped.
+	if [[ "$state" == idle ]] && tail -n 60 "$out/screen.txt" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' |
+		grep -qE 'doyouwanttoproceed|esctocancel|waitingforpermission|doyouwanttoallow'; then
+		state=blocked
+	fi
 fi
 
 success=false
