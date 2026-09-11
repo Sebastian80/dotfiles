@@ -1,7 +1,7 @@
 # Dotfiles Makefile - GNU Stow Management
 # Usage: make help
 
-.PHONY: help install uninstall update link unlink list test clean shortcuts dump-shortcuts
+.PHONY: help install uninstall update link unlink list test clean shortcuts dump-shortcuts dock
 
 # Colors
 GREEN  := \033[0;32m
@@ -11,7 +11,7 @@ RED    := \033[0;31m
 NC     := \033[0m # No Color
 
 # Package list - all stow packages to manage (DRY: defined once, used everywhere)
-PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents
+PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 
 # Default target
 .DEFAULT_GOAL := help
@@ -132,6 +132,10 @@ shortcuts: ## Restore the desktop keyboard shortcuts (dconf)
 	@dconf load /org/gnome/settings-daemon/plugins/media-keys/ < system/dconf/media-keys.ini
 	@echo "$(GREEN)✓ Shortcuts restored$(NC)"
 	@dconf dump /org/gnome/settings-daemon/plugins/media-keys/ | grep -E '^binding' || true
+
+# Plank stores launchers by absolute path, so a ~/.local desktop override never reaches the dock.
+dock: ## Point Plank dock launchers at their ~/.local desktop overrides
+	@scripts/setup/plank-use-overrides.sh
 
 dump-shortcuts: ## Capture the current desktop keyboard shortcuts into the repo
 	@dconf dump /org/gnome/settings-daemon/plugins/media-keys/ > system/dconf/media-keys.ini

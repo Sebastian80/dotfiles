@@ -53,4 +53,8 @@ dconf shortcuts in `system/dconf/media-keys.ini` are also GNOME-specific
 (`org.gnome.settings-daemon`) and have no meaning under KDE; re-create them in
 Plasma's shortcut editor.
 
+`make dock` (`scripts/setup/plank-use-overrides.sh`) only matters while the Plank dock
+exists; Plasma's task manager launches through desktop IDs, which the `chrome` package's
+two override files already cover.
+
 GTK stow package (`gtk.css` + bookmarks) is harmless on KDE, but don't add a `settings.ini` to it — Plasma's `kde-gtk-config` owns `~/.config/gtk-3.0/settings.ini`.
