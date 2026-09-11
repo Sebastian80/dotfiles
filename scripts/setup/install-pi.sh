@@ -57,7 +57,10 @@ info "Installing $PI_PACKAGE globally"
 npm install -g --ignore-scripts "$PI_PACKAGE" >"$LOG" 2>&1 || fail "global pi install"
 
 info "Installing pi packages declared in settings.json"
-pi install npm:pi-subagents >>"$LOG" 2>&1 || fail "pi install npm:pi-subagents"
+[[ -f "$AGENT_DIR/settings.json" ]] || fail "$AGENT_DIR/settings.json missing; stow the 'pi' package first (make install)"
+jq -r '.packages[]' "$AGENT_DIR/settings.json" | while read -r pkg; do
+	pi install "$pkg" >>"$LOG" 2>&1 || fail "pi install $pkg"
+done
 
 info "Provisioning the sandbox extension"
 SRC="$(npm root -g)/$PI_PACKAGE/examples/extensions/sandbox"
@@ -74,6 +77,5 @@ if ! npm audit --prefix "$EXT_DIR/sandbox" --audit-level=high >>"$LOG" 2>&1; the
 	printf 'WARNING: npm audit reports advisories in the sandbox extension.\n  log: %s\n' "$LOG" >&2
 fi
 
-info "settings.json stays untracked; pi rewrites it at runtime."
 info "Done. Config comes from the 'pi' stow package; credentials stay in $AGENT_DIR/auth.json."
 info "Log: $LOG"

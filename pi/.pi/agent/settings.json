@@ -1,0 +1,8 @@
+{
+  "packages": [
+    "npm:pi-subagents",
+    "npm:pi-web-access"
+  ],
+  "lastChangelogVersion": "0.85.1",
+  "theme": "dark"
+}
