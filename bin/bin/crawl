@@ -20,7 +20,9 @@
 # pi runs from a private directory under ~/.cache/crawl/<project>, never from the project itself:
 # the MCP adapter merges the working directory's .mcp.json, and a project's own config may expose
 # every Oro Mate tool. Model, thinking level and system prompt come from
-# ~/.pi/agent/crawler/idx-scout.md.
+# ~/.pi/agent/crawler/idx-scout.md. Only three extensions load: the MCP adapter, protected-paths
+# (keeps `read` away from secrets) and, with --tui, herdr's state reporter. The global web,
+# subagent and sandbox extensions stay out of the crawler's process.
 #
 # Prints the answer on stdout; the run log stays in ~/.cache/crawl/<project>/runs/.
 # Exit: 0 answered, 1 crawler failed, 2 usage error, 3 PhpStorm not reachable.
@@ -31,6 +33,8 @@ set -euo pipefail
 AGENT_FILE="$HOME/.pi/agent/crawler/idx-scout.md"
 IDE_URL="http://127.0.0.1:29175/index-mcp/streamable-http"
 ADAPTER="npm:pi-mcp-adapter@2.33.0"
+PROTECTED_PATHS="$HOME/.pi/agent/extensions/protected-paths.ts"
+HERDR_STATE="$HOME/.pi/agent/extensions/herdr-agent-state.ts"
 
 # Read-only navigation tools; the IDE's refactoring and lifecycle tools stay off.
 IDE_TOOLS=(ide_project_status ide_index_status ide_find_implementations ide_find_references
@@ -81,8 +85,13 @@ fi
 slug="$(basename "$root" | tr -c 'A-Za-z0-9\n' '-')"
 home="${XDG_CACHE_HOME:-$HOME/.cache}/crawl/$slug"
 stamp="$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$home/.pi" "$home/runs"
-[[ -f "$home/.pi/settings.json" ]] || jq -n --arg a "$ADAPTER" '{packages: [$a]}' >"$home/.pi/settings.json"
+mkdir -p "$home/runs"
+adapter_entry="$home/.pi/npm/node_modules/pi-mcp-adapter/index.ts"
+if [[ ! -f "$adapter_entry" ]] && ! (cd "$home" && pi install "$ADAPTER" -l >"$home/install.log" 2>&1); then
+	echo "crawl: installing $ADAPTER failed, see $home/install.log" >&2
+	exit 1
+fi
+[[ -f "$PROTECTED_PATHS" ]] || { echo "crawl: $PROTECTED_PATHS missing; refusing to crawl without it" >&2; exit 1; }
 
 # The Oro Mate server name carries the project so each project keeps its own tool-metadata cache
 # entry; the tools themselves stay unprefixed. PWD is pinned because stdio children inherit the
@@ -128,10 +137,13 @@ thinking="$(awk '/^---$/ {n++; next} n == 1 && sub(/^thinking: */, "")' "$AGENT_
 
 tools=(read "${IDE_TOOLS[@]}")
 $mate && tools+=("${MATE_TOOLS[@]}")
-pi_args=(-a -nc -ns -np --model "$model" --thinking "$thinking"
+# -na: the runtime dir's .pi files are not needed, the adapter reads .mcp.json on its own.
+pi_args=(-na -ne -nc -ns -np -e "$adapter_entry" -e "$PROTECTED_PATHS"
+	--model "$model" --thinking "$thinking"
 	--tools "$(IFS=,; echo "${tools[*]}")" --append-system-prompt "$home/system.md")
 
 if $tui; then
+	[[ ! -f "$HERDR_STATE" ]] || pi_args+=(-e "$HERDR_STATE")
 	cd "$home"
 	exec pi "${pi_args[@]}" ${question:+-- "$question"}
 fi
