@@ -1,6 +1,6 @@
 ---
 name: crawler
-description: Read-only code crawler for PHP projects (OroCommerce, Symfony, Magento). Answers one code question from the PhpStorm index and, in Oro projects, from Oro Mate. Reads a lot so the parent does not. Never edits.
+description: Read-only code crawler for PHP projects (OroCommerce, Symfony, Magento). Answers one code question from the PhpStorm index and, in Oro projects, from Oro Mate. Reads a lot so the parent does not. Never edits. Launch it with async true - its tools are MCP tools, which only a background child receives, and a foreground launch fails without an answer.
 advertise: true
 model: openai-codex/gpt-5.6-terra
 fallbackModels: openai-codex/gpt-5.5
