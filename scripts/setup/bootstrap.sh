@@ -358,6 +358,15 @@ if [[ ! -f "$HOME/.bash/local.bash" ]]; then
     echo "# This file is git-ignored" >> "$HOME/.bash/local.bash"
 fi
 
+# herdr's agent integrations make each agent report its own state. Without them herdr guesses from
+# the screen, reports pi as idle while it works, and `lane` misjudges when a worker has finished.
+# They are generated files, so they are installed here rather than stowed.
+if command -v herdr >/dev/null; then
+    for agent in claude codex pi; do
+        herdr integration install "$agent" || warn "herdr integration for $agent failed"
+    done
+fi
+
 # Install system configuration
 echo ""
 step "System Configuration"
