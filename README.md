@@ -84,7 +84,7 @@ cd ~/dotfiles
 # - Check for conflicts and offer backup/adopt options
 # - Install all dotfiles packages (including ~/bin utilities)
 # - Optionally install Node.js via fnm
-# - Optionally install AI agent tooling (Codex/Gemini CLIs, pi + sandbox, herdr integrations)
+# - Optionally install AI agent tooling (Claude Code, Codex/Gemini CLIs, pi + sandbox, herdr integrations)
 # - Verify symlinks
 
 # Install system configurations (requires sudo)

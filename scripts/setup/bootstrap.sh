@@ -529,11 +529,12 @@ echo ""
 info "Optional: the AI agent CLIs, pi, and herdr's agent integrations."
 echo ""
 echo "What you get:"
+echo "  • Claude Code, through Anthropic's own installer (skipped when already present)"
 echo "  • Codex, Gemini and agent-browser CLIs, plus repomix"
 echo "  • pi with its sandbox extension (without it, pi's bash runs unsandboxed)"
 echo "  • herdr agent integrations for claude, codex and pi"
 echo ""
-warn "Needs Node.js from the previous step. Claude Code is installed separately."
+warn "Needs Node.js from the previous step for everything except Claude Code."
 echo ""
 read -p "Install AI agent tooling now? (y/n) " -n 1 -r
 echo

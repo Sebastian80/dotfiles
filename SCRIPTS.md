@@ -20,6 +20,7 @@ dotfiles/
 ├── scripts/                   # Installation & maintenance (NOT stowed)
 │   ├── setup/
 │   │   ├── bootstrap.sh       # Automated initial setup
+│   │   ├── install-claude.sh  # Claude Code via Anthropic's installer
 │   │   ├── install-docker.sh  # Docker Engine installation
 │   │   ├── install-fonts.sh   # Nerd Fonts installation
 │   │   ├── install-ghostty.sh # Ghostty terminal installation
@@ -166,6 +167,28 @@ cd ~/dotfiles
 **When to use:**
 - Fresh machine where Ghostty isn't available via Homebrew
 - Upgrading Ghostty to a newer community build than what's in the repos
+
+---
+
+#### install-claude.sh
+**Purpose:** Install Claude Code with Anthropic's own installer
+
+**What it does:**
+1. Skips silently when `claude` is already on PATH, since Claude Code updates itself
+2. Downloads `https://claude.ai/install.sh` to a temp file and runs that file, so a truncated
+   download cannot execute half a script
+3. Verifies `claude` is on PATH afterwards
+
+**Usage:**
+```bash
+cd ~/dotfiles
+./scripts/setup/install-claude.sh           # install when missing
+./scripts/setup/install-claude.sh --check   # report what is installed
+./scripts/setup/install-claude.sh --force latest
+```
+
+The installer places a versioned build under `~/.local/share/claude/versions` and links
+`~/.local/bin/claude` at it. Nothing here is stowed. Usually run through `make install-ai`.
 
 ---
 
@@ -600,6 +623,7 @@ dotfiles/
 | Install Node.js | `./scripts/setup/install-node.sh` |
 | Install AI agent tooling | `make install-ai` |
 | Install pi only | `./scripts/setup/install-pi.sh` |
+| Install Claude Code only | `./scripts/setup/install-claude.sh` |
 | Uninstall all | `./scripts/setup/uninstall.sh` |
 | Verify setup | `./scripts/maintenance/verify-installation.sh` |
 | Verify auth | `./scripts/maintenance/verify-auth.sh` or `make verify-auth` |

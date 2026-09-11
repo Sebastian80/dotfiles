@@ -138,7 +138,8 @@ install-pi: ## Install pi, its packages and the sandbox extension (needs Node: i
 
 # The single definition of the AI tooling sequence; bootstrap runs this target rather than repeating
 # it. Each script loads fnm itself, so the CLIs land under fnm's default Node, not Homebrew's.
-install-ai: ## Install AI agent tooling: Codex/Gemini CLIs, pi + sandbox, herdr agent integrations
+install-ai: ## Install AI agent tooling: Claude Code, Codex/Gemini CLIs, pi + sandbox, herdr integrations
+	@scripts/setup/install-claude.sh
 	@scripts/setup/install-node.sh --ai
 	@scripts/setup/install-pi.sh
 	@if command -v herdr >/dev/null 2>&1; then \

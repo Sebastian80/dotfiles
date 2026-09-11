@@ -537,8 +537,9 @@ After completing installation:
    ```bash
    make install-ai
    ```
-   Codex, Gemini and agent-browser CLIs plus repomix, pi with its sandbox extension,
-   and herdr's agent integrations. Needs Node.js from step 6.
+   Claude Code (through Anthropic's own installer, skipped when already present), the Codex,
+   Gemini and agent-browser CLIs plus repomix, pi with its sandbox extension, and herdr's agent
+   integrations. Everything except Claude Code needs Node.js from step 6.
 
 8. **Consider future enhancements**:
    - Add pre-commit hooks for secret scanning

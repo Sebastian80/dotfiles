@@ -40,9 +40,9 @@ NPM_GLOBALS=(
 )
 
 # AI agent tooling, installed with --ai (bootstrap and `make install-ai` ask first).
-# Claude Code is NOT installed via npm: it uses its native installer and self-updates
-# (`curl -fsSL https://claude.ai/install.sh | bash`, binary in ~/.local/bin/claude).
-# pi is not here either: install-pi.sh also provisions its sandbox extension.
+# Claude Code is NOT installed via npm: it uses its native installer and self-updates, so it has
+# its own script (install-claude.sh). pi is not here either: install-pi.sh also provisions its
+# sandbox extension. Both run from `make install-ai` alongside this manifest.
 NPM_AI_GLOBALS=(
     "@openai/codex|codex:OpenAI Codex CLI (also the codex MCP server for Claude Code)"
     "@google/gemini-cli|gemini:Google Gemini CLI"
