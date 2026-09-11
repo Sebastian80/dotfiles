@@ -36,6 +36,7 @@ install: ## Install all dotfiles (create symlinks)
 	@echo ""
 	@echo "$(YELLOW)Manual step required:$(NC)"
 	@echo "  Install system config: make install-system"
+	@echo "  Install pi and its sandbox: make install-pi"
 	@echo "  Then reload shell: source ~/.bashrc"
 
 uninstall: ## Uninstall all dotfiles (remove symlinks)
@@ -129,6 +130,10 @@ install-system: ## Install system-level configurations (requires sudo)
 	@sudo visudo -c
 	@echo "$(GREEN)✓ System configuration installed$(NC)"
 	@echo "Homebrew tools now work with sudo"
+
+# pi itself, its packages and the sandbox extension are installed, not stowed: see install-pi.sh.
+install-pi: ## Install pi, its packages and the sandbox extension (needs Node: install-node.sh)
+	@scripts/setup/install-pi.sh
 
 # Desktop shortcuts live in dconf, not in files, so stow cannot reach them.
 shortcuts: ## Restore the desktop keyboard shortcuts (dconf)

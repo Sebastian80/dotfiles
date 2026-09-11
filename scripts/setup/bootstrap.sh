@@ -363,6 +363,27 @@ if [[ ! -f "$HOME/.bash/local.bash" ]]; then
     echo "# This file is git-ignored" >> "$HOME/.bash/local.bash"
 fi
 
+# pi, its packages and its sandbox extension are installed rather than stowed (see install-pi.sh).
+# This runs after stowing, since install-pi.sh reads the package list from the stowed settings.json,
+# and before the herdr integrations, so `herdr integration install pi` finds pi.
+echo ""
+step "pi coding agent"
+if ! command -v npm >/dev/null; then
+    warn "npm not found, skipping pi. Install Node first (scripts/setup/install-node.sh), then: make install-pi"
+else
+    read -p "Install pi, its packages and the sandbox extension now? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if "$DOTFILES_DIR/scripts/setup/install-pi.sh"; then
+            info "✓ pi installed with its sandbox extension"
+        else
+            warn "pi installation failed. Retry later with: make install-pi"
+        fi
+    else
+        warn "Skipping pi. Without it pi's bash runs unsandboxed. Install later with: make install-pi"
+    fi
+fi
+
 # herdr's agent integrations make each agent report its own state. Without them herdr guesses from
 # the screen, reports pi as idle while it works, and `lane` misjudges when a worker has finished.
 # They are generated files, so they are installed here rather than stowed.

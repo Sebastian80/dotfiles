@@ -83,10 +83,14 @@ cd ~/dotfiles
 # - Optionally install Homebrew
 # - Check for conflicts and offer backup/adopt options
 # - Install all dotfiles packages (including ~/bin utilities)
+# - Optionally install pi, its packages and its sandbox extension (needs Node)
 # - Verify symlinks
 
 # Install system configurations (requires sudo)
 make install-system
+
+# Install pi on its own later, or re-provision its sandbox extension
+make install-pi
 ```
 
 ### Manual Installation
