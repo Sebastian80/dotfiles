@@ -23,7 +23,7 @@ herdr agent prompt "$N" 'Use the subagent tool once with agent "crawler" and asy
 with the task below. When the child result arrives, print the child answer verbatim and nothing else.
 If the child contacts you for a decision, do not answer it yourself and never tell it to work from
 the files instead: call start_ide with the reason it gave, and if that hands the question back,
-print it verbatim and stop.
+interrupt the child, then print the request verbatim and stop.
 
 Project root: /abs/project/root
 Question: <question>' --wait --until idle --until done --until blocked --timeout 900000
@@ -32,6 +32,9 @@ Question: <question>' --wait --until idle --until done --until blocked --timeout
 herdr agent read "$N" --source recent-unwrapped --lines 60
 ```
 
+- **Interrupt the child when you hand its question up.** A child that asked for a decision waits
+  for the reply, so an orchestrator that stops without answering leaves it running until its 900 s
+  timeout (measured: `subagent({ action: "interrupt", id })` is what clears it).
 - **The orchestrator will answer its child's escalation unless you forbid it.** Measured with
   PhpStorm down: the crawler escalated correctly with `reason=need_decision`, and the orchestrator
   replied "proceed from repository files and derive exact line positions by reading them, do not
