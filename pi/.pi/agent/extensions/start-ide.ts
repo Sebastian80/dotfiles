@@ -47,15 +47,20 @@ export default function (pi: ExtensionAPI) {
 	let pending: Promise<string> | undefined;
 
 	// A run that hands the question up stops straight afterwards, and an agent that stops reads as
-	// idle, which looks like an answer. Mark it blocked instead, and clear that when the next turn
-	// starts: herdr keeps a counter and a blocked pane stays blocked even while it works, so an
-	// emit that is never matched pins the pane for good.
+	// idle, which looks like an answer. Mark it blocked so a listener waiting on the pane wakes, and
+	// release it as soon as the turn settles. Holding the state is not an option: to herdr, blocked
+	// means the terminal is waiting for a keypress, so `herdr agent prompt` answers agent_blocked and
+	// refuses to deliver. The parent could then never send the rerun the decision exists to enable,
+	// and nothing else would clear the state either, because clearing it needs a turn that can no
+	// longer start.
 	let handedUp = false;
-	pi.on("agent_start", () => {
+	const release = () => {
 		if (!handedUp) return;
 		handedUp = false;
 		pi.events.emit("herdr:blocked", { active: false });
-	});
+	};
+	pi.on("agent_settled", release);
+	pi.on("agent_start", release);
 
 	// The endpoint antivirus accepts connections on dead local ports, so a reachable socket is not a
 	// running IDE. Only a real HTTP response counts, whatever its status.
