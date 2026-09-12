@@ -1,6 +1,6 @@
 ---
 name: ide-index-mcp
-description: "MANDATORY for single-symbol navigation and for ALL refactoring. You MUST invoke this skill whenever: going to a definition ('where is X defined'), finding usages of one named symbol ('who calls X', 'where is X used'), implementations of an interface or abstract class, call or type/inheritance hierarchies, file structure or class methods, diagnostics for a file, finding a class/file/symbol by name, targeted project-wide text search (service ids, YAML keys, TODOs), renaming or moving any symbol, reformatting, syncing the IDE after external file changes, or opening and waking IDE projects (multi-project, sleep/wake, Power Save). Do NOT skip this and use Grep/Glob instead. One exception: broad multi-hop exploration of code you are NOT editing ('how does this flow work', 'which of our classes ...') in a project with .pi/mcp.json belongs to pi-crawler, which reads far more and answers condensed. A reachable port is not an open project: check ide_project_status first."
+description: "MANDATORY for single-symbol navigation and for ALL refactoring. You MUST invoke this skill whenever: going to a definition ('where is X defined'), finding usages of one named symbol ('who calls X', 'where is X used'), implementations of an interface or abstract class, call or type/inheritance hierarchies, file structure or class methods, diagnostics for a file, finding a class/file/symbol by name, targeted project-wide text search (service ids, YAML keys, TODOs), renaming or moving any symbol, reformatting, syncing the IDE after external file changes, or opening and waking IDE projects (multi-project, sleep/wake, Power Save). Do NOT skip this for Bash grep or rg while the project is open. One exception: broad multi-hop exploration of code you are NOT editing ('how does this flow work', 'which of our classes ...') in a project with .pi/mcp.json belongs to pi-crawler, which reads far more and answers condensed. A reachable port is not an open project: check ide_project_status first."
 ---
 
 # IDE Index MCP - Agent Guide
@@ -115,13 +115,17 @@ When both this plugin (`mcp__phpstorm-index__*` / `mcp__intellij-index__*`) and 
 | Code navigation, search, diagnostics, rename, move, run tests | index plugin (`*-index`) |
 | Terminal, running non-test processes, Symfony service lookup (`locate_symfony_service`) | built-in server only |
 
-The built-in server is **not a fallback** for the index plugin: it cannot do semantic code search, and during dumb mode it fails the same way. Dumb mode / stale index are transient — wait and retry the index plugin, or use the Grep/rg fallbacks below; don't reroute to the built-in server.
+The built-in server is **not a fallback** for the index plugin: it cannot do semantic code search, and during dumb mode it fails the same way. Dumb mode / stale index are transient — wait and retry the index plugin, or use the `rg` fallbacks below; don't reroute to the built-in server.
 
-## When to use built-in tools instead
+## When to use Bash or Read instead
 
-- **Regex pattern matching** → `ide_search_text` with `regex: true` + optional `filePattern` (in-project regex no longer needs `Grep`; routes through IntelliJ Find in Files)
-- **Finding files by extension/path glob pattern** → `Glob` (e.g. `**/*.py`, `src/**/*.yaml`)
-- **Files outside the project root** → `Grep`/`Glob` (IDE indexes project + libraries; for paths beyond both, use Grep)
+There is no `Grep` and no `Glob` tool in this harness — text search is `rg` through Bash, and `Read`
+takes a path you already know, so it is never the answer to "where is X".
+
+- **Regex pattern matching** → `ide_search_text` with `regex: true` + optional `filePattern` (routes through IntelliJ Find in Files)
+- **Finding files by extension/path glob pattern** → `ide_find_file`, or `rg --files -g '**/*.yaml'` when the project is not open
+- **Files outside the project root** → `rg <pattern> <path>` (the IDE indexes project + libraries; for paths beyond both, Bash is the only instrument; add `-N` only when the output feeds a pipeline, because the ripgreprc forces line numbers even when piped)
+- **Project closed, or the ide_* tools unavailable** → `rg -uu <path>`; a reachable index port is not an open project, so confirm with `ide_project_status` before trusting an empty result
 - **Reading project file content** → `Read` (`ide_read_file` is for library/jar sources)
 - **Code in IDE-excluded folders** → `rg -uu <path>` (peels off `.gitignore` and hidden-file filters; `-uuu` also searches binaries). The IDE MCP returns nothing for explicitly-excluded paths regardless of `scope`. Typical case: a heavyweight `vendor/<thing>/*` excluded for IDE perf — `rg -uu vendor/oro` etc.
 
