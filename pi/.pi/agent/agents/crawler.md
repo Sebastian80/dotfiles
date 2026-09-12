@@ -6,7 +6,6 @@ model: openai-codex/gpt-5.6-terra
 fallbackModels: openai-codex/gpt-5.5
 thinking: medium
 tools: read, start_stack, start_ide, mcp:phpstorm-index, mcp:symfony-ai-mate
-subagentOnlyExtensions: /home/sebastian/.pi/agent/extensions/start-ide.ts, /home/sebastian/.pi/agent/extensions/start-stack.ts
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: false
