@@ -15,20 +15,23 @@ background child, and that session gets its MCP servers from the project (see
 
 ## Crawl, or look it up yourself
 
-A crawl costs 30-80 s and a few cents. The same narrow answer costs one `rg -uu` and a `Read`,
-measured at roughly 400 times faster for an identical result: every crawl in a day of testing
-answered a question that grep answered first and better. Delegating a lookup you could do yourself
-is the common mistake here, not the rare one.
+The scarce resource is your context, not the clock. A crawl is slow and costs a few cents of
+Codex, which is a different budget; what it returns into your window is 30-40 lines. Doing it
+yourself is fast and free of Codex, and every line of evidence lands in your context, on the budget
+that actually runs out. So compare bytes returned, not seconds.
+
+The only real overhead a crawl adds on your side is three round trips, launching it, being notified
+and reading the answer, each re-sending your context. It therefore loses exactly when the answer is
+smaller than that: one line whose location you already know, or a file you are about to read
+anyway because you are editing it. Above that, hand it over.
 
 Crawl when one of these holds, and look it up yourself otherwise:
 
-- **Breadth**, which you decide in two steps rather than by estimating. First the question's shape:
-  one named symbol is narrow, a question quantified over a set is not ("which of our services ...",
-  "everywhere X is ...", "what does each ... do"). Then one counting grep before you read anything,
-  `rg -uu -l <pattern> <roots> | wc -l`, which costs milliseconds and turns the threshold into a
-  number: past about ten files, hand it over instead of opening them. The worked example here,
-  every first-party service that decorates an Oro service and what each overrides, counts 13 files
-  and 12 classes to open, so 40-70 KB of your context against the crawler's 30-40 lines.
+- **Breadth**, decided by a counting grep rather than an estimate: `rg -uu -l <pattern> <roots> |
+  wc -l` costs milliseconds and turns the threshold into a number. Past roughly three files worth
+  of reading, hand it over. The worked example here, every first-party service that decorates an
+  Oro service and what each overrides, counts 13 files and 12 classes to open: 40-70 KB of your
+  context against the crawler's 30-40 lines.
 - **Semantics that text cannot do.** Call sites, implementations, overrides. It correctly dropped a
   same-named method on a different type where `rg` could not.
 - **Runtime truth.** How many records, what the container holds, what the logs say, through Mate.
