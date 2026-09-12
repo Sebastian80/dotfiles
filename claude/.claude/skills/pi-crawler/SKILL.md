@@ -22,9 +22,13 @@ is the common mistake here, not the rare one.
 
 Crawl when one of these holds, and look it up yourself otherwise:
 
-- **Breadth.** The raw evidence runs past roughly ten files. A real one here, every first-party
-  service that decorates an Oro service and what each overrides, is 24 matches in 13 files plus 12
-  classes to open: 40-70 KB of your context against the crawler's 30-40 lines.
+- **Breadth**, which you decide in two steps rather than by estimating. First the question's shape:
+  one named symbol is narrow, a question quantified over a set is not ("which of our services ...",
+  "everywhere X is ...", "what does each ... do"). Then one counting grep before you read anything,
+  `rg -uu -l <pattern> <roots> | wc -l`, which costs milliseconds and turns the threshold into a
+  number: past about ten files, hand it over instead of opening them. The worked example here,
+  every first-party service that decorates an Oro service and what each overrides, counts 13 files
+  and 12 classes to open, so 40-70 KB of your context against the crawler's 30-40 lines.
 - **Semantics that text cannot do.** Call sites, implementations, overrides. It correctly dropped a
   same-named method on a different type where `rg` could not.
 - **Runtime truth.** How many records, what the container holds, what the logs say, through Mate.
