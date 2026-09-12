@@ -51,12 +51,20 @@ call() { # tool name, arguments JSON -> raw JSON-RPC response
 # gate would report the state it just caused. The bare call lists every project untouched.
 OPEN=$(call ide_project_status '{}' | python3 -c '
 import json, sys
+root = sys.argv[1].rstrip("/")
 try:
     payload = json.loads(json.load(sys.stdin)["result"]["content"][0]["text"])
-    projects = payload["projects"]
 except Exception:
     print("unreadable"); raise SystemExit
-root = sys.argv[1].rstrip("/")
+# With more than one project open the bare call refuses, but its available_projects list is
+# exactly the set of open projects, which is the question being asked.
+if payload.get("error") == "multiple_projects_open":
+    paths = [p.get("path", "").rstrip("/") for p in payload.get("available_projects", [])]
+    print("open" if root in paths else "closed")
+    raise SystemExit
+projects = payload.get("projects")
+if projects is None:
+    print("unreadable"); raise SystemExit
 for project in projects:
     if project.get("path", "").rstrip("/") == root:
         print("open" if project.get("open") else "closed"); break
@@ -68,10 +76,10 @@ case $OPEN in
 open) ;;
 closed) request "PhpStorm is running but does not have this project open" \
 	"the index refuses every query for a project it does not have open: it answers isError with a hint to use ide_open_project, and does not start it on its own" \
-	"post ide_open_project to $MCP_URL with project_path $ROOT (the index exposes it over plain HTTP even where .pi/mcp.json does not expose it to pi), wait until ide_index_status reports isIndexing false, then run this again" ;;
+	"post ide_open_project to $MCP_URL with path $ROOT AND project_path set to a project that is already open (path names what to open, project_path only routes the call, so passing the closed root there is refused), wait until ide_index_status reports isIndexing false, then run this again" ;;
 unknown) request "PhpStorm does not know this project" \
 	"ide_project_status does not list this root at all, so the index holds nothing for it" \
-	"post ide_open_project to $MCP_URL with project_path $ROOT (the index exposes it over plain HTTP even where .pi/mcp.json does not expose it to pi), wait until ide_index_status reports isIndexing false, then run this again" ;;
+	"post ide_open_project to $MCP_URL with path $ROOT AND project_path set to a project that is already open (path names what to open, project_path only routes the call, so passing the closed root there is refused), wait until ide_index_status reports isIndexing false, then run this again" ;;
 *) request "the index did not answer ide_project_status" \
 	"the index is reachable but its project status was unreadable" \
 	"check PhpStorm, then run this again" ;;

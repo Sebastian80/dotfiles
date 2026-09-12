@@ -28,10 +28,12 @@ background child, and that session gets its MCP servers from the project (see
   project that is managed-but-closed makes it refuse every code-search question rather than answer
   from whichever project happens to be open — and parallel checkouts share relative paths and line
   numbers, so an answer from the wrong one is indistinguishable. Check `ide_project_status` for
-  *this* path, and if it is closed, open it here in the preflight (the index MCP exposes
-  `ide_open_project` over HTTP on the same port, even where `.pi/mcp.json` does not expose it to
-  pi) and wait until `ide_index_status` reports `isIndexing: false`. Opening takes a while on a
-  monorepo, and a half-built index answers partially instead of refusing. The crawler never opens a
+  *this* path, which `check-ide.sh` does for you. A closed project is not started on demand: the
+  index answers `isError` with a hint, and no second IDE appears. Opening one needs no IDE restart,
+  just `ide_open_project` over plain HTTP on the same port (exposed there even where
+  `.pi/mcp.json` does not expose it to pi), with `path` the project to open **and** `project_path`
+  a project that is already open, because `project_path` only routes the call. A half-built index
+  answers partially instead of refusing, so wait for `isIndexing: false`. The crawler never opens a
   project on its own: `start_ide` puts that question to whoever started the run.
 - Mate's data tools (SQL, logs, profiler, queue, search indexes) need the project's stack running;
   code and config tools work with it down. Check `docker compose ps` here and ask before starting
