@@ -523,8 +523,12 @@ load_bw_secrets() {
 | Composer | `COMPOSER_AUTH` | Assembled from the three above | PHP package auth |
 
 `GITLAB_HOST` is exported alongside `GITLAB_TOKEN` so other tools resolve the self-hosted instance.
-The item IDs live in `bash/.bash/functions/bitwarden.bash`; look them up there rather than here, so
-there is one place to change when a vault item is replaced.
+
+The vault item IDs are **not** in this repo. `load_bw_secrets` reads them from `BW_ITEM_GITHUB`,
+`BW_ITEM_GITLAB` and `BW_ITEM_MAGENTO`, set in the git-ignored `~/.bash/local.bash`. An unset one
+skips its token with a warning rather than failing the whole load, so a fresh machine works as soon
+as the variables are filled in. Get an ID with
+`bw list items --search <name> | jq -r '.[] | "\(.id)  \(.name)"'`.
 
 ### Usage
 
@@ -738,7 +742,7 @@ Your configuration uses a **self-hosted GitLab** instance, not gitlab.com:
 2. **API Operations:** Use GITLAB_TOKEN environment variable
    - Auto-loaded from Bitwarden when running `bw unlock`
    - Stored in tmpfs: `/run/user/$UID/bw-gitlab-token`
-   - Bitwarden item ID: `<bw-item-gitlab>`
+   - Bitwarden item: the one named by `BW_ITEM_GITLAB` in `~/.bash/local.bash`
 
 3. **GITLAB_HOST:** Automatically set when GITLAB_TOKEN is loaded
    - `export GITLAB_HOST="git.netresearch.de"`

@@ -75,10 +75,17 @@ fi
 #   - Vault must be unlocked (BW_SESSION must be set)
 #   - jq must be installed for JSON parsing
 #
+# Vault item IDs come from ~/.bash/local.bash (git-ignored), not from this file: this repo is
+# public, and an item ID says nothing to anyone else while still describing the vault's shape.
+#   BW_ITEM_GITHUB   - the "Github" item
+#   BW_ITEM_GITLAB   - the "Gitlab" item
+#   BW_ITEM_MAGENTO  - the "Magento Repository Access" item
+# An unset variable skips its token instead of failing the whole load.
+#
 # Tokens loaded:
-#   GITHUB_TOKEN   - From item: <bw-item-github> (Github)
+#   GITHUB_TOKEN   - From the BW_ITEM_GITHUB item, custom field "token"/"Token"
 #                    Used by: gh CLI, Composer (via COMPOSER_AUTH)
-#   GITLAB_TOKEN   - From item: <bw-item-gitlab> (Gitlab)
+#   GITLAB_TOKEN   - From the BW_ITEM_GITLAB item, custom field "token"/"Token"
 #                    Used by: glab CLI, Composer (via COMPOSER_AUTH)
 #   COMPOSER_AUTH  - Generated from GitHub + GitLab + Magento tokens in proper JSON format
 #                    Format: {"github-oauth":{...},"gitlab-token":{...},"http-basic":{"repo.magento.com":{...}}}
@@ -112,9 +119,14 @@ load_bw_secrets() {
         return 1
     fi
 
-    # GitHub token (from custom field "Token" in "Github" item)
+    # GitHub token (from custom field "Token" in the "Github" item)
     # Accepts both "token" and "Token" field names for flexibility
-    local github_token=$(command bw get item <bw-item-github> 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
+    local github_token=""
+    if [[ -n "${BW_ITEM_GITHUB:-}" ]]; then
+        github_token=$(command bw get item "$BW_ITEM_GITHUB" 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
+    elif [[ "$quiet" == false ]]; then
+        echo "   ⚠ BW_ITEM_GITHUB unset in ~/.bash/local.bash, skipping GITHUB_TOKEN"
+    fi
     if [[ -n "$github_token" && "$github_token" != "null" ]]; then
         export GITHUB_TOKEN="$github_token"
         # Use umask in subshell to ensure secure permissions from creation (no race window)
@@ -122,8 +134,13 @@ load_bw_secrets() {
         [[ "$quiet" == false ]] && echo "   🔑 GITHUB_TOKEN loaded"
     fi
 
-    # GitLab token (from custom field "token" in "Gitlab" item)
-    local gitlab_token=$(command bw get item <bw-item-gitlab> 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
+    # GitLab token (from custom field "token" in the "Gitlab" item)
+    local gitlab_token=""
+    if [[ -n "${BW_ITEM_GITLAB:-}" ]]; then
+        gitlab_token=$(command bw get item "$BW_ITEM_GITLAB" 2>/dev/null | jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
+    elif [[ "$quiet" == false ]]; then
+        echo "   ⚠ BW_ITEM_GITLAB unset in ~/.bash/local.bash, skipping GITLAB_TOKEN"
+    fi
     if [[ -n "$gitlab_token" && "$gitlab_token" != "null" ]]; then
         export GITLAB_TOKEN="$gitlab_token"
         export GITLAB_HOST="git.netresearch.de"  # Self-hosted GitLab instance
@@ -132,10 +149,13 @@ load_bw_secrets() {
         [[ "$quiet" == false ]] && echo "   🔑 GITLAB_TOKEN loaded"
     fi
 
-    # Magento repo credentials (from "Magento Repository Access" item)
-    local magento_item=$(command bw get item <bw-item-magento> 2>/dev/null)
-    local magento_user=$(echo "$magento_item" | jq -r '.login.username // empty' 2>/dev/null)
-    local magento_pass=$(echo "$magento_item" | jq -r '.login.password // empty' 2>/dev/null)
+    # Magento repo credentials (login username/password on the "Magento Repository Access" item)
+    local magento_item="" magento_user="" magento_pass=""
+    if [[ -n "${BW_ITEM_MAGENTO:-}" ]]; then
+        magento_item=$(command bw get item "$BW_ITEM_MAGENTO" 2>/dev/null)
+        magento_user=$(echo "$magento_item" | jq -r '.login.username // empty' 2>/dev/null)
+        magento_pass=$(echo "$magento_item" | jq -r '.login.password // empty' 2>/dev/null)
+    fi
     if [[ -n "$magento_user" && -n "$magento_pass" ]]; then
         [[ "$quiet" == false ]] && echo "   🔑 Magento repo credentials loaded"
     fi
