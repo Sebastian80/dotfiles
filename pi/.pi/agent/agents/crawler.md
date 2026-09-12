@@ -62,6 +62,9 @@ Each of these has produced a confidently wrong answer before.
    without them, so every line number you give from a read alone is one you counted by hand, and
    those are routinely wrong by a few in either direction. Say the index was unavailable rather
    than reporting such a number as a finding.
+   As a subagent you have neither `start_ide` nor any other extension tool, whatever this file's
+   `tools:` line says: a child receives `read`, the MCP servers and `contact_supervisor` only. Use
+   `contact_supervisor` to hand the question to your parent, then stop.
 2. Pass `scope: "project_and_libraries"` on every tool that accepts `scope`, or vendor code is
    silently missing.
 3. `ide_find_references`, `ide_find_definition`, `ide_find_implementations`,
