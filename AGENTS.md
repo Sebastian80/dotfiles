@@ -2,9 +2,13 @@
 
 ## What this repo is
 
-GNU Stow-managed dotfiles. Each top-level directory (`bash`, `git`, `tmux`, `ghostty`, …) is a stow package mirroring `$HOME`; `make install` symlinks them. CLI tools come from Homebrew (`Brewfile`, `brew bundle install`). System-level pieces (Docker Engine, sudoers) are documented in `INSTALLATION.md` and `system/`.
+GNU Stow-managed dotfiles. Each top-level directory (`bash`, `git`, `tmux`, `ghostty`, …) is a stow
+package mirroring `$HOME`; `make install` symlinks them. CLI tools come from Homebrew (`Brewfile`,
+`brew bundle install`). System-level pieces (Docker Engine, sudoers) are documented in
+`INSTALLATION.md` and `system/`.
 
-**Note:** `claude/` is the stow package for the *global* `~/.claude` config (AGENTS.md, rules, skills, hooks) — edits there change agent behavior in every project, not just this repo.
+**Note:** `claude/` is the stow package for the *global* `~/.claude` config (AGENTS.md, rules,
+skills, hooks) — edits there change agent behavior in every project, not just this repo.
 
 ## Commands
 
@@ -21,22 +25,33 @@ GNU Stow-managed dotfiles. Each top-level directory (`bash`, `git`, `tmux`, `gho
 - Configs live in stow packages, never loose in the repo root.
 - New CLI tools go into `Brewfile` with a one-line comment, grouped by section.
 - Never commit secrets; see `SECRET_MANAGEMENT.md`.
-- Repo docs: `README.md` (overview), `INSTALLATION.md` (setup walkthrough), `SETUP-NOTES.md` (keyboard/terminal fixes), `SCRIPTS.md` (user scripts).
+- Repo docs: `README.md` (overview), `INSTALLATION.md` (setup walkthrough), `SETUP-NOTES.md`
+  (keyboard/terminal fixes), `SCRIPTS.md` (user scripts), `SECRET_MANAGEMENT.md` (Bitwarden, tokens).
+- `make lint` covers scripts and this repo's prose; the trees under `claude/`, `agents/` and `pi/`
+  are spellchecked but not format-linted.
 
 ## OS compatibility — Kubuntu 26.04 LTS (verified 2026-07)
 
-Migration target from Ubuntu 24.04 is Kubuntu 26.04 LTS "Resolute Raccoon" (Plasma 6.6, **Wayland-only** — the X11 session is not installed and not supported).
+Migration target from Ubuntu 24.04 is Kubuntu 26.04 LTS "Resolute Raccoon" (Plasma 6.6,
+**Wayland-only** — the X11 session is not installed and not supported).
 
 Verified compatible, no changes needed:
 
-- **Homebrew**: Ubuntu 26.04 is Tier 1 since Homebrew 6.0.0 (bottle baseline glibc 2.39). All Brewfile formulae are pure CLI.
-- **Stow setup**: pure symlinks; bootstrap apt deps (`stow`, `build-essential`, `procps`, `curl`, `file`, `git`) all exist in 26.04.
-- **Docker CE**: Docker's apt repo has day-one `resolute` support — re-add the repo with the new codename.
-- **Ghostty**: `ppa:mkasberg/ghostty-ubuntu` has resolute builds; Ghostty is also in the official 26.04 universe repo (`apt install ghostty`, may lag the PPA). Runs natively on Wayland; the CSI-u/`.inputrc` fixes in `SETUP-NOTES.md` are unaffected.
+- **Homebrew**: Ubuntu 26.04 is Tier 1 since Homebrew 6.0.0 (bottle baseline glibc 2.39). All
+  Brewfile formulae are pure CLI.
+- **Stow setup**: pure symlinks; bootstrap apt deps (`stow`, `build-essential`, `procps`, `curl`,
+  `file`, `git`) all exist in 26.04.
+- **Docker CE**: Docker's apt repo has day-one `resolute` support — re-add the repo with the new
+  codename.
+- **Ghostty**: `ppa:mkasberg/ghostty-ubuntu` has resolute builds; Ghostty is also in the official
+  26.04 universe repo (`apt install ghostty`, may lag the PPA). Runs natively on Wayland; the
+  CSI-u/`.inputrc` notes in `SETUP-NOTES.md` are unaffected.
 
-Open migration item — **xclip is X11-only** and flaky under Wayland/XWayland clipboard bridging (pipe-and-exit loses selection ownership). Affected spots:
+Open migration item — **xclip is X11-only** and flaky under Wayland/XWayland clipboard bridging
+(pipe-and-exit loses selection ownership). Affected spots:
 
-- `tmux/.tmux.conf:91` — copy-mode `y` pipes to `xclip -sel clip` (prefer `set -g set-clipboard on` / OSC 52, which Ghostty supports)
+- `tmux/.tmux.conf:91` — copy-mode `y` pipes to `xclip -sel clip` (prefer
+  `set -g set-clipboard on` / OSC 52, which Ghostty supports)
 - `bash/.bash/aliases.bash` — `pbcopy`/`pbpaste` aliases
 - `bash/.bash/functions/fzf.bash` — Ctrl+Y copy binding
 - `bash/.bash/functions/bitwarden.bash` — password copy
@@ -57,4 +72,5 @@ Plasma's shortcut editor.
 exists; Plasma's task manager launches through desktop IDs, which the `chrome` package's
 two override files already cover.
 
-GTK stow package (`gtk.css` + bookmarks) is harmless on KDE, but don't add a `settings.ini` to it — Plasma's `kde-gtk-config` owns `~/.config/gtk-3.0/settings.ini`.
+GTK stow package (`gtk.css` + bookmarks) is harmless on KDE, but don't add a `settings.ini` to it —
+Plasma's `kde-gtk-config` owns `~/.config/gtk-3.0/settings.ini`.

@@ -46,7 +46,7 @@ Do not rebuild these.
 
 ## Components
 
-```
+```text
 dotfiles/agents/.agents/skills/qa-review/
 ├── SKILL.md                     lifecycle, gate rules, waiver rule
 ├── scripts/qa-run.sh            wrapper: records command, exit code, output tail
@@ -115,7 +115,7 @@ full output beside the ledger and references it.
 
 `qa-review-gate.py <KEY>` prints one machine-readable line as its last output:
 
-```
+```text
 QA-REVIEW-RESULT: pass
 QA-REVIEW-RESULT: fail
 ```

@@ -9,6 +9,7 @@ sudo apt update && sudo apt install -y stow
 ```
 
 Verify installation:
+
 ```bash
 stow --version
 ```
@@ -27,12 +28,14 @@ make test
 ```
 
 Or manually:
+
 ```bash
 cd ~/dotfiles
 stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 ```
 
 **What to look for**:
+
 - `LINK: .bashrc => dotfiles/bash/.bashrc` ✓ Good
 - `WARNING: existing target is ...` ⚠️ Conflict (see below)
 
@@ -40,13 +43,15 @@ stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop 
 
 If you see conflicts (existing files), you have two options:
 
-**Option A: Backup existing files** (Recommended)
+#### Option A: Backup existing files (recommended)
+
 ```bash
 # Run the bootstrap script (handles backups automatically)
 ./scripts/setup/bootstrap.sh
 ```
 
-**Option B: Manual backup**
+#### Option B: Manual backup
+
 ```bash
 mkdir -p ~/dotfiles-backup-$(date +%Y%m%d)
 mv ~/.bashrc ~/dotfiles-backup-$(date +%Y%m%d)/
@@ -67,6 +72,7 @@ cd ~/dotfiles
 ```
 
 The script will:
+
 - Check for GNU Stow
 - Detect conflicts
 - Offer to backup existing files
@@ -84,12 +90,14 @@ make install
 ### Manual Stow (Advanced)
 
 Install all packages:
+
 ```bash
 cd ~/dotfiles
 stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 ```
 
 Or install selectively:
+
 ```bash
 stow bash    # Just bash config
 stow git     # Just git config
@@ -119,19 +127,22 @@ ls -la ~ | grep '\->'
 ```
 
 You should see something like:
-```
+
+```text
 .bashrc -> dotfiles/bash/.bashrc
 .bash_profile -> dotfiles/bash/.bash_profile
 .gitconfig -> dotfiles/git/.gitconfig
 ```
 
 Verify config directories:
+
 ```bash
 ls -la ~/.config | grep '\->'
 ```
 
 Expected:
-```
+
+```text
 ghostty -> ../dotfiles/ghostty/.config/ghostty
 oh-my-posh -> ../dotfiles/oh-my-posh/.config/oh-my-posh
 yazi -> ../dotfiles/yazi/.config/yazi
@@ -150,9 +161,12 @@ make install-system
 ```
 
 This installs:
-- **Sudoers configuration**: Adds Homebrew paths to sudo's secure_path, allowing Homebrew tools (bat, eza, fd, rg, etc.) to work with sudo commands
+
+- **Sudoers configuration**: Adds Homebrew paths to sudo's secure_path, so Homebrew tools
+  (bat, eza, fd, rg, etc.) work with sudo commands
 
 **What happens:**
+
 1. Copies `system/.config/sudoers.d/homebrew-path` to `/etc/sudoers.d/`
 2. Sets correct permissions (0440)
 3. Validates configuration with `visudo -c`
@@ -181,7 +195,8 @@ This step sets up Bitwarden for unified authentication across GitHub, GitLab, an
 
 ```bash
 # Download from https://bitwarden.com/download/
-wget https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb -O Bitwarden.deb
+# Quote the URL: an unquoted & splits the command and backgrounds the first half.
+wget "https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb" -O Bitwarden.deb
 sudo dpkg -i Bitwarden.deb
 ```
 
@@ -250,7 +265,8 @@ glab auth status
 # Should show: ✓ Logged in to git.netresearch.de (GITLAB_TOKEN)
 ```
 
-**Note:** Both `gh` and `glab` use environment variables (GITHUB_TOKEN, GITLAB_TOKEN) which are auto-loaded from Bitwarden when you run `bw unlock`.
+**Note:** Both `gh` and `glab` read environment variables (GITHUB_TOKEN, GITLAB_TOKEN) that are
+auto-loaded from Bitwarden when you run `bw unlock`.
 
 ### Test Authentication
 
@@ -290,42 +306,27 @@ bw unlock
 
 ---
 
-## Step 8: Push to GitHub
+## Step 8: The GitHub Remote
 
-### Create GitHub Repository
+This repo already lives at [Sebastian80/dotfiles](https://github.com/Sebastian80/dotfiles), so a
+fresh clone has its remote set up and there is nothing to create. Confirm it:
 
-**Option A: Using GitHub CLI (gh)**
 ```bash
 cd ~/dotfiles
-
-# Create private repo
-gh repo create dotfiles --private --source=. --remote=origin
-
-# Push
-git push -u origin main
-```
-
-**Option B: Using GitHub Web Interface**
-
-1. Go to https://github.com/new
-2. Repository name: `dotfiles`
-3. Description: "Personal dotfiles managed with GNU Stow"
-4. **Private** (recommended for first version)
-5. Do NOT initialize with README (we already have one)
-6. Click "Create repository"
-
-Then:
-```bash
-cd ~/dotfiles
-git remote add origin git@github.com:Sebastian80/dotfiles.git
-git push -u origin main
-```
-
-### Verify Push
-
-```bash
 git remote -v
-git log --oneline
+# origin  git@github.com:Sebastian80/dotfiles.git (fetch)
+# origin  git@github.com:Sebastian80/dotfiles.git (push)
+```
+
+The repository is **public**. Nothing machine-specific or secret belongs in a tracked file: keep
+those in `bash/.bash/local.bash` (git-ignored) and the vault. See
+[SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md).
+
+If you ever need to point a clone at a different remote:
+
+```bash
+cd ~/dotfiles
+git remote set-url origin git@github.com:<owner>/dotfiles.git
 ```
 
 ---
@@ -361,6 +362,7 @@ git push
 ```
 
 Or use Make shortcuts:
+
 ```bash
 cd ~/dotfiles
 make commit   # Interactive commit
@@ -409,16 +411,24 @@ make install
 ## Makefile Commands
 
 ```bash
-make help       # Show all commands
-make install    # Install all dotfiles
-make uninstall  # Remove all symlinks
-make update     # Git pull + restow
-make test       # Dry run (shows what would happen)
-make list       # List available packages
-make status     # Git status
-make commit     # Quick commit
-make push       # Push to GitHub
-make sync       # Pull + push
+make help           # Show all commands
+make install        # Install all dotfiles
+make uninstall      # Remove all symlinks
+make update         # Git pull + restow
+make test           # Dry run (shows what would happen)
+make list           # List available packages
+make lint           # Lint and spellcheck scripts and docs
+make install-system # System config, requires sudo (sudoers)
+make install-ai     # Claude Code, Codex/Gemini CLIs, pi + sandbox, herdr integrations
+make install-pi     # Just pi and its sandbox extension
+make verify-auth    # Verify the authentication setup
+make shortcuts      # Restore the desktop keyboard shortcuts from dconf
+make dump-shortcuts # Capture the current desktop shortcuts into the repo
+make dock           # Point Plank dock launchers at their ~/.local overrides
+make status         # Git status
+make commit         # Quick commit
+make push           # Push to GitHub
+make sync           # Pull + push
 ```
 
 ---
@@ -426,30 +436,37 @@ make sync       # Pull + push
 ## Troubleshooting
 
 ### "Permission denied" when installing stow
+
 ```bash
 sudo apt install stow
 ```
 
 ### Stow reports "existing target" conflicts
+
 **Solution 1**: Use bootstrap script
+
 ```bash
 ./scripts/setup/bootstrap.sh  # Offers to backup automatically
 ```
 
 **Solution 2**: Manually backup and retry
+
 ```bash
 mv ~/.bashrc ~/.bashrc.backup
 stow bash
 ```
 
 **Solution 3**: Adopt existing files (merges into repo)
+
 ```bash
 stow --adopt bash
 git diff  # Review what changed
 ```
 
 ### Symlinks are broken after moving dotfiles repo
+
 Stow uses absolute paths. If you move the repo, unstow and restow:
+
 ```bash
 cd ~/dotfiles  # In new location
 stow -D bash   # Unstow
@@ -457,6 +474,7 @@ stow bash      # Restow with new paths
 ```
 
 ### Want to remove everything and start over
+
 ```bash
 cd ~/dotfiles
 make uninstall  # Remove all symlinks
@@ -500,6 +518,7 @@ You can freely create files matching these patterns - they won't be committed.
 After completing installation:
 
 1. **Test the setup**:
+
    ```bash
    source ~/.bashrc
    # Check if oh-my-posh prompt loads
@@ -507,36 +526,44 @@ After completing installation:
    ```
 
 2. **Customize for this machine**:
+
    ```bash
    # Add machine-specific settings (git-ignored)
    vim ~/.bash/local.bash
    ```
 
 3. **Review and clean up**:
+
    ```bash
-   # Remove old backup if everything works
-   rm -rf ~/dotfiles-backup-20251019_134818
+   # Remove the backup bootstrap made, once everything works
+   ls -d ~/dotfiles-backup-*
+   rm -rf ~/dotfiles-backup-<timestamp>
    ```
 
 4. **Set up GitHub repo** (see Step 8 above)
 
 5. **Install modern CLI tools via Homebrew**:
+
    ```bash
    cd ~/dotfiles
    brew bundle install --file=~/dotfiles/Brewfile
    ```
 
 6. **Install Node.js and npm globals**:
+
    ```bash
    ./scripts/setup/install-node.sh
    ```
+
    Installs Node.js 22 and 24 (default 24) via fnm, plus the base globals (pnpm).
    Claude Code is not included: it uses its own installer and self-updates.
 
 7. **Install AI agent tooling** (optional):
+
    ```bash
    make install-ai
    ```
+
    Claude Code (through Anthropic's own installer, skipped when already present), the Codex,
    Gemini and agent-browser CLIs plus repomix, pi with its sandbox extension, and herdr's agent
    integrations. Everything except Claude Code needs Node.js from step 6.
@@ -551,13 +578,14 @@ After completing installation:
 
 ## Resources
 
-- **GNU Stow Manual**: https://www.gnu.org/software/stow/manual/
+- **GNU Stow Manual**: <https://www.gnu.org/software/stow/manual/>
 - **Your README**: `~/dotfiles/README.md`
 - **Makefile Help**: `make help`
 - **Bootstrap Script**: `./scripts/setup/bootstrap.sh --help`
 
 ---
 
-**You're almost done!** Just install stow, test, deploy, and push to GitHub. Your dotfiles will then be under version control and ready to deploy to any new machine with a single command.
+**You're almost done!** Install stow, dry-run, deploy, reload the shell. The dotfiles are then
+symlinked from this repo and ready to deploy to any new machine with a single command.
 
 Happy dotfile-ing! 🚀

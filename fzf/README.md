@@ -1,6 +1,6 @@
 # fzf Configuration
 
-```
+```text
 ~/.config/fzf/config             # Shell-agnostic options, loaded via FZF_DEFAULT_OPTS_FILE
 ~/.bash/exports/fzf.bash         # Bash integration: Ctrl+T / Ctrl+R / Alt+C, previews with bat/eza
 ```

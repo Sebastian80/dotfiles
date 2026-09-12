@@ -4,7 +4,8 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 
 ## Features
 
-- **Modular Bash Configuration**: Organized into focused modules (top-level files plus exports, functions, integrations and completions modules)
+- **Modular Bash Configuration**: Organized into focused modules (top-level files plus exports,
+  functions, integrations and completions modules)
 - **XDG Compliant**: Modern tools configured in `~/.config/`
 - **GNU Stow**: Simple, transparent symlink management
 - **Modern Tooling**: Homebrew packages (see Brewfile) including modern CLI tools and Bitwarden (see Tools section)
@@ -12,7 +13,7 @@ Modern, modular dotfiles managed with GNU Stow. XDG Base Directory compliant.
 
 ## Structure
 
-```
+```text
 dotfiles/
 ├── bash/           # Bash shell configuration
 │   ├── .bashrc
@@ -29,7 +30,9 @@ dotfiles/
 │   └── .claude/
 │       ├── AGENTS.md       # Global instructions (CLAUDE.md imports it)
 │       ├── rules/          # Modular topic-specific rules (git, gitlab, jira, python, ...)
-│       ├── skills/         # Custom skills (herdr, ide-index-mcp, jetbrains-debugger, mermaid, qa)
+│       ├── skills/         # Custom skills (codex-in-herdr, herdr, herdr-orchestration,
+│       │                   #   ide-index-mcp, jetbrains-debugger, mermaid, pi-crawler, qa;
+│       │                   #   qa-review and terminal-browser are symlinks into agents/ and brew)
 │       ├── hooks/          # Event hooks with their test suites
 │       └── statusline-omp.sh  # oh-my-posh statusline
 ├── git/            # Git configuration
@@ -46,6 +49,9 @@ dotfiles/
 ├── btop/           # Modern system monitor
 ├── tmux/           # Terminal multiplexer
 ├── herdr/          # Agent multiplexer (persistent panes for Claude Code & co.)
+├── agents/         # Harness-neutral agent skills shared by Claude Code and pi (qa-review)
+├── pi/             # pi coding agent: agent definitions, extensions, settings
+├── chrome/         # Chrome desktop-entry overrides (so the dock uses them)
 ├── system/         # System-level configurations (requires sudo)
 │   ├── .config/
 │   │   └── sudoers.d/
@@ -53,8 +59,9 @@ dotfiles/
 │   └── README.md
 ├── scripts/        # Installation & maintenance scripts
 │   ├── setup/      # bootstrap.sh, install-*.sh
-│   ├── maintenance/# verify-installation.sh
+│   ├── maintenance/# verify-installation.sh, lint.sh
 │   └── utils/      # Helper scripts
+├── docs/           # Design and plan documents (docs/plans/)
 ├── Brewfile        # Homebrew package manifest
 └── README.md       # This file
 ```
@@ -118,7 +125,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -227,6 +234,7 @@ stow --restow bash
 The bash configuration is organized into focused modules loaded by `.bashrc`:
 
 ### Top-Level Files (5)
+
 | File | Purpose |
 |------|---------|
 | `path.bash` | PATH modifications and binary locations |
@@ -236,6 +244,7 @@ The bash configuration is organized into focused modules loaded by `.bashrc`:
 | `local.bash` | Machine-specific settings (git-ignored) |
 
 ### Modular Directories
+
 | Directory | Files | Purpose |
 |-----------|-------|---------|
 | `exports/` | 8 modules | Environment variables split by concern (core, history, colors, tools, XDG, fzf, bitwarden, jira) |
@@ -243,7 +252,8 @@ The bash configuration is organized into focused modules loaded by `.bashrc`:
 | `integrations/` | 3 modules | Tool initializations (fzf keybindings, yazi, zoxide) |
 | `completions/` | 3 modules | Custom completions (bitwarden, composer, dynamic lazy-loading) |
 
-**Loading Order**: path → exports/* → prompt → aliases → functions/* → bash-completion → completions/* → integrations/* → keybindings → local
+**Loading Order**: `path` → `exports/*` → `prompt` → `aliases` → `functions/*` → bash-completion →
+`completions/*` → `integrations/*` → `keybindings` → `local`
 
 ## Machine-Specific Configuration
 
@@ -281,6 +291,7 @@ Use the `.local` suffix pattern for sensitive configs:
 ### Comprehensive Security Guide
 
 See **[SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md)** for detailed guidelines on:
+
 - Bitwarden integrated setup (Desktop + Browser + CLI + SSH Agent)
 - Biometric unlock configuration (fingerprint authentication)
 - SSH key management with Bitwarden SSH agent
@@ -294,6 +305,7 @@ See **[SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.md)** for detailed guidelines on:
 This dotfiles setup uses **Bitwarden** as a unified authentication solution for all development workflows:
 
 ### What It Provides
+
 - **CLI tools:** GitHub CLI (`gh`), GitLab CLI (`glab`), Composer
 - **SSH keys:** Managed via Bitwarden SSH Agent
 - **Development tokens:** GITHUB_TOKEN, GITLAB_TOKEN, COMPOSER_AUTH
@@ -304,9 +316,11 @@ This dotfiles setup uses **Bitwarden** as a unified authentication solution for 
 1. **Install Bitwarden desktop app** (.deb, not Flatpak)
 2. **Enable SSH Agent** in Bitwarden settings
 3. **Unlock once:**
+
    ```bash
    bw unlock
    ```
+
 4. **All tokens auto-load** and persist across all terminals
 
 ### Key Features
@@ -354,15 +368,18 @@ git push
 
 All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete list).
 
-**🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for complete guide to user utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
+**🔧 For script organization:** See **[SCRIPTS.md](SCRIPTS.md)** for the complete guide to user
+utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 
 ### Terminal
+
 - **ghostty** - Modern GPU-accelerated terminal (via apt)
 - **oh-my-posh** - Cross-platform prompt engine with custom themes
 - **tmux** - Terminal multiplexer for session management
 - **herdr** - Agent multiplexer: persistent panes with agent state, Claude Code hook + skill wired in
 
 ### Modern CLI Tools (Rust-based)
+
 - **bat** - `cat` with syntax highlighting and Git integration
 - **eza** - Modern `ls` replacement with icons and Git status
 - **fd** - Fast and user-friendly `find` replacement
@@ -373,6 +390,7 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete li
 - **zoxide** - Smarter `cd` command that learns your habits
 
 ### Git Tools
+
 - **git-delta** - Better `git diff` viewer with syntax highlighting
 - **difftastic** - Structural diff tool that understands syntax
 - **lazygit** - Terminal UI for git commands
@@ -381,16 +399,20 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete li
 - **git-filter-repo** - Rewrite history when something leaked into it
 
 ### Editors
+
 - **micro** - Modern, intuitive terminal text editor (mouse support!)
 
 ### System Monitoring
+
 - **htop** - Interactive process viewer
 - **btop** - Beautiful resource monitor with modern TUI
 
 ### Password Manager
+
 - **bitwarden-cli** - Bitwarden CLI for password management and secrets
 
 ### Utilities
+
 - **jq** - Command-line JSON processor
 - **glow** - Render markdown in the terminal
 - **rich-cli** - Rich terminal output (JSON, CSV, markdown, syntax highlighting)
@@ -398,12 +420,17 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete li
 - **lazydocker** - Terminal UI for Docker management
 - **bbrew** - Terminal UI for managing Homebrew packages
 - **xclip** - X11 clipboard utility
+- **yt-dlp** - Video downloader; pi-web-access calls it from PATH for video frames
 
 ### AI & MCP
-- **Claude Code** - Anthropic's AI coding assistant CLI, configured via `claude/` stow package (CLAUDE.md instructions, permission model, plugin list, modular rules)
+
+- **Claude Code** - Anthropic's AI coding assistant CLI, configured via the `claude/` stow package
+  (AGENTS.md instructions, permission model, plugin list, modular rules)
 - **mcp** - CLI for inspecting and debugging MCP servers
+- **terminal-browser** - A real browser inside the terminal (cask; ships its own Claude Code skill)
 
 ### Development Tools
+
 - **bun** - JavaScript runtime, bundler, and package manager
 - **fnm** - Fast Node.js version manager
 - **uv** - Fast Python package installer and resolver
@@ -414,6 +441,8 @@ All CLI tools are installed via **Homebrew** (see `Brewfile` for the complete li
 - **d2** - Text-to-diagram language
 - **cloudflared** - Cloudflare Tunnel client
 - **bash-completion@2** - Programmable completion for Bash 4.2+
+- **go** - Builds herdr plugins written in Go (herdr-auto-title)
+- **rust** - Builds herdr plugins written in Rust (herdr-spreader)
 - **Docker Engine** - Container platform (via apt)
 
 ## Deployment to New Machine
@@ -434,10 +463,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
+stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 
 # 4. Deploy packages
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr
+stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile
@@ -506,4 +535,3 @@ MIT License - Feel free to use and modify
 Sebastian - 2025-2026
 
 ---
-

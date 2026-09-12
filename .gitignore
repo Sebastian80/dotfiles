@@ -214,6 +214,12 @@ temp/
 !LICENSE
 !INSTALL.md
 
+# Documentation is prose about a topic, never the secret itself. Without this the blanket
+# *token*, *secret* and *credential* patterns above swallow any doc whose filename names
+# the topic it discusses, and it silently never stages.
+# (docs/plans/2026-09-02-claude-code-credential-hardening.md was untracked for that reason.)
+!docs/**/*.md
+
 # ============================================================================
 # pi coding agent - runtime state and credentials, never tracked
 # ============================================================================

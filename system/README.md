@@ -5,19 +5,24 @@ This directory contains system-level configuration files that require root acces
 ## Files
 
 ### sudoers.d/homebrew-path
-Adds Homebrew paths to sudo's secure_path, allowing Homebrew-installed tools (bat, eza, fd, rg, etc.) to work with sudo commands.
+
+Adds Homebrew paths to sudo's secure_path, so Homebrew-installed tools (bat, eza, fd, rg, etc.)
+work with sudo commands.
 
 **Installation:**
+
 ```bash
 sudo install -m 0440 ~/.config/sudoers.d/homebrew-path /etc/sudoers.d/homebrew-path
 sudo visudo -c  # Validate configuration
 ```
 
 **Why needed:**
-By default, sudo uses a restricted PATH for security. This configuration adds Homebrew's bin directories so that aliased commands (like `sudo cat` → `bat`, `sudo ls` → `eza`) work correctly.
+By default, sudo uses a restricted PATH for security. This configuration adds Homebrew's bin
+directories so that aliased commands (like `sudo cat` → `bat`, `sudo ls` → `eza`) work correctly.
 
 **Security note:**
 This is safe because:
+
 1. Homebrew paths are user-controlled but still validated by sudo
 2. Only affects PATH, not sudo authentication
 3. Standard practice for systems using Homebrew
@@ -35,11 +40,13 @@ and a reinstall loses them. This dump carries the custom shortcuts:
 | `Super+Shift+M` | Move the focused window to the next screen (`window-to-screen`) |
 
 **Restore them:**
+
 ```bash
 make shortcuts
 ```
 
 **Capture them again after adding one:**
+
 ```bash
 make dump-shortcuts
 ```
@@ -55,6 +62,7 @@ external monitor's xrandr transform at login. It is still untracked, like
 ## Installation via Stow
 
 The sudoers file should be manually installed (not stowed) because:
+
 1. It requires root privileges
 2. Incorrect permissions (must be 0440) can lock you out
 3. Should be validated with `visudo -c` before activation
@@ -127,7 +135,8 @@ make verify-auth
 ### Issue: "sudo: unable to resolve host"
 
 **Symptom:**
-```
+
+```text
 sudo: unable to resolve host <hostname>: Name or service not known
 ```
 
@@ -141,23 +150,28 @@ echo "127.0.1.1 $(hostname)" | sudo tee -a /etc/hosts
 ### Issue: "visudo: syntax error" after installation
 
 **Symptom:**
-```
+
+```text
 sudo visudo -c
 >>> /etc/sudoers.d/homebrew-path: syntax error near line X <<<
 ```
 
 **Solution:**
+
 1. Remove the broken file immediately:
+
    ```bash
    sudo rm /etc/sudoers.d/homebrew-path
    ```
 
 2. Check the source file for issues:
+
    ```bash
    cat ~/dotfiles/system/.config/sudoers.d/homebrew-path
    ```
 
 3. Reinstall with correct content:
+
    ```bash
    cd ~/dotfiles
    make install-system
@@ -166,12 +180,14 @@ sudo visudo -c
 ### Issue: Homebrew commands still not found with sudo
 
 **Symptom:**
+
 ```bash
 sudo bat --version
 sudo: bat: command not found
 ```
 
 **Diagnosis:**
+
 ```bash
 # Check if file exists
 ls -la /etc/sudoers.d/homebrew-path
@@ -184,18 +200,21 @@ echo $PATH | grep linuxbrew
 ```
 
 **Solution 1:** File not installed
+
 ```bash
 cd ~/dotfiles
 make install-system
 ```
 
 **Solution 2:** Wrong permissions
+
 ```bash
 sudo chmod 0440 /etc/sudoers.d/homebrew-path
 sudo visudo -c
 ```
 
 **Solution 3:** Homebrew not in user PATH
+
 ```bash
 # Add to ~/.bashrc if missing
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -205,6 +224,7 @@ source ~/.bashrc
 ### Issue: "Permission denied" when running make install-system
 
 **Symptom:**
+
 ```bash
 make install-system
 Permission denied
@@ -219,6 +239,7 @@ make install-system
 ```
 
 Or run with sudo explicitly:
+
 ```bash
 sudo make install-system
 ```
@@ -226,6 +247,7 @@ sudo make install-system
 ### Issue: Locked out of sudo after installation
 
 **Symptom:**
+
 ```bash
 sudo ls
 sudo: /etc/sudoers.d/homebrew-path is mode 0644, should be 0440
@@ -238,15 +260,20 @@ Boot into recovery mode and fix permissions:
 1. Reboot and select "Advanced options" > "Recovery mode"
 2. Select "root" (drop to root shell prompt)
 3. Remount filesystem as writable:
+
    ```bash
    mount -o remount,rw /
    ```
+
 4. Fix permissions:
+
    ```bash
    chmod 0440 /etc/sudoers.d/homebrew-path
    visudo -c
    ```
+
 5. Reboot:
+
    ```bash
    reboot
    ```
@@ -299,6 +326,7 @@ ls                   # Uses eza
 ```
 
 To restore functionality, reinstall:
+
 ```bash
 cd ~/dotfiles
 make install-system

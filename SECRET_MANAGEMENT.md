@@ -1,6 +1,6 @@
 # Secret Management with Bitwarden - 2025
 
-**Last Updated:** 2025-10-24
+**Last Updated:** 2026-09-12
 **System:** Integrated Bitwarden (Desktop + Browser + CLI + SSH Agent)
 
 ---
@@ -23,7 +23,7 @@
 
 This system uses **Bitwarden** as a unified secret management solution with four integrated components:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ BITWARDEN INTEGRATED ARCHITECTURE                           │
 ├─────────────────────────────────────────────────────────────┤
@@ -45,10 +45,11 @@ This system uses **Bitwarden** as a unified secret management solution with four
 │  │ (bw function)    │  ← Session in tmpfs                  │
 │  └────────┬─────────┘  ← Shortcuts (u/l/g/c)              │
 │           │                                                 │
-│           ├──→ BW_SESSION ────→ /run/user/$UID/bw-session │
-│           ├──→ GITHUB_TOKEN ──→ /run/user/$UID/bw-github  │
-│           ├──→ GITLAB_TOKEN ──→ /run/user/$UID/bw-gitlab  │
-│           └──→ COMPOSER_AUTH ─→ /run/user/$UID/bw-compose │
+│           ├──→ BW_SESSION ────→ bw-session                │
+│           ├──→ GITHUB_TOKEN ──→ bw-github-token           │
+│           ├──→ GITLAB_TOKEN ──→ bw-gitlab-token           │
+│           └──→ COMPOSER_AUTH ─→ bw-composer-auth          │
+│                                 (all in /run/user/$UID/)  │
 │                                                             │
 │  All tokens in tmpfs (RAM-only, cleared on logout)         │
 └─────────────────────────────────────────────────────────────┘
@@ -74,6 +75,7 @@ This system uses **Bitwarden** as a unified secret management solution with four
 **Unlock:** Fingerprint (fprintd + polkit integration)
 
 **Features:**
+
 - Master vault storage
 - Biometric unlock (fingerprint reader)
 - Native messaging for browser extension
@@ -81,10 +83,12 @@ This system uses **Bitwarden** as a unified secret management solution with four
 - Background process (remains unlocked)
 
 **Installation:**
+
 ```bash
 # Download from https://bitwarden.com/download/
-wget https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb
-sudo dpkg -i Bitwarden-*.deb
+# Quote the URL: an unquoted & splits the command and backgrounds the first half.
+wget "https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb" -O Bitwarden.deb
+sudo dpkg -i Bitwarden.deb
 ```
 
 ### 2. Browser Extension
@@ -94,11 +98,13 @@ sudo dpkg -i Bitwarden-*.deb
 **Communication:** Native messaging → Desktop app
 
 **Why .deb Chrome?**
+
 - Flatpak Chrome blocks native messaging (sandboxing)
 - .deb version allows IPC with desktop app
 - Enables biometric unlock in browser
 
 **Setup:**
+
 1. Install Chrome .deb: `sudo dpkg -i google-chrome-stable_current_amd64.deb`
 2. Install Bitwarden extension from Chrome Web Store
 3. Enable "Unlock with biometrics" in extension settings
@@ -111,11 +117,13 @@ sudo dpkg -i Bitwarden-*.deb
 **Config:** `~/.bash/functions/bitwarden.bash`
 
 **Installation:**
+
 ```bash
 brew install bitwarden-cli
 ```
 
 **Enhanced Features** (via bash wrapper):
+
 - `bw unlock` or `bw u` - Unlock and save session to tmpfs
 - `bw lock` - Lock and clear all tokens
 - `bw get` or `bw g` - Get password from item
@@ -128,12 +136,14 @@ brew install bitwarden-cli
 **Config:** `~/.bash/exports/bitwarden.bash`
 
 **Features:**
+
 - Manages all SSH keys stored in Bitwarden vault
 - No need for ssh-agent or keychain
 - Keys decrypted on demand with biometric unlock
 - Integrated with SSH client via SSH_AUTH_SOCK
 
 **Configuration:**
+
 ```bash
 # Automatically configured in exports/bitwarden.bash
 export SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
@@ -198,6 +208,7 @@ cat /etc/pam.d/polkit-1
 ### Troubleshooting Biometric Unlock
 
 **Desktop app doesn't show fingerprint option:**
+
 ```bash
 # Verify fprintd is running
 systemctl status fprintd
@@ -210,6 +221,7 @@ pkexec echo "test"  # Should prompt for fingerprint
 ```
 
 **Browser extension shows "biometrics unavailable":**
+
 - Check Chrome is .deb package (not Flatpak)
 - Verify native messaging: `ls ~/.config/google-chrome/NativeMessagingHosts/`
 - Restart Chrome completely
@@ -225,39 +237,37 @@ Custom bash wrapper in `~/.bash/functions/bitwarden.bash` enhances the official 
 
 ### File: `~/.bash/functions/bitwarden.bash` (relevant excerpt)
 
+The file is the authority; this is the shape of it, not a copy to keep in sync.
+
 ```bash
-# Enhanced bw function that overrides official CLI
 bw() {
     local cmd="${1:-list}"
     case "$cmd" in
         unlock|u)
-            # Unlock and save session to tmpfs
             declare -g BW_SESSION=$(command bw unlock --raw)
-            if [[ -n "$BW_SESSION" ]]; then
+            # `bw unlock --raw` has shipped broken before, printing a valid-looking token that no
+            # later command accepts. Verify the session really unlocks the vault instead of
+            # reporting success and discovering the lie on the first secret lookup.
+            if [[ -n "$BW_SESSION" ]] && BW_SESSION="$BW_SESSION" command bw unlock --check &>/dev/null; then
                 export BW_SESSION
-                local BW_SESSION_FILE="/run/user/$(id -u)/bw-session"
-                echo "$BW_SESSION" > "$BW_SESSION_FILE"
-                chmod 600 "$BW_SESSION_FILE"
-                echo "✓ Bitwarden unlocked (session available until logout)"
-                load_bw_secrets  # Auto-load dev tokens
+                # umask in a subshell, so the file is never briefly world-readable.
+                (umask 077; echo "$BW_SESSION" >| "/run/user/${UID:-$(id -u)}/bw-session")
+                load_bw_secrets
+            else
+                unset BW_SESSION
+                return 1
             fi
             ;;
         lock)
             command bw lock
             unset BW_SESSION GITHUB_TOKEN GITLAB_TOKEN COMPOSER_AUTH
-            rm -f "/run/user/$(id -u)"/bw-*
-            echo "✓ Bitwarden locked (session and tokens cleared)"
+            rm -f "/run/user/${UID:-$(id -u)}/"bw-*
             ;;
-        get|g)
-            command bw get item "$2" 2>/dev/null | grep -o '"password":"[^"]*"' | cut -d'"' -f4
-            ;;
-        copy|c)
-            local password=$(bw get "$2")
-            echo -n "$password" | xclip -selection clipboard
-            echo "✓ Password copied to clipboard"
+        get|g|copy|c|search|find|f|list|ls|l|sync|status|s|help|h)
+            : # shortcuts, see the file
             ;;
         *)
-            command bw "$@"  # Pass-through to original CLI
+            command bw "$@"  # Pass-through to the original CLI
             ;;
     esac
 }
@@ -294,21 +304,35 @@ bw edit item <id>
 
 **Session stored in:** `/run/user/$UID/bw-session`
 **Characteristics:**
+
 - tmpfs (RAM-only storage)
 - Automatically cleared on logout/reboot
 - Shared across all terminal windows
 - Secure (mode 600, only readable by you)
 
 **Auto-loading on new shells:**
+
 ```bash
 # In functions/bitwarden.bash
 if command -v bw &>/dev/null; then
     _BW_RUNDIR="/run/user/${UID:-$(id -u)}"
-    [[ -f "$_BW_RUNDIR/bw-session" ]] && export BW_SESSION=$(command cat "$_BW_RUNDIR/bw-session")
+    # The session token stays out of shells that belong to Claude Code (it sets CLAUDECODE=1):
+    # the agent gets the derived tokens below, never the key to the whole vault.
+    [[ -f "$_BW_RUNDIR/bw-session" && -z "${CLAUDECODE:-}" ]] && export BW_SESSION=$(command cat "$_BW_RUNDIR/bw-session")
+    [[ -f "$_BW_RUNDIR/bw-github-token" ]] && export GITHUB_TOKEN=$(command cat "$_BW_RUNDIR/bw-github-token")
+    # ... bw-gitlab-token (plus GITLAB_HOST) and bw-composer-auth likewise
 fi
 ```
 
 Result: Open new terminal → BW_SESSION automatically loaded → CLI works immediately
+
+### The Claude Code boundary
+
+An agent session is deliberately a tier below a human shell. `CLAUDECODE=1` suppresses the
+`BW_SESSION` export, so Claude Code inherits `GITHUB_TOKEN`, `GITLAB_TOKEN` and `COMPOSER_AUTH`
+(scoped, revocable) but cannot run `bw get` against the vault itself. Tightening this further, with
+agent-scoped tokens and a scrubbing launcher, is designed in `docs/plans/` (untracked: it names
+customer projects).
 
 ---
 
@@ -317,6 +341,7 @@ Result: Open new terminal → BW_SESSION automatically loaded → CLI works imme
 ### Bitwarden SSH Agent
 
 **How it works:**
+
 1. Store SSH private keys in Bitwarden vault (as "SSH Key" item type)
 2. Bitwarden desktop app creates SSH agent socket
 3. SSH client uses Bitwarden as SSH agent
@@ -325,6 +350,7 @@ Result: Open new terminal → BW_SESSION automatically loaded → CLI works imme
 ### Setup
 
 **1. Enable SSH Agent in Bitwarden Desktop:**
+
 - Open Bitwarden desktop app
 - Settings → Options
 - Enable "Enable SSH Agent"
@@ -333,6 +359,7 @@ Result: Open new terminal → BW_SESSION automatically loaded → CLI works imme
 **2. Configure SSH Client:**
 
 File: `~/.bash/exports/bitwarden.bash`
+
 ```bash
 # Configure SSH to use Bitwarden SSH agent
 if [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
@@ -341,11 +368,13 @@ fi
 ```
 
 **3. Add SSH Keys to Bitwarden:**
+
 - Item Type: "SSH Key"
 - Private Key: Paste your private key (including passphrase if any)
 - Bitwarden will manage decryption
 
 **4. Test:**
+
 ```bash
 # List keys managed by Bitwarden SSH agent
 ssh-add -l
@@ -366,6 +395,7 @@ ssh git@github.com
 ### SSH Key Best Practices
 
 **Key Generation:**
+
 ```bash
 # Generate Ed25519 key
 ssh-keygen -t ed25519 -C "your-email@example.com"
@@ -378,6 +408,7 @@ ssh-keygen -t ed25519 -C "your-email@example.com"
 ```
 
 **Multiple Keys:**
+
 - Store each key as separate "SSH Key" item in Bitwarden
 - Name them clearly: "GitHub SSH", "GitLab SSH", "Work Server SSH"
 - Bitwarden SSH agent automatically provides correct key
@@ -388,14 +419,14 @@ ssh-keygen -t ed25519 -C "your-email@example.com"
 
 ### Architecture
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │ tmpfs (/run/user/$UID) - RAM-only storage           │
 ├──────────────────────────────────────────────────────┤
-│  bw-session       ← Bitwarden CLI session token     │
-│  bw-github-token  ← GitHub personal access token    │
-│  bw-gitlab-token  ← GitLab access token             │
-│  bw-composer-token ← Composer auth.json             │
+│  bw-session        ← Bitwarden CLI session token    │
+│  bw-github-token   ← GitHub personal access token   │
+│  bw-gitlab-token   ← GitLab access token            │
+│  bw-composer-auth  ← Composer auth JSON             │
 └──────────────────────────────────────────────────────┘
          ↓ Cleared automatically on logout/reboot
 ```
@@ -448,43 +479,57 @@ When you run `bw unlock`, the enhanced CLI automatically calls `load_bw_secrets`
 ```bash
 load_bw_secrets() {
     local quiet=false
-    if [[ "$1" == "--quiet" ]]; then
+    # $1 has to tolerate being unset: callers pass nothing, and a `set -u` caller would
+    # otherwise abort here instead of loading secrets.
+    if [[ "${1:-}" == "--quiet" ]]; then
         quiet=true
     fi
 
-    # Check if bw is available and unlocked
+    # Check bw is available, then that the vault is actually unlocked
     if ! command -v bw &>/dev/null; then
         [[ "$quiet" == false ]] && echo "⚠ Bitwarden CLI not installed"
         return 1
     fi
-
-    # GitHub token (from custom field "token" in "Github" item)
-    local github_token=$(bw get item <bw-item-github> 2>/dev/null | jq -r '.fields[] | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
-    if [[ -n "$github_token" && "$github_token" != "null" ]]; then
-        export GITHUB_TOKEN="$github_token"
-        echo "$GITHUB_TOKEN" > "/run/user/$(id -u)/bw-github-token"
-        chmod 600 "/run/user/$(id -u)/bw-github-token"
-        [[ "$quiet" == false ]] && echo "✓ GITHUB_TOKEN loaded"
+    local status=$(command bw status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+    if [[ "$status" != "unlocked" ]]; then
+        [[ "$quiet" == false ]] && echo "⚠ Bitwarden is locked. Please unlock first with: bw unlock"
+        return 1
     fi
 
-    # GitLab token (similar pattern)
-    # COMPOSER_AUTH (similar pattern)
+    # Each token: read the item, then write the tmpfs copy with umask in a subshell so there
+    # is no window where the file exists with default permissions.
+    local github_token=$(command bw get item <github-item> 2>/dev/null | \
+        jq -r '.fields[]? | select(.name == "token" or .name == "Token") | .value' 2>/dev/null)
+    if [[ -n "$github_token" && "$github_token" != "null" ]]; then
+        export GITHUB_TOKEN="$github_token"
+        (umask 077; echo "$github_token" >| "/run/user/${UID:-$(id -u)}/bw-github-token")
+    fi
 
-    [[ "$quiet" == false ]] && echo "✓ Development secrets loaded"
+    # GitLab token (same shape, also exports GITLAB_HOST)
+    # Magento repo credentials (login username/password, not a custom field)
+    # COMPOSER_AUTH assembled from all three, see the next section
+
+    [[ "$quiet" == false ]] && echo "✅ Development secrets loaded and saved to tmpfs"
 }
 ```
 
 ### Supported Tokens
 
-| Token | Env Variable | Bitwarden Item ID | Purpose |
-|-------|--------------|-------------------|---------|
-| GitHub | `GITHUB_TOKEN` | `<bw-item-github>` | GitHub API access |
-| GitLab | `GITLAB_TOKEN` | `<bw-item-gitlab>` | GitLab API access |
-| Composer | `COMPOSER_AUTH` | Search by name "Composer" | PHP package auth |
+| Token | Env Variable | Source | Purpose |
+|-------|--------------|--------|---------|
+| GitHub | `GITHUB_TOKEN` | "Github" vault item, custom field `token`/`Token` | GitHub API access, Composer |
+| GitLab | `GITLAB_TOKEN` | "Gitlab" vault item, custom field `token`/`Token` | GitLab API access, Composer |
+| Magento | (none) | "Magento Repository Access" item, login username/password | `repo.magento.com` Composer auth |
+| Composer | `COMPOSER_AUTH` | Assembled from the three above | PHP package auth |
+
+`GITLAB_HOST` is exported alongside `GITLAB_TOKEN` so other tools resolve the self-hosted instance.
+The item IDs live in `bash/.bash/functions/bitwarden.bash`; look them up there rather than here, so
+there is one place to change when a vault item is replaced.
 
 ### Usage
 
 **Automatic (on unlock):**
+
 ```bash
 bw unlock
 # Output:
@@ -496,11 +541,13 @@ bw unlock
 ```
 
 **Manual (reload tokens):**
+
 ```bash
 load_bw_secrets
 ```
 
 **Silent mode:**
+
 ```bash
 load_bw_secrets --quiet
 ```
@@ -513,6 +560,7 @@ load_bw_secrets --quiet
    - Get item ID: `bw list items | jq -r '.[] | select(.name=="YourItem") | .id'`
 
 2. **Add to `load_bw_secrets` function:**
+
 ```bash
 # Your new token
 local your_token=$(bw get item ITEM_ID 2>/dev/null | jq -r '.fields[] | select(.name == "token") | .value' 2>/dev/null)
@@ -524,7 +572,8 @@ if [[ -n "$your_token" && "$your_token" != "null" ]]; then
 fi
 ```
 
-3. **Add to unlock and unload:**
+1. **Add to unlock and unload:**
+
 ```bash
 # In bw() function, lock case:
 unset BW_SESSION GITHUB_TOKEN GITLAB_TOKEN COMPOSER_AUTH YOUR_TOKEN
@@ -594,11 +643,13 @@ gh config set git_protocol https
 ### How GITHUB_TOKEN is Used
 
 The `GITHUB_TOKEN` environment variable is used for:
+
 1. **gh CLI API operations** - All `gh` commands that call GitHub API
 2. **Composer** - Accessing private GitHub packages
 3. **CI/CD** - Can be passed to GitHub Actions
 
 **Not used for:**
+
 - Git clone/push operations (uses SSH keys instead)
 
 ### Troubleshooting
@@ -667,9 +718,9 @@ hosts:
 
 Your configuration uses a **self-hosted GitLab** instance, not gitlab.com:
 
-- **GitLab URL:** https://git.netresearch.de
-- **SSH URL:** git@git.netresearch.de:group/project.git
-- **API Endpoint:** https://git.netresearch.de/api/v4/
+- **GitLab URL:** <https://git.netresearch.de>
+- **SSH URL:** <git@git.netresearch.de>:group/project.git
+- **API Endpoint:** <https://git.netresearch.de/api/v4/>
 
 ### Authentication Methods
 
@@ -735,11 +786,13 @@ glab config set --global host git.netresearch.de
 ### How GITLAB_TOKEN is Used
 
 The `GITLAB_TOKEN` environment variable is used for:
+
 1. **glab CLI API operations** - All `glab` commands that call GitLab API
 2. **Composer** - Accessing private GitLab packages from git.netresearch.de
 3. **CI/CD** - Can be passed to GitLab CI pipelines
 
 **Not used for:**
+
 - Git clone/push operations (uses SSH keys instead)
 
 ### GitLab.com vs Self-Hosted
@@ -749,12 +802,13 @@ Your setup is configured for **self-hosted GitLab**:
 | Aspect | GitLab.com (public) | git.netresearch.de (self-hosted) |
 |--------|---------------------|----------------------------------|
 | Host | gitlab.com | git.netresearch.de |
-| SSH URL | git@gitlab.com:user/repo.git | git@git.netresearch.de:group/project.git |
-| API Endpoint | https://gitlab.com/api/v4/ | https://git.netresearch.de/api/v4/ |
+| SSH URL | <git@gitlab.com>:user/repo.git | <git@git.netresearch.de>:group/project.git |
+| API Endpoint | <https://gitlab.com/api/v4/> | <https://git.netresearch.de/api/v4/> |
 | Token Domain | gitlab.com | git.netresearch.de |
 | COMPOSER_AUTH | `"gitlab-token":{"gitlab.com":"token"}` | `"gitlab-token":{"git.netresearch.de":"token"}` |
 
 **Your dotfiles automatically configure this** via:
+
 - `GITLAB_HOST` environment variable
 - glab config file pointing to git.netresearch.de
 - COMPOSER_AUTH using git.netresearch.de (not gitlab.com)
@@ -826,6 +880,7 @@ ssh -T git@git.netresearch.de
 Composer reads the `COMPOSER_AUTH` environment variable to authenticate with package repositories.
 
 **Format:**
+
 ```json
 {
   "github-oauth": {
@@ -833,28 +888,44 @@ Composer reads the `COMPOSER_AUTH` environment variable to authenticate with pac
   },
   "gitlab-token": {
     "git.netresearch.de": "glpat-..."
+  },
+  "http-basic": {
+    "repo.magento.com": { "username": "...", "password": "..." }
+  },
+  "bearer": {
+    "<satis-host>": "glpat-..."
   }
 }
 ```
 
 **Note:** This configuration uses **git.netresearch.de** (self-hosted GitLab), not gitlab.com.
 
+The `bearer` entry appears only when `COMPOSER_SATIS_HOST` is set (in `~/.bash/local.bash`, so the
+host stays out of this public repo). The internal Satis sits behind GitLab Pages access control:
+unauthenticated it answers with the GitLab sign-in page, composer reports
+`"…/users/sign_in" does not contain valid JSON`, and the repository then silently falls back to a
+stale cache. It reuses the same GitLab PAT as `gitlab-token`, so there is no separate secret. Having
+`gitlab-token` set is not evidence the auth is complete.
+
 ### Generated by Bitwarden
 
 The `COMPOSER_AUTH` is **automatically generated** from GitHub and GitLab tokens when you run `bw unlock`:
 
-**Source:** `~/dotfiles/bash/.bash/functions/bitwarden.bash` (lines 126-151)
+**Source:** the `load_bw_secrets` function in `~/dotfiles/bash/.bash/functions/bitwarden.bash`
 
 ```bash
-# Build COMPOSER_AUTH JSON from tokens
+# Build COMPOSER_AUTH JSON from whichever tokens were found. Each section is appended only when
+# its credential exists, and a leading comma is added only once the object is non-empty.
 composer_auth='{'
-# Add GitHub OAuth
-composer_auth+='"github-oauth":{"github.com":"'$github_token'"}'
-# Add GitLab token for self-hosted instance
-composer_auth+=',"gitlab-token":{"git.netresearch.de":"'$gitlab_token'"}'
+composer_auth+='"github-oauth":{"github.com":"'"$github_token"'"}'
+composer_auth+=',"gitlab-token":{"'"$GITLAB_HOST"'":"'"$gitlab_token"'"}'
+composer_auth+=',"http-basic":{"repo.magento.com":{"username":"'"$magento_user"'","password":"'"$magento_pass"'"}}'
+# Only when COMPOSER_SATIS_HOST is set:
+composer_auth+=',"bearer":{"'"$COMPOSER_SATIS_HOST"'":"'"$gitlab_token"'"}'
 composer_auth+='}'
 
 export COMPOSER_AUTH="$composer_auth"
+(umask 077; echo "$composer_auth" >| "/run/user/${UID:-$(id -u)}/bw-composer-auth")
 ```
 
 ### Using Composer
@@ -920,6 +991,7 @@ For self-hosted GitLab instances, you must specify the domain in `gitlab-token`:
 ```
 
 **Not:**
+
 ```json
 {
   "gitlab-token": {
@@ -975,6 +1047,7 @@ composer config --global repositories.netresearch vcs https://git.netresearch.de
 ### Workflow
 
 **Daily routine:**
+
 ```bash
 # Morning: Unlock once
 bw unlock
@@ -985,6 +1058,7 @@ bw lock
 ```
 
 **Project work:**
+
 ```bash
 # Check if unlocked
 bw status
@@ -1000,7 +1074,8 @@ composer install  # Uses COMPOSER_AUTH
 ### Organization
 
 **Bitwarden Vault Structure:**
-```
+
+```text
 Bitwarden Vault
 ├── 🔐 Login Items
 │   ├── GitHub (with custom field "token")
@@ -1021,11 +1096,13 @@ Bitwarden Vault
 ### Backup
 
 **What to backup:**
+
 - Bitwarden vault (automatically synced to cloud)
 - Emergency Kit (recovery codes, printed)
 - Master password (memorized + written in safe)
 
 **Emergency recovery:**
+
 1. Download Bitwarden app on new machine
 2. Login with email + master password
 3. Vault syncs automatically
@@ -1039,6 +1116,7 @@ Bitwarden Vault
 ### Bitwarden CLI Issues
 
 **Problem:** `bw unlock` shows "Session already unlocked"
+
 ```bash
 # Force re-unlock
 bw lock
@@ -1046,6 +1124,7 @@ bw unlock
 ```
 
 **Problem:** Session not persisting across terminals
+
 ```bash
 # Check if session file exists
 ls -la /run/user/$(id -u)/bw-session
@@ -1058,6 +1137,7 @@ source ~/.bashrc
 ```
 
 **Problem:** Tokens not loading
+
 ```bash
 # Check if load_bw_secrets is defined
 type load_bw_secrets
@@ -1072,6 +1152,7 @@ ls -la /run/user/$(id -u)/bw-*
 ### SSH Agent Issues
 
 **Problem:** SSH keys not working
+
 ```bash
 # Check if SSH agent socket exists
 ls -la ~/.bitwarden-ssh-agent.sock
@@ -1087,6 +1168,7 @@ ssh-add -l
 ```
 
 **Problem:** Wrong key being used
+
 ```bash
 # Check SSH config
 cat ~/.ssh/config
@@ -1100,6 +1182,7 @@ cat ~/.ssh/config
 ### Biometric Unlock Issues
 
 **Problem:** Fingerprint not working in desktop app
+
 ```bash
 # Check fprintd status
 systemctl status fprintd
@@ -1112,6 +1195,7 @@ fprintd-enroll
 ```
 
 **Problem:** Browser extension can't use biometrics
+
 - Verify Chrome is .deb (not Flatpak): `which google-chrome`
 - Check native messaging: `ls ~/.config/google-chrome/NativeMessagingHosts/`
 - Restart Chrome completely
@@ -1165,7 +1249,7 @@ load_bw_secrets
 
 ---
 
-**Document Version:** 2.0
+**Document Version:** 2.1
 **Author:** Sebastian
-**Last Updated:** 2025-10-24
+**Last Updated:** 2026-09-12
 **System:** Ubuntu 24.04 with Bitwarden integrated setup

@@ -7,11 +7,20 @@ distinguishable from Esc / Tab / Enter. Everything else already arrives as the l
 want more (Claude Code, herdr) switch the terminal into the kitty keyboard protocol themselves.
 
 **Files**:
-- `~/.config/ghostty/config` - five keybind overrides, each commented with its reason
-- `~/.inputrc` - `skip-csi-sequence` so readline swallows CSI sequences bash has no binding for
-  (e.g. Shift+Enter at a bash prompt) instead of inserting them as text
+
+- `~/.config/ghostty/config` - five `text:` keybind overrides, each commented with its reason
+- `~/.inputrc` - the arrow-key history search and Ctrl/Alt word navigation bindings, plus readline
+  options (`keyseq-timeout`, bracketed paste, completion behaviour)
+
+**Open item**: the `"\e[": skip-csi-sequence` line in `~/.inputrc` is commented out, so readline has
+no CSI-u fallback and a sequence bash has no binding for (e.g. Shift+Enter at a bash prompt) is still
+inserted as text. `bind -p | grep -i csi` reports `# skip-csi-sequence (not bound)`. Why it was
+disabled is not recorded; the obvious suspicion, that a bare `\e[` binding would shadow the `\e[A` /
+`\e[B` history search, does not hold (both coexist in the keymap, verified 2026-09-12). Either
+re-enable the line or delete it.
 
 **Rules of thumb**:
+
 - Do not add `text:` overrides for Ctrl+letter, Alt+digit or arrow chords: they are byte-identical
   without one, and inside Claude Code or herdr they hide the modifier from the app (verified 2026-09-06
   with a raw-key probe in both encodings).
@@ -35,15 +44,18 @@ want more (Claude Code, herdr) switch the terminal into the kitty keyboard proto
 ### Preview Details
 
 **Ctrl+T** (File/Directory):
+
 - Files: Syntax highlighted (bat)
 - Directories: Tree structure (eza)
 - Binary: "[Binary file]" message
 
 **Ctrl+R** (History):
+
 - Full command with wrapped text
 - Default hidden, press `?` to toggle
 
 **Alt+C** (Directory Navigation):
+
 - eza tree preview always visible
 - Actually changes directory (cd)
 
@@ -83,18 +95,22 @@ ls -d */ | fzf --preview 'eza --tree {}'
 ## Tools Overview
 
 ### bat (Syntax Highlighter)
+
 **Use**: Syntax-highlighted file viewing
 **Config**: Uses Homebrew defaults (no custom config)
 **Commands**:
+
 ```bash
 bat file.py                    # View with syntax
 bat --style=plain file.txt     # Plain text
 ```
 
 ### eza (Modern ls)
+
 **Use**: Enhanced directory listings
-**Config**: Aliased in `~/dotfiles/bash/.bash/aliases`
+**Config**: Aliased in `~/dotfiles/bash/.bash/aliases.bash`
 **Commands**:
+
 ```bash
 eza --tree                     # Tree view
 eza -l --git                   # Long format with git status
@@ -102,19 +118,23 @@ eza -la                        # All files, long format
 ```
 
 ### fzf (Fuzzy Finder)
+
 **Use**: Interactive file/command search
 **Config**: `~/.config/fzf/config` (UI options) + `~/.bash/exports/fzf.bash` (shell integration)
 **Keybindings**: See "fzf Usage" section above
 **Integration**: Ctrl+T, Ctrl+R, Alt+C in bash
 
 ### yazi (File Manager)
+
 **Use**: Terminal file manager with preview
 **Config**: `~/dotfiles/yazi/.config/yazi/yazi.toml`
 **Commands**:
+
 ```bash
 yazi                           # Launch file manager
 yazi /path/to/dir              # Open specific directory
 ```
+
 **Note**: yazi preview is separate from fzf preview (different config files)
 
 ---
@@ -122,20 +142,28 @@ yazi /path/to/dir              # Open specific directory
 ## Troubleshooting
 
 ### Escape sequences visible in bash
-```bash
-# Check if .inputrc is loaded
-bind -v | grep csi
-# Should show: "\e[": skip-csi-sequence
 
-# If missing, reload bash
+```bash
+# Bindings live in `bind -p`; `bind -v` lists readline variables and never shows a binding.
+bind -p | grep -i csi
+# Today: "# skip-csi-sequence (not bound)" - the binding in ~/.inputrc is commented out
+#        (see "Open item" under Keyboard Encoding above)
+
+# Confirm ~/.inputrc is loaded at all by checking a binding that is active
+bind -p | grep history-search-backward
+# Should show: "\e[A": history-search-backward
+
+# After editing ~/.inputrc, reload readline
 exec bash
 ```
 
 ### fzf shows CSI codes
+
 fzf does not use readline and cannot parse CSI u. Ctrl+[ / Ctrl+I / Ctrl+M are mapped back to control
 bytes in the Ghostty config; other modified chords have no fzf binding anyway.
 
 ### fzf preview not showing
+
 ```bash
 # Check if bat/eza are installed
 which bat eza
@@ -149,5 +177,5 @@ echo $FZF_CTRL_T_OPTS
 
 ---
 
-**Last Updated**: 2025-12-16
+**Last Updated**: 2026-09-12
 **Status**: Production Ready
