@@ -316,8 +316,8 @@ bw edit item <id>
 # In functions/bitwarden.bash
 if command -v bw &>/dev/null; then
     _BW_RUNDIR="/run/user/${UID:-$(id -u)}"
-    # The session token stays out of shells that belong to Claude Code (it sets CLAUDECODE=1):
-    # the agent gets the derived tokens below, never the key to the whole vault.
+    # Belt-and-braces only: keeps the session token out of an interactive shell started inside a
+    # Claude Code session (it sets CLAUDECODE=1). The real scrub happens in the launcher.
     [[ -f "$_BW_RUNDIR/bw-session" && -z "${CLAUDECODE:-}" ]] && export BW_SESSION=$(command cat "$_BW_RUNDIR/bw-session")
     [[ -f "$_BW_RUNDIR/bw-github-token" ]] && export GITHUB_TOKEN=$(command cat "$_BW_RUNDIR/bw-github-token")
     # ... bw-gitlab-token (plus GITLAB_HOST) and bw-composer-auth likewise
@@ -328,11 +328,26 @@ Result: Open new terminal → BW_SESSION automatically loaded → CLI works imme
 
 ### The Claude Code boundary
 
-An agent session is deliberately a tier below a human shell. `CLAUDECODE=1` suppresses the
-`BW_SESSION` export, so Claude Code inherits `GITHUB_TOKEN`, `GITLAB_TOKEN` and `COMPOSER_AUTH`
-(scoped, revocable) but cannot run `bw get` against the vault itself. Tightening this further, with
-agent-scoped tokens and a scrubbing launcher, is designed in `docs/plans/` (untracked: it names
-customer projects).
+An agent session gets **no** credentials at all. The `claude` wrapper in
+`~/.bash/functions/claude.bash` launches the binary through
+`env -u BW_SESSION -u GITHUB_TOKEN -u GITLAB_TOKEN -u COMPOSER_AUTH`, so neither the vault key nor
+the derived tokens exist in the agent's process, and nothing it spawns can inherit or print them.
+
+The launcher is the control point, not `bitwarden.bash`. A guard there cannot unset a value the
+shell already inherited, and the agent's tool shells are non-interactive (`$-` carries no `i`), so
+`.bashrc` is never sourced for them at all. The `CLAUDECODE` guard shown above is belt-and-braces
+for an interactive shell started inside a session. herdr is covered too: it starts agents by typing
+into a pane already at an interactive prompt, where `claude` resolves to the wrapper.
+
+Verified 2026-09-12, this costs no capability: `gh` and `glab` both authenticate from the OS
+keyring, and git works over SSH to GitHub and over HTTPS to git.netresearch.de. Composer still
+runs, though whether it authenticates from `~/.config/composer/auth.json` or falls back to
+anonymous access is **unverified**. The one visible effect is that the token presence checks in
+`Makefile`, `verify-auth.sh` and `verify-installation.sh` report "not set" inside an agent session.
+
+Why it is worth the loss: a command that can read a credential env var can print it into the
+session transcript, and nothing can redact it afterwards. Agent-scoped tokens, the further
+tightening, are designed in `docs/plans/` (untracked: it names customer projects).
 
 ---
 
@@ -967,20 +982,26 @@ composer require your-org/private-package
 
 ### Environment Variable vs auth.json
 
-Composer supports two authentication methods:
+Composer supports two authentication methods, and this machine has **both**:
 
-1. **`COMPOSER_AUTH` environment variable** (used by these dotfiles)
+1. **`COMPOSER_AUTH` environment variable** (the primary path)
    - ✅ Works in all contexts (interactive shells, scripts, CI/CD, Docker)
    - ✅ No file to manage
    - ✅ Auto-loaded from Bitwarden
    - ✅ Stored in tmpfs (RAM-only, auto-cleared)
+   - ❌ Absent in agent sessions, which the launcher scrubs (see "The Claude Code boundary")
 
-2. **`~/.composer/auth.json` file** (not used)
-   - ❌ Token stored on disk
-   - ❌ Manual management required
-   - ❌ Doesn't work in Docker containers without volume mount
+2. **`~/.config/composer/auth.json`** (present, mode 600)
+   - Holds `bearer`, `github-oauth`, `gitlab-oauth`, `gitlab-token`, `http-basic`, `bitbucket-oauth`
+   - ❌ Tokens on disk rather than in tmpfs
+   - ❌ Maintained by hand, so it drifts from the vault silently
+   - ❌ Doesn't reach Docker containers without a volume mount
 
-**The environment variable takes precedence**, so even if you have an `auth.json` file, `COMPOSER_AUTH` will be used.
+**The environment variable takes precedence**, so wherever `COMPOSER_AUTH` is set the file is
+ignored. It only matters where the variable is absent, which since 2026-09-12 includes every agent
+session. Whether its credentials are still current is **unverified**: `composer diagnose` runs
+there but printed no oauth line, so it may be reaching github.com anonymously. Confirm that before
+relying on composer from an agent session.
 
 ### Composer + Self-Hosted GitLab
 
