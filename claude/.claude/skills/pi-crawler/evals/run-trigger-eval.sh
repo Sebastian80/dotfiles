@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# run-trigger-eval.sh [skill-name] [router-model] [samples]
+# run-trigger-eval.sh [--skill NAME] [--router-model CLAUDE-MODEL] [--samples N]
+#
+#   run-trigger-eval.sh --skill pi-crawler --router-model sonnet --samples 3
 #
 # Asks a fresh Claude session, per case in trigger-eval.json, which skill it would invoke, and
 # compares that against should_trigger. It never lets the session do the work: routing is the only
@@ -13,11 +15,21 @@
 # visible, and a summary with false positives and false negatives named.
 set -uo pipefail
 
-SKILL=${1:-pi-crawler}
-ROUTER_MODEL=${2:-sonnet}  # a Claude model: haiku answers NONE even for an unmistakable positive
+SKILL=pi-crawler
+ROUTER_MODEL=sonnet  # a Claude model: haiku answers NONE even for an unmistakable positive
 # Routing is not deterministic: one query answered NONE, then the same skill twice, across three
 # fresh sessions. A single sample per case scores noise as if it were a verdict.
-SAMPLES=${3:-3}
+SAMPLES=3
+
+while [ $# -gt 0 ]; do
+	case $1 in
+	--skill) SKILL=$2; shift 2 ;;
+	--router-model) ROUTER_MODEL=$2; shift 2 ;;
+	--samples) SAMPLES=$2; shift 2 ;;
+	-h | --help) sed -n '2,14p' "$0"; exit 0 ;;
+	*) echo "unknown argument: $1 (see --help)" >&2; exit 2 ;;
+	esac
+done
 CASES=$(dirname "$0")/trigger-eval.json
 export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
