@@ -18,9 +18,9 @@ background child, and that session gets its MCP servers from the project (see
 - The project must be enabled: `<project>/.pi/mcp.json` must exist. If it doesn't, offer the
   setup from [references/project-setup.md](references/project-setup.md) instead of falling back
   to a worse answer.
-- PhpStorm must run. The endpoint antivirus fakes connects on dead local ports, so check the HTTP
-  status, not curl's exit code: `curl -s -o /dev/null -m 2 -w '%{http_code}' http://127.0.0.1:29175/`
-  prints `000` when PhpStorm is down. Then tell the user; never start PhpStorm yourself.
+- PhpStorm must run, and `crawl.sh` checks that before it starts anything: a dead index costs 5 ms
+  to find there and a 15 s model round trip to find inside a crawl. Never start PhpStorm unasked.
+  Ask, and start it on yes.
 - **A reachable port is not an open project.** The crawler holds read-only index tools only, so a
   project that is managed-but-closed makes it refuse every code-search question rather than answer
   from whichever project happens to be open — and parallel checkouts share relative paths and line
@@ -28,8 +28,8 @@ background child, and that session gets its MCP servers from the project (see
   *this* path, and if it is closed, open it here in the preflight (the index MCP exposes
   `ide_open_project` over HTTP on the same port, even where `.pi/mcp.json` does not expose it to
   pi) and wait until `ide_index_status` reports `isIndexing: false`. Opening takes a while on a
-  monorepo, and a half-built index answers partially instead of refusing. Never let the crawler
-  open or wake a project itself.
+  monorepo, and a half-built index answers partially instead of refusing. The crawler never opens a
+  project on its own: `start_ide` puts that question to whoever started the run.
 - Mate's data tools (SQL, logs, profiler, queue, search indexes) need the project's stack running;
   code and config tools work with it down. Check `docker compose ps` here and ask before starting
   anything: a headless crawl has no UI, so it cannot ask and will just report the stack down.
@@ -37,22 +37,28 @@ background child, and that session gets its MCP servers from the project (see
 
 ## Ask it headless (your default)
 
-One pi process in the project. No parent, no subagent, no script: the agent file supplies the
-prompt, so there is still one copy of it. Always as a background Bash task; a crawl outlives the
-foreground timeout.
+`crawl.sh` in this skill's directory is the whole recipe: it checks the preconditions, runs one pi
+process in the project and writes the answer where you say. Always as a background Bash task; a
+crawl outlives the foreground timeout.
 
 ```bash
-cd /abs/project/root && HERDR_ENV= pi -p -a -ns \
-  --model openai-codex/gpt-5.6-terra --thinking medium -xt write,edit,bash \
-  --append-system-prompt "$(sed -n '/^You are a read-only code crawler/,$p' ~/.pi/agent/agents/crawler.md)" \
-  'Project root: /abs/project/root
-First-party code: src/, vendor/acme/*
-Question: <one precise question>' </dev/null > <scratchpad>/crawl-<topic>.md 2>&1
+~/.claude/skills/pi-crawler/crawl.sh /abs/project/root <scratchpad>/question.txt <scratchpad>/answer.md
 ```
 
-- `-xt write,edit,bash` drops the mutating builtins, which is shorter and safer than allowlisting
-  53 tools; the IDE and Mate tools come from the project's `.pi/mcp.json`.
-- The answer is on stdout. No run ids, no artifacts, no waiting.
+The question file holds the project root, the first-party list and one precise question:
+
+```
+Project root: /abs/project/root
+First-party code: src/, vendor/acme/*
+Question: <one precise question>
+```
+
+- **Exit 10 means someone has to decide, and that someone is the user.** The request is on stdout
+  and in `<answer>.decision`. Put it to them with `AskUserQuestion` in your very next message, the
+  named fix as the recommended option, then act on the answer and run the crawl again. Reporting it
+  as prose and carrying on is the one wrong move: the crawl produced nothing and the question is
+  still open.
+- The answer is in the file you named. No run ids, no artifacts, no waiting.
 - Spot-check one or two `file:line` claims before building on them; the last line lists the tools
   it used.
 
@@ -71,6 +77,10 @@ Only when the user asks. See [references/herdr.md](references/herdr.md): split a
 `--cwd` the project, start pi there with `herdr agent start --kind pi`, send the same delegation
 prompt with `herdr agent prompt --wait` as a background task, then read the pane. The session
 stays open for follow-ups.
+
+Pass `--env PI_DECISION_FILE=<path>` on the split. The user watches the pane, but the conversation
+is here, so a `start_ide` question should land in that file and become your `AskUserQuestion`
+rather than a dialog counting down in a pane they may have looked away from.
 
 ## Rules
 

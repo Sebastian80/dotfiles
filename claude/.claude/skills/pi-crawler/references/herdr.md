@@ -6,7 +6,8 @@ they ask for a tab; several at once belong in tabs, because stacked splits get t
 ```bash
 # 1. A pane next to yours, in the PROJECT: that is where the MCP servers come from.
 P=$(herdr pane split --current --direction right --no-focus \
-      --cwd /abs/project/root | jq -r '.result.pane.pane_id')
+      --cwd /abs/project/root --env PI_DECISION_FILE=<scratchpad>/pane.decision \
+      | jq -r '.result.pane.pane_id')
 #    For a tab instead:
 #    P=$(herdr tab create --workspace "${HERDR_PANE_ID%%:*}" --label crawler --no-focus \
 #          --cwd /abs/project/root | jq -r '.result.root_pane.pane_id')
@@ -28,6 +29,9 @@ Question: <question>' --wait --until idle --until done --until blocked --timeout
 herdr agent read "$N" --source recent-unwrapped --lines 60
 ```
 
+- `PI_DECISION_FILE` is what keeps a question from stalling in the pane: with it set, `start_ide`
+  writes the request there and the agent stops instead of opening a dialog. Check that file
+  whenever a pane agent finishes early, and ask the user yourself.
 - Leave the pane open: the user reads the answer and asks follow-ups there. Close it only when
   they are done, with `herdr pane close "$P"`.
 - herdr knows pi's state only through its pi integration (`herdr integration status` must list
