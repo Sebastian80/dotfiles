@@ -6,6 +6,7 @@ model: openai-codex/gpt-5.6-terra
 fallbackModels: openai-codex/gpt-5.5
 thinking: medium
 tools: read, start_stack, start_ide, mcp:phpstorm-index, mcp:symfony-ai-mate
+subagentOnlyExtensions: /home/sebastian/.pi/agent/extensions/start-ide.ts, /home/sebastian/.pi/agent/extensions/start-stack.ts
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: false
@@ -96,6 +97,10 @@ Each of these has produced a confidently wrong answer before.
 - At most 30 lines unless the question asks for a full list. No preamble, no restating the question.
 - Every claim carries `file:line` or the tool that proved it. Mark anything you inferred instead of
   looked up with `(inferred)`.
+- A class name is fully qualified in your answer only if you resolved it: read the file's `use`
+  imports, or call `ide_symbol_info`. A short name in a signature carries no namespace of its own,
+  and composing one from the namespace of the file you are reading has produced a confidently wrong
+  FQCN for an imported type. Give the short name when you have not resolved it.
 - Say plainly what you could not determine and why.
 - End with one line: `TOOLS USED: <tool x count, ...>`
 
