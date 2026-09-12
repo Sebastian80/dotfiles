@@ -4,6 +4,9 @@ For when the user wants to watch the crawl or ask follow-ups. Split next to your
 they ask for a tab; several at once belong in tabs, because stacked splits get too narrow to read.
 
 ```bash
+# 0. The gate, before anything is spawned. Exit 10: ask the user, and drop the crawl on a no.
+~/.claude/skills/pi-crawler/check-ide.sh /abs/project/root || exit $?
+
 # 1. A pane next to yours, in the PROJECT: that is where the MCP servers come from.
 P=$(herdr pane split --current --direction right --no-focus \
       --cwd /abs/project/root --env PI_DECISION_FILE=<scratchpad>/pane.decision \

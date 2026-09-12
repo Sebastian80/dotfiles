@@ -13,8 +13,6 @@ ROOT=${1:?usage: crawl.sh <project-root> <question-file> [answer-file]}
 QUESTION=${2:?usage: crawl.sh <project-root> <question-file> [answer-file]}
 ANSWER=${3:-${TMPDIR:-/tmp}/crawl-$(date +%s).md}
 DECISION=$ANSWER.decision
-INDEX_URL=http://127.0.0.1:29175/
-LAUNCHER=$HOME/.local/share/JetBrains/Toolbox/scripts/phpstorm
 AGENT=$HOME/.pi/agent/agents/crawler.md
 
 export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
@@ -25,18 +23,8 @@ rm -f "$DECISION"
 [ -r "$AGENT" ] || { echo "no crawler agent at $AGENT" >&2; exit 2; }
 [ -r "$ROOT/.pi/mcp.json" ] || { echo "$ROOT is not enabled for the crawler ($ROOT/.pi/mcp.json is missing)" >&2; exit 2; }
 
-# The endpoint antivirus accepts connections on dead local ports, so the HTTP status decides, not
-# curl's exit code: a dead IDE prints 000.
-if [ "$(curl -s -o /dev/null -m 2 -w '%{http_code}' "$INDEX_URL")" = "000" ]; then
-  cat > "$DECISION" <<EOF
-NEEDS-DECISION: start_ide $ROOT
-reason: preflight: $INDEX_URL did not answer, so the crawler would have no code tools
-state: PhpStorm is not running
-fix: run \`$LAUNCHER $ROOT\`, wait until $INDEX_URL answers and the index has finished, then run this again
-EOF
-  cat "$DECISION"
-  exit 10
-fi
+# The gate. Nothing is spawned until the index is up, has this project open and has finished.
+"$(dirname "$0")/check-ide.sh" "$ROOT" "$DECISION" || exit $?
 
 # -nc matches the crawler agent's own inheritProjectContext: false. Without it pi loads the
 # project's AGENTS.md and CLAUDE.md, and the crawler spends its first turn obeying them instead of

@@ -18,9 +18,12 @@ background child, and that session gets its MCP servers from the project (see
 - The project must be enabled: `<project>/.pi/mcp.json` must exist. If it doesn't, offer the
   setup from [references/project-setup.md](references/project-setup.md) instead of falling back
   to a worse answer.
-- PhpStorm must run, and `crawl.sh` checks that before it starts anything: a dead index costs 5 ms
-  to find there and a 15 s model round trip to find inside a crawl. Never start PhpStorm unasked.
-  Ask, and start it on yes.
+- **Run `check-ide.sh <project-root>` before you spawn anything, on every path.** It is the gate:
+  exit 0 means the index is up, has this project open and has finished indexing; exit 10 means the
+  user has to decide, so put the request to them with `AskUserQuestion` and **if they decline, do
+  not start the crawl at all**; exit 11 means the index is still building, which is nobody's
+  decision, so wait and run it again. `crawl.sh` runs it for you; a pane or an orchestrator does
+  not, so run it yourself first. Never start PhpStorm unasked.
 - **A reachable port is not an open project.** The crawler holds read-only index tools only, so a
   project that is managed-but-closed makes it refuse every code-search question rather than answer
   from whichever project happens to be open — and parallel checkouts share relative paths and line
