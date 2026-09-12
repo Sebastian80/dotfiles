@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Claude Code statusline in the Netresearch oh-my-posh look (netresearch.omp.json):
-# a dark block with the [n] badge, path, git branch + change counts and model on the
-# left, and a context bar ("▓░░░░░░░░░ 8%") right-aligned, colored by fill level.
+# a dark block with the [n] badge, path and git branch + change counts on the left, and a
+# context bar ("▓░░░░░░░░░ 8%") right-aligned, colored by fill level, with the model
+# dimmed on the line above it.
 # Reads the statusLine JSON payload from stdin. Requires: jq, a Nerd Font.
 
 # The bar and glyphs are multibyte; a UTF-8 locale makes ${#var} count characters for alignment.
@@ -33,8 +34,11 @@ FG_WHITE=$'\033[38;2;255;255;255m' # #ffffff
 FG_YELLOW=$'\033[38;2;229;192;123m' # #e5c07b, working tree
 FG_GREEN=$'\033[38;2;152;195;121m' # #98c379, staged
 FG_PURPLE=$'\033[38;2;198;120;221m' # #c678dd, stash
+FG_DIM=$'\033[38;2;127;132;142m'   # #7f848e, untracked
 POWERLINE=$''   # Nerd Font right arrow, as in the omp theme
-ICON_BRANCH=$'' # Nerd Font GitHub icon, the omp theme's branch_icon
+ICON_GITHUB=$'\uf09b' # Nerd Font icons for the repo host, picked from the origin remote
+ICON_GITLAB=$'\uf296'
+ICON_GIT=$'\ue725'
 BOLD=$'\033[1m'
 NOBOLD=$'\033[22m'
 RESET=$'\033[0m'
@@ -46,48 +50,50 @@ seg() { left+="$1"; left_plain+="$2"; }
 seg "${FG_TEAL}${BOLD} [${FG_WHITE}n${FG_TEAL}] ${NOBOLD}" " [n] "
 seg "${FG_LIGHT}${dir} " "${dir} "
 
-# Git: branch, ahead/behind, working (!mod +add ✘del ?untracked), staged (!mod +add ✘del), stash.
+# Git: host icon, branch, ahead/behind, file totals (● staged ✎ unstaged ? untracked), stash.
+# A file with both staged and unstaged edits counts in both totals.
 # One porcelain v2 call; --no-optional-locks keeps it from touching the index lock.
 if [ -n "$cwd" ] && status=$(git -C "$cwd" --no-optional-locks status --porcelain=v2 --branch --show-stash 2>/dev/null); then
-    IFS=$'\t' read -r head oid ahead behind stash wm wa wd wu sm sa sd <<<"$(awk '
+    IFS=$'\t' read -r head oid ahead behind stash staged unstaged untracked <<<"$(awk '
         /^# branch.head / { head = $3 }
         /^# branch.oid /  { oid = substr($3, 1, 7) }
         /^# branch.ab /   { ahead = substr($3, 2); behind = substr($4, 2) }
         /^# stash /       { stash = $3 }
         /^[12u] / {
-            x = substr($2, 1, 1); y = substr($2, 2, 1)
-            if (x ~ /[MTRC]/) sm++; else if (x == "A") sa++; else if (x == "D") sd++
-            if (y ~ /[MT]/) wm++; else if (y == "A") wa++; else if (y == "D") wd++
+            if (substr($2, 1, 1) != ".") staged++
+            if (substr($2, 2, 1) != ".") unstaged++
         }
-        /^\? / { wu++ }
-        END { printf "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", head, oid, ahead, behind, stash, wm, wa, wd, wu, sm, sa, sd }
+        /^\? / { untracked++ }
+        END { printf "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", head, oid, ahead, behind, stash, staged, unstaged, untracked }
     ' <<<"$status")"
     [ "$head" = "(detached)" ] && head="$oid"
 
-    counts() {  # counts <!n> <+n> <✘n> [?n] -> "!1+1✘1?1" with zero parts dropped
-        local s="" sym n i=0
-        for sym in '!' '+' '✘' '?'; do
-            i=$((i + 1)); n=${!i:-0}
-            (( n > 0 )) && s+="${sym}${n}"
-        done
-        printf '%s' "$s"
-    }
-    ab=""
-    (( ahead > 0 )) && ab+="⇡${ahead}"
-    (( behind > 0 )) && ab+="⇣${behind}"
-    working=$(counts "$wm" "$wa" "$wd" "$wu")
-    staged=$(counts "$sm" "$sa" "$sd")
-
-    seg "${FG_WHITE} ${ICON_BRANCH} ${head}" " ${ICON_BRANCH} ${head}"
-    [ -n "$ab" ] && seg " ${ab}" " ${ab}"
-    [ -n "$working" ] && seg " ${FG_YELLOW}${working}" " ${working}"
-    [ -n "$staged" ] && seg " ${FG_GREEN}${staged}" " ${staged}"
-    (( stash > 0 )) && seg " ${FG_PURPLE}≡${stash}" " ≡${stash}"
+    case "$(git -C "$cwd" config --get remote.origin.url)" in
+        *github.com*)                  icon="$ICON_GITHUB" ;;
+        *gitlab*|*git.netresearch.de*) icon="$ICON_GITLAB" ;;
+        *)                             icon="$ICON_GIT" ;;
+    esac
+    seg "${FG_WHITE} ${icon} ${head}" " ${icon} ${head}"
+    (( ahead > 0 )) && seg " ⇡ ${ahead}" " ⇡ ${ahead}"
+    (( behind > 0 )) && seg " ⇣ ${behind}" " ⇣ ${behind}"
+    (( staged > 0 )) && seg " ${FG_GREEN}● ${staged}" " ● ${staged}"
+    (( unstaged > 0 )) && seg " ${FG_YELLOW}✎ ${unstaged}" " ✎ ${unstaged}"
+    (( untracked > 0 )) && seg " ${FG_DIM}? ${untracked}" " ? ${untracked}"
+    (( stash > 0 )) && seg " ${FG_PURPLE}≡ ${stash}" " ≡ ${stash}"
     seg " " " "
 fi
 
-seg "${FG_TEAL}${BOLD} ${model} ${NOBOLD}" " ${model} "
 seg "${RESET}${FG_BLOCK}${POWERLINE}${RESET}" "${POWERLINE}"
+
+# Right-align using the width Claude Code passes in COLUMNS. MARGIN leaves room for the
+# TUI's own row padding (2 cells each side); anything wider gets cut off with "…".
+MARGIN=4
+
+# First line: the model, dimmed and right-aligned so it sits above the context bar.
+pad=$(( ${COLUMNS:-0} - MARGIN - ${#model} ))
+(( pad < 1 )) && pad=1
+# Starts with the color code: Claude Code trims leading whitespace, which would drop the padding.
+printf '%s%*s%s\n' "$FG_DIM" "$pad" "" "${model}${RESET}"
 
 if [ -z "$used" ]; then
     printf '%s\n' "$left"
@@ -114,9 +120,6 @@ fi
 right_plain="${bar} ${pct}%"
 right="${ctx_color}${right_plain}${RESET}"
 
-# Right-align using the width Claude Code passes in COLUMNS. MARGIN leaves room for the
-# TUI's own row padding so the line never wraps.
-MARGIN=2
 pad=$(( ${COLUMNS:-0} - MARGIN - ${#left_plain} - ${#right_plain} ))
 (( pad < 1 )) && pad=1
 printf '%s%*s%s\n' "$left" "$pad" "" "$right"
