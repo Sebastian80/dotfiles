@@ -130,17 +130,32 @@ preview() {
         return 1
     fi
 
+    # Each branch picks one viewer. `A && B || C` would also run C when B itself
+    # fails, and chaining two of them runs the second viewer even after the first
+    # succeeded, so the choice is made with if/elif instead.
     case "${file##*.}" in
         md|markdown)
-            command -v glow &>/dev/null && glow "$file" || cat "$file"
+            if command -v glow &>/dev/null; then
+                glow "$file"
+            else
+                cat "$file"
+            fi
             ;;
         jpg|jpeg|png|gif|bmp|webp)
-            command -v viu &>/dev/null && viu "$file" || \
-            command -v chafa &>/dev/null && chafa "$file" || \
-            echo "No image viewer available"
+            if command -v viu &>/dev/null; then
+                viu "$file"
+            elif command -v chafa &>/dev/null; then
+                chafa "$file"
+            else
+                echo "No image viewer available"
+            fi
             ;;
         json)
-            command -v jq &>/dev/null && jq . "$file" || cat "$file"
+            if command -v jq &>/dev/null; then
+                jq . "$file"
+            else
+                cat "$file"
+            fi
             ;;
         *)
             if command -v bat &>/dev/null; then

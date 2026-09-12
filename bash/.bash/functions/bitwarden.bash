@@ -93,7 +93,9 @@ fi
 # Note: This function is automatically called by 'bw unlock'
 load_bw_secrets() {
     local quiet=false
-    if [[ "$1" == "--quiet" ]]; then
+    # Callers pass no argument, so $1 has to tolerate being unset: a `set -u` caller
+    # would otherwise abort here instead of loading secrets.
+    if [[ "${1:-}" == "--quiet" ]]; then
         quiet=true
     fi
 
