@@ -60,8 +60,8 @@ list: ## List all stow packages
 	@echo "$(GREEN)Available packages:$(NC)"
 	@ls -d */ | grep -v '.git' | sed 's|/||' | awk '{print "  - " $$1}'
 
-lint: ## Lint and spellcheck all tracked scripts (shellcheck, ruff, codespell)
-	@scripts/maintenance/lint-scripts.sh
+lint: ## Lint and spellcheck tracked scripts and docs (shellcheck, ruff, markdownlint, codespell)
+	@scripts/maintenance/lint.sh
 
 test: ## Test stow (dry run, shows what would be created)
 	@echo "$(YELLOW)Dry run - showing what would be created:$(NC)"

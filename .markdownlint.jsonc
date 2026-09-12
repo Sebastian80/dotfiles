@@ -1,0 +1,27 @@
+// markdownlint config for this repo's own documentation.
+//
+// Scope is set by scripts/maintenance/lint.sh, which lints the repo's prose
+// (README, INSTALLATION, SCRIPTS, SECRET_MANAGEMENT, SETUP-NOTES, AGENTS, docs/,
+// package READMEs) and leaves out the agent instruction corpora under claude/,
+// agents/ and pi/ plus the vendored yazi flavors.
+{
+  "default": true,
+
+  // 120 columns, matching the skill repos. Code blocks and tables carry commands
+  // and fixed-width output that must not be reflowed; headings are short anyway.
+  "MD013": {
+    "line_length": 120,
+    "code_blocks": false,
+    "tables": false,
+    "headings": false
+  },
+
+  // Repeated subheadings (Usage, Troubleshooting) under different parents are fine.
+  "MD024": { "siblings_only": true },
+
+  // Table pipe alignment is cosmetic and churns every table edit.
+  "MD060": false,
+
+  // The docs use inline HTML for the occasional detail block.
+  "MD033": false
+}
