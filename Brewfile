@@ -29,6 +29,13 @@ brew "herdr"        # Agent multiplexer: persistent panes with Claude/Codex stat
 
 # Utilities
 brew "jq"           # JSON processor
+brew "yq"           # YAML/TOML/XML/CSV processor; the data-tools skill mandates it for structured formats
+# gawk claims the `awk` name in Homebrew's bin, so `awk` becomes GNU awk rather than
+# Ubuntu's mawk for any shell with brew early on PATH. Installed because mawk 1.3.4
+# crashes compiling an interval combined with an alternation (`^ {0,3}(a|b)`, both
+# POSIX ERE), which aborts skill-repo-skill's validate-skill.sh with exit 100 on a
+# stock Ubuntu box. Every awk call in this repo is plain POSIX, so the swap is safe here.
+brew "gawk"         # GNU awk; also becomes `awk` (see note above)
 brew "glow"         # Markdown viewer
 brew "rich-cli"     # Rich terminal output (JSON, CSV, markdown, syntax)
 brew "btop"         # Resource monitor with beautiful TUI
