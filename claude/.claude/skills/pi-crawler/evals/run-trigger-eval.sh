@@ -31,13 +31,17 @@ Which skill would you invoke first to handle this? Answer with the skill name on
 skill applies. Do not start the work." 2>/dev/null | tr '[:upper:]' '[:lower:]')
 
 	if printf '%s' "$answer" | command grep -q -- "$SKILL"; then got=true; else got=false; fi
+	# What won matters as much as whether this skill did. In a session with thirty skills a miss is
+	# usually another skill winning, and often winning correctly, which is a wrong expectation here
+	# rather than a fault in the skill.
+	won=$(printf '%s' "$answer" | head -1 | cut -c1-40)
 	if [ "$got" = "$want" ]; then
 		pass=$((pass + 1)); mark=ok
 	else
 		fail=$((fail + 1)); mark=MISS
-		[ "$want" = false ] && fp+=("$query") || fn+=("$query")
+		[ "$want" = false ] && fp+=("$query -> $won") || fn+=("$query -> won by: $won")
 	fi
-	printf '%-4s want=%-5s got=%-5s %s\n' "$mark" "$want" "$got" "${query:0:68}"
+	printf '%-4s want=%-5s got=%-5s %-52s %s\n' "$mark" "$want" "$got" "${query:0:52}" "[$won]"
 done
 
 echo
