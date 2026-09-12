@@ -21,8 +21,18 @@ background child, and that session gets its MCP servers from the project (see
 - PhpStorm must run. The endpoint antivirus fakes connects on dead local ports, so check the HTTP
   status, not curl's exit code: `curl -s -o /dev/null -m 2 -w '%{http_code}' http://127.0.0.1:29175/`
   prints `000` when PhpStorm is down. Then tell the user; never start PhpStorm yourself.
+- **A reachable port is not an open project.** The crawler holds read-only index tools only, so a
+  project that is managed-but-closed makes it refuse every code-search question rather than answer
+  from whichever project happens to be open — and parallel checkouts share relative paths and line
+  numbers, so an answer from the wrong one is indistinguishable. Check `ide_project_status` for
+  *this* path, and if it is closed, open it here in the preflight (the index MCP exposes
+  `ide_open_project` over HTTP on the same port, even where `.pi/mcp.json` does not expose it to
+  pi) and wait until `ide_index_status` reports `isIndexing: false`. Opening takes a while on a
+  monorepo, and a half-built index answers partially instead of refusing. Never let the crawler
+  open or wake a project itself.
 - Mate's data tools (SQL, logs, profiler, queue, search indexes) need the project's stack running;
-  code and config tools work with it down.
+  code and config tools work with it down. Check `docker compose ps` here and ask before starting
+  anything: a headless crawl has no UI, so it cannot ask and will just report the stack down.
 - For "our code" questions, pass the first-party list (see [references/first-party.md](references/first-party.md)).
 
 ## Ask it headless (your default)
