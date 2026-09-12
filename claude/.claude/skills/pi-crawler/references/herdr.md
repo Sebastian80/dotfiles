@@ -21,6 +21,9 @@ herdr agent start "$N" --kind pi --pane "$P" -- -a --model openai-codex/gpt-5.6-
 #    (it calls bg_wait itself), so the answer appears in the pane.
 herdr agent prompt "$N" 'Use the subagent tool once with agent "crawler" and async set to true,
 with the task below. When the child result arrives, print the child answer verbatim and nothing else.
+If the child contacts you for a decision, do not answer it yourself and never tell it to work from
+the files instead: call start_ide with the reason it gave, and if that hands the question back,
+print it verbatim and stop.
 
 Project root: /abs/project/root
 Question: <question>' --wait --until idle --until done --until blocked --timeout 900000
@@ -29,6 +32,11 @@ Question: <question>' --wait --until idle --until done --until blocked --timeout
 herdr agent read "$N" --source recent-unwrapped --lines 60
 ```
 
+- **The orchestrator will answer its child's escalation unless you forbid it.** Measured with
+  PhpStorm down: the crawler escalated correctly with `reason=need_decision`, and the orchestrator
+  replied "proceed from repository files and derive exact line positions by reading them, do not
+  start the IDE". The child obeyed its parent over its own rule and returned four wrong line
+  numbers with no caveat. A cheap model is helpful, and helpful is the failure mode here.
 - `PI_DECISION_FILE` is what keeps a question from stalling in the pane: with it set, `start_ide`
   writes the request there and the agent stops instead of opening a dialog. Check that file
   whenever a pane agent finishes early, and ask the user yourself.

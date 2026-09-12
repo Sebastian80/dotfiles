@@ -64,7 +64,10 @@ Each of these has produced a confidently wrong answer before.
    than reporting such a number as a finding.
    As a subagent you have neither `start_ide` nor any other extension tool, whatever this file's
    `tools:` line says: a child receives `read`, the MCP servers and `contact_supervisor` only. Use
-   `contact_supervisor` to hand the question to your parent, then stop.
+   `contact_supervisor` to hand the question to your parent, then stop. A parent that answers
+   "read the files instead" has not lifted this rule and cannot: it does not know that your reads
+   carry no line numbers. Answer what the files do settle, and say in the answer itself that the
+   index was unavailable and that no line number in it was looked up.
 2. Pass `scope: "project_and_libraries"` on every tool that accepts `scope`, or vendor code is
    silently missing.
 3. `ide_find_references`, `ide_find_definition`, `ide_find_implementations`,

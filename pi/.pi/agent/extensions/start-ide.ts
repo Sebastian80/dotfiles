@@ -46,6 +46,17 @@ export default function (pi: ExtensionAPI) {
 	// Parallel tool calls share one dialog and one launch.
 	let pending: Promise<string> | undefined;
 
+	// A run that hands the question up stops straight afterwards, and an agent that stops reads as
+	// idle, which looks like an answer. Mark it blocked instead, and clear that when the next turn
+	// starts: herdr keeps a counter and a blocked pane stays blocked even while it works, so an
+	// emit that is never matched pins the pane for good.
+	let handedUp = false;
+	pi.on("agent_start", () => {
+		if (!handedUp) return;
+		handedUp = false;
+		pi.events.emit("herdr:blocked", { active: false });
+	});
+
 	// The endpoint antivirus accepts connections on dead local ports, so a reachable socket is not a
 	// running IDE. Only a real HTTP response counts, whatever its status.
 	async function indexAnswers(): Promise<boolean> {
@@ -96,6 +107,10 @@ export default function (pi: ExtensionAPI) {
 					// The marker below still carries the request; a caller that set the variable and finds
 					// no file falls back to reading the answer.
 				}
+			}
+			if (!handedUp) {
+				handedUp = true;
+				pi.events.emit("herdr:blocked", { active: true, label: "start PhpStorm?" });
 			}
 			return [
 				request,
