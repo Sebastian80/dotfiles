@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# run-trigger-eval.sh [skill-name] [model] [samples]
+# run-trigger-eval.sh [skill-name] [router-model] [samples]
 #
 # Asks a fresh Claude session, per case in trigger-eval.json, which skill it would invoke, and
 # compares that against should_trigger. It never lets the session do the work: routing is the only
 # thing under test.
+#
+# router-model is the model of the CLAUDE session doing the routing, nothing to do with pi. No pi
+# process runs here and no crawl happens; the crawler's own model is set in crawler.md and is a
+# Codex one. Only Claude model names belong in that argument.
 #
 # Prints one line per case with want and got, so a case that passes for the wrong reason is still
 # visible, and a summary with false positives and false negatives named.
 set -uo pipefail
 
 SKILL=${1:-pi-crawler}
-MODEL=${2:-sonnet}   # haiku answers NONE even for an unmistakable positive: it does not route to skills here
+ROUTER_MODEL=${2:-sonnet}  # a Claude model: haiku answers NONE even for an unmistakable positive
 # Routing is not deterministic: one query answered NONE, then the same skill twice, across three
 # fresh sessions. A single sample per case scores noise as if it were a verdict.
 SAMPLES=${3:-3}
@@ -30,7 +34,7 @@ for i in $(seq 0 $((total - 1))); do
 	# about the work rather than about routing, and every positive then reads as a miss.
 	hits=0; won=""
 	for _ in $(seq "$SAMPLES"); do
-		answer=$(claude -p --model "$MODEL" "$query
+		answer=$(claude -p --model "$ROUTER_MODEL" "$query
 
 Which skill would you invoke first to handle this? Answer with the skill name only, or NONE if no
 skill applies. Do not start the work." 2>/dev/null | tr '[:upper:]' '[:lower:]')
@@ -53,7 +57,7 @@ skill applies. Do not start the work." 2>/dev/null | tr '[:upper:]' '[:lower:]')
 done
 
 echo
-echo "$SKILL on $MODEL, majority of $SAMPLES samples: $pass/$total pass, $fail miss"
+echo "$SKILL routed by claude $ROUTER_MODEL, majority of $SAMPLES samples: $pass/$total pass, $fail miss"
 [ ${#fp[@]} -gt 0 ] && { echo "false positives (fired when it should not):"; printf '  - %s\n' "${fp[@]}"; }
 [ ${#fn[@]} -gt 0 ] && { echo "false negatives (missed when it should fire):"; printf '  - %s\n' "${fn[@]}"; }
 exit 0
