@@ -29,7 +29,9 @@
   },
   {
     "query": "which of our bundles register a datagrid listener on a frontend grid?",
-    "should_trigger": true
+    "should_trigger": false,
+    "belongs_to": "ide-index-mcp",
+    "why": "one or two text searches for a tag name, which the counting-grep rule calls narrow"
   },
   {
     "query": "spawn the pi crawler in a pane so I can watch it work",
@@ -41,7 +43,9 @@
   },
   {
     "query": "what does the compiled container say about decorators on oro_checkout services?",
-    "should_trigger": true
+    "should_trigger": false,
+    "belongs_to": "mate-oro-mate",
+    "why": "a direct Mate question: the crawler only wraps the same tools"
   },
   {
     "query": "where is the class BatchSafeCheckoutSubtotalUpdater declared?",

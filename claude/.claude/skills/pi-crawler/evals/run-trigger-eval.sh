@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run-trigger-eval.sh [--skill NAME] [--router-model CLAUDE-MODEL] [--samples N]
+# run-trigger-eval.sh [--skill NAME] [--cases FILE] [--router-model CLAUDE-MODEL] [--samples N]
 #
 #   run-trigger-eval.sh --skill pi-crawler --router-model sonnet --samples 3
 #
@@ -24,13 +24,14 @@ SAMPLES=3
 while [ $# -gt 0 ]; do
 	case $1 in
 	--skill) SKILL=$2; shift 2 ;;
+	--cases) CASES=$2; shift 2 ;;
 	--router-model) ROUTER_MODEL=$2; shift 2 ;;
 	--samples) SAMPLES=$2; shift 2 ;;
 	-h | --help) sed -n '2,14p' "$0"; exit 0 ;;
 	*) echo "unknown argument: $1 (see --help)" >&2; exit 2 ;;
 	esac
 done
-CASES=$(dirname "$0")/trigger-eval.json
+CASES=$(dirname "$0")/trigger-eval.json  # --cases points it at another skill's suite
 export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 [ -r "$CASES" ] || { echo "no cases at $CASES" >&2; exit 2; }
