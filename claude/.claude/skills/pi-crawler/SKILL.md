@@ -13,6 +13,33 @@ You never run it directly. A pi session running **in the project directory** spa
 background child, and that session gets its MCP servers from the project (see
 [references/project-setup.md](references/project-setup.md)).
 
+## Crawl, or look it up yourself
+
+A crawl costs 30-80 s and a few cents. The same narrow answer costs one `rg -uu` and a `Read`,
+measured at roughly 400 times faster for an identical result: every crawl in a day of testing
+answered a question that grep answered first and better. Delegating a lookup you could do yourself
+is the common mistake here, not the rare one.
+
+Crawl when one of these holds, and look it up yourself otherwise:
+
+- **Breadth.** The raw evidence runs past roughly ten files. A real one here, every first-party
+  service that decorates an Oro service and what each overrides, is 24 matches in 13 files plus 12
+  classes to open: 40-70 KB of your context against the crawler's 30-40 lines.
+- **Semantics that text cannot do.** Call sites, implementations, overrides. It correctly dropped a
+  same-named method on a different type where `rg` could not.
+- **Runtime truth.** How many records, what the container holds, what the logs say, through Mate.
+- **A flow through vendor code**, where the path hops through Oro, Symfony or Doctrine internals.
+
+Never for the file you are editing, for a symbol whose file you already know, or when you need the
+file contents anyway.
+
+The gate turns a crawl into a question for the user whenever PhpStorm is closed, so the bar rises
+then: ask only for a question that clearly meets one of those four, and say which one.
+
+Its accuracy is measured on narrow questions, 10 of 10 exact and repeatedly, and **not** on
+breadth, where the failure mode is a plausible but incomplete list that nothing in the answer marks
+as partial. Check a "which" or "all" answer's count against `rg -uu` before building on it.
+
 ## Before you start
 
 - The project must be enabled: `<project>/.pi/mcp.json` must exist. If it doesn't, offer the
@@ -40,7 +67,7 @@ background child, and that session gets its MCP servers from the project (see
   anything: a headless crawl has no UI, so it cannot ask and will just report the stack down.
 - For "our code" questions, pass the first-party list (see [references/first-party.md](references/first-party.md)).
 
-## Ask it headless (your default)
+## Ask it headless (the default way to run one)
 
 `crawl.sh` in this skill's directory is the whole recipe: it checks the preconditions, runs one pi
 process in the project and writes the answer where you say. Always as a background Bash task; a

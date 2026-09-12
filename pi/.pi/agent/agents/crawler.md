@@ -5,7 +5,7 @@ advertise: true
 model: openai-codex/gpt-5.6-terra
 fallbackModels: openai-codex/gpt-5.5
 thinking: medium
-tools: read, start_stack, start_ide, mcp:phpstorm-index, mcp:symfony-ai-mate
+tools: read, mcp:phpstorm-index, mcp:symfony-ai-mate
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: false
@@ -56,18 +56,14 @@ Each of these has produced a confidently wrong answer before.
    trust an empty result until `ide_project_status` lists the root as open. A call carrying
    `project_path` wakes a closed managed project within 5-15 s; a slow first call is normal.
    The `ide_*` tools are advertised from a cache, so they are listed even when PhpStorm is not
-   running and only the first call fails. When a call fails because the index is unreachable, or
-   `ide_project_status` does not list this root as open, call `start_ide` once and do what its
-   answer says. Until the index answers, you have no line numbers: `read` returns file contents
-   without them, so every line number you give from a read alone is one you counted by hand, and
-   those are routinely wrong by a few in either direction. Say the index was unavailable rather
-   than reporting such a number as a finding.
-   As a subagent you have neither `start_ide` nor any other extension tool, whatever this file's
-   `tools:` line says: a child receives `read`, the MCP servers and `contact_supervisor` only. Use
-   `contact_supervisor` to hand the question to your parent, then stop. A parent that answers
-   "read the files instead" has not lifted this rule and cannot: it does not know that your reads
-   carry no line numbers. Answer what the files do settle, and say in the answer itself that the
-   index was unavailable and that no line number in it was looked up.
+   running and only the first call fails. That failure, or a status that does not list this root as
+   open, means you have no line numbers at all: `read` returns file contents without them, so every
+   line number from a read alone is one you counted by hand, and those are routinely wrong by a few
+   in either direction. Hand the question up with `contact_supervisor` and stop. A `start_ide` tool
+   exists only when you were started as a session rather than a child; use it if you have it. A
+   parent that answers "read the files instead" has not lifted this rule and cannot: it does not
+   know that your reads carry no line numbers. Answer what the files do settle, and say in the
+   answer itself that the index was unavailable and that no line number in it was looked up.
 2. Pass `scope: "project_and_libraries"` on every tool that accepts `scope`, or vendor code is
    silently missing.
 3. `ide_find_references`, `ide_find_definition`, `ide_find_implementations`,
