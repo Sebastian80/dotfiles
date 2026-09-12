@@ -28,7 +28,7 @@ TARGET='\.(php|phtml|twig|js|mjs|ts|vue|scss|ya?ml)\b|(^|[[:space:]"'"'"'])(src|
 
 # Appended to search-rule blocks: the hook fires reliably, the skill often is not
 # invoked, so the failure mode that produces wrong answers is stated here.
-HINT="If an IDE search comes back empty, verify with ide_project_status that this project is open — an empty result is only an answer for a project the IDE actually has indexed."
+HINT="If an IDE search comes back empty, verify with ide_project_status that this project is open — an empty result is only an answer for a project the IDE actually has indexed. A reachable port is not an open project: when this one is managed-but-closed, or the ide_* tools are not callable at all, use rg -uu <path> instead of guessing. For broad or multi-hop exploration of code you are not editing, delegate to the pi-crawler skill rather than searching it yourself."
 
 matches_target() { printf '%s' "$1" | grep -qE "$TARGET"; }
 
