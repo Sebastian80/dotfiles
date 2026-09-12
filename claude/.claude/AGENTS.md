@@ -51,6 +51,7 @@ Things you'd get wrong from first principles, each earned the hard way:
 - Name code by what it does in the domain, never by its implementation or history — no `NewX`, `XV2`, `LegacyY`.
 - Comments explain what the code does and why, never what changed or when.
 - Failing tests, lints and builds on the path you touch get fixed immediately, even if you didn't cause them. Unrelated bugs and design smells elsewhere get noted (file and issue) so we can come back to them — don't derail the current task.
+- Never print a credential's value, not even to verify it is absent. Assert on `${#VAR}` or emptiness, and run anything that touches credential env vars under `env -u VAR ...` so it cannot read one. A test asserting `want=<empty>` printed a live `gho_` token into a transcript, because the child shell inherited the variable the assertion was trying to prove was unset. Nothing can redact it afterwards: PostToolUse fires after the tool result is already written and has no field to modify it, and there is no built-in scrubbing, so the only remedy is rotation.
 - No customer or project specifics (customer names, ticket/MR ids, customer hosts) in these GitHub-stored dotfiles — rules cite incidents anonymously; the named detail belongs in the project's local auto-memory. Netresearch's own infrastructure (Jira and GitLab hosts, field ids) is fine here.
 
 ## Hyperlink references
