@@ -27,5 +27,7 @@
   {"query": "which .feature files changed in the last two commits?", "should_trigger": false},
   {"query": "add a nullable createdAt column to the PriceListSchedule entity with a doctrine migration", "should_trigger": false},
   {"query": "search my downloads folder for that export csv from yesterday, something like preise_final.csv", "should_trigger": false},
-  {"query": "reformat this JSON blob I pasted so I can actually read it", "should_trigger": false}
+  {"query": "reformat this JSON blob I pasted so I can actually read it", "should_trigger": false},
+  {"query": "in src/Acme/PricingBundle/Provider/PriceProvider.php add a docblock to getPrice that explains the currency fallback", "should_trigger": false},
+  {"query": "open config/packages/doctrine.yaml and raise the dbal connection timeout to 30 seconds", "should_trigger": false}
 ]

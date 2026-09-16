@@ -121,3 +121,18 @@ The recheck covered all positives (to catch a loss from the new exclusion) and t
 negatives it targets, not the other 13 negatives. Those scored 0 by majority in the first arm, and a
 clause that only excludes cannot plausibly make them trigger; that is an inference, not a measurement.
 "is phpstorm still indexing?" still invokes the skill in 1 of 3 runs, below the threshold.
+
+## 2026-09-16, full set on the final description
+
+Closes the two caveats of the previous section. Two hard negatives were added where the request names
+the file to edit, so reading it is correct and the index is not; they replace the negative coverage the
+rename relabel removed. All 31 queries, Sonnet, 3 runs, majority (`final-full-sonnet-2026-09-16`).
+
+| positives | false triggers |
+| --- | --- |
+| 11/12 | 0/19 |
+
+The miss is the relabelled rename query at 1 of 3 runs; it scored 2 of 3 in both earlier arms, so it
+sits near the threshold and flips between runs. Kept as a positive and not tuned for. Four negatives
+invoke the skill in 1 of 3 runs (a breakpoint request, the migration request, the docblock request with
+a given path, and the rename-adjacent Explore routes), all below the threshold.
