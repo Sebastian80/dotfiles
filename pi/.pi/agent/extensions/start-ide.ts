@@ -1,6 +1,6 @@
 /**
- * start_ide: the crawler's code tools come from the PhpStorm index, so a dead IDE or a project the
- * IDE does not have open leaves it with `read` alone, where its line numbers drift by a few in
+ * start_ide: an agent whose code tools come from the PhpStorm index is left with `read` alone when
+ * the IDE is dead or does not have the project open, where its line numbers drift by a few in
  * either direction and the answer still reads as authoritative. This tool turns that into a
  * question instead of a guess: it asks whether to start PhpStorm and open the project, and on yes
  * runs the JetBrains launcher with the project path, which both starts a dead IDE and opens the
@@ -18,7 +18,7 @@
  *
  * The file is the reliable half. A model told to repeat the marker verbatim paraphrases it anyway
  * (measured twice), which reads fine to a human and defeats every caller that greps the answer for
- * it. A parent that knows the marker starts the IDE and runs the crawl again; one that does not
+ * it. A parent that knows the marker starts the IDE and runs the agent again; one that does not
  * still sees why the answer is missing.
  */
 import { existsSync, writeFileSync } from "node:fs";
@@ -122,7 +122,7 @@ export default function (pi: ExtensionAPI) {
 				"",
 				"The question cannot be answered here: it belongs to whoever started this run. Stop now.",
 				"The four lines above are your entire final answer: no findings, no partial answer, no",
-				"other text. The parent decides whether to start the IDE and runs the crawl again.",
+				"other text. The parent decides whether to start the IDE and runs the agent again.",
 			].join("\n");
 		}
 
