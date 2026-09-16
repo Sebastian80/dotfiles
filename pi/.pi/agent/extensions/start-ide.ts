@@ -73,9 +73,13 @@ export default function (pi: ExtensionAPI) {
 		}
 	}
 
+	// phpstorm-background (dotfiles bin) wraps the JetBrains launcher and hands keyboard focus back
+	// while the IDE starts, so it wins over a plain phpstorm on PATH.
 	function launcher(): string | undefined {
-		for (const dir of (process.env.PATH ?? "").split(":")) {
-			if (dir && existsSync(join(dir, "phpstorm"))) return join(dir, "phpstorm");
+		for (const name of ["phpstorm-background", "phpstorm"]) {
+			for (const dir of (process.env.PATH ?? "").split(":")) {
+				if (dir && existsSync(join(dir, name))) return join(dir, name);
+			}
 		}
 		return existsSync(TOOLBOX_LAUNCHER) ? TOOLBOX_LAUNCHER : undefined;
 	}
