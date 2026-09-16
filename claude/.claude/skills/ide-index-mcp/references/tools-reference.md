@@ -39,6 +39,13 @@ Parse the `text` field as JSON for structured data.
 ### ide_find_references
 Find all usages of a symbol (semantic, not text search).
 
+**Cost warning (Oro-size composer trees):** the search resolves every word-index candidate across the
+scope with PSI, so on a large vendor tree it runs for minutes and pins the IDE regardless of target size
+(measured on a single method with one caller), at `project_and_libraries` and at `project_files` once
+vendor packages are un-excluded. The plugin has no server-side timeout and the IDE keeps running the job
+after the client times out. Use `ide_search_text` on the call expression, or `ide_find_implementations`
+on the interface the call is typed against, and treat a timeout as "change approach", never "retry".
+
 **Target (mutually exclusive):** `file`+`line`+`column` OR `language`+`symbol`
 
 | Parameter | Type | Required | Description |

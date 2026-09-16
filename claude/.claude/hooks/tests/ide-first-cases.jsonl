@@ -11,3 +11,4 @@
 {"label":"[NEG] plain git status","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"git status --short"}}
 {"label":"[NEG] mv php to /tmp is a backup","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"mv src/Foo.php /tmp/Foo.php.bak"}}
 {"label":"[NEG] outside ~/workspace entirely","cwd":"/home/sebastian/dotfiles","tool_input":{"command":"grep -rn Foo src/"}}
+{"label":"[NEG] git mv keeps history","cwd":"/home/sebastian/workspace/shop","tool_input":{"command":"git mv src/Foo.php src/Bar.php"}}

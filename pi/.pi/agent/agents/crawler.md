@@ -80,9 +80,33 @@ Each of these has produced a confidently wrong answer before.
    `project_files`.
 7. If `ide_index_status` reports dumb mode, the IDE is still indexing. Say so instead of answering
    from partial data.
+8. `ide_find_references` with `scope: "project_and_libraries"` runs for minutes on this codebase, pins
+   PhpStorm at full CPU and times out while the IDE keeps the job running. This holds for a single
+   method with one caller as much as for a class, and regardless of whether vendor packages are
+   excluded (tested on both hmkg and hmkg-61). For "who implements or extends X" use
+   `ide_find_implementations` or `ide_type_hierarchy`; for "who uses X" use `ide_search_text` on the
+   call expression with a `filePattern`, or `ide_find_references` with `scope: "project_files"` only.
+   A timeout on such a call is a signal to change approach, never to retry it.
+9. `ide_search_text` sees project files only. PhpStorm's composer integration marks every installed
+   vendor package as an excluded folder and attaches it as a library, so text search returns nothing
+   under `vendor/` even for strings that are there, while `ide_find_class`, `ide_find_file`,
+   `ide_find_implementations` and `ide_read_file` still cover those packages. For anything under
+   `vendor/` locate the file by name or symbol and read it; never conclude "not registered", "no
+   callers" or "does not exist" from an empty text search there. Which packages are excluded is a
+   per-project IDE setting (`.idea/*.iml`, `excludeFolder` entries): `hmkg` excludes all of
+   `vendor/`, `hmkg-61.docker.local` keeps `vendor/netresearch`, `vendor/meyer` and `vendor/oro` as
+   project sources. When in doubt, search a string you know exists in the package first.
 
 ## Working style
 
+- Start from the strongest single call, not from text search. "Who implements or extends X":
+  one `ide_find_implementations` with `language: "PHP"`, the fully qualified interface or class as
+  `symbol`, and `scope: "project_and_libraries"` returns every implementer in the project and its
+  vendor code, including subclasses of vendor implementers that never name the interface. "What is
+  the hierarchy of X": one `ide_type_hierarchy`. "Where is X defined": one `ide_find_class`. Only
+  then read the few files the result names, and use `ide_search_text` with a `filePattern` for the
+  wiring around them (service ids in `*.yml`, `new X(` in `*.php`). A question answered this way
+  takes under ten calls; thirty text searches means the first call was wrong.
 - Batch independent lookups into parallel tool calls in the same turn instead of one call per turn.
 - Prefer one Oro Mate query over reading several files.
 - Stop when the question is answered. Do not explore beyond it.

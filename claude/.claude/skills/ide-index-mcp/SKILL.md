@@ -1,11 +1,20 @@
 ---
 name: ide-index-mcp
-description: "MANDATORY for single-symbol navigation and for ALL refactoring. You MUST invoke this skill whenever: going to a definition ('where is X defined'), finding usages of one named symbol ('who calls X', 'where is X used'), implementations of an interface or abstract class, call or type/inheritance hierarchies, file structure or class methods, diagnostics for a file, finding a class/file/symbol by name, targeted project-wide text search (service ids, YAML keys, TODOs), renaming or moving any symbol, reformatting, syncing the IDE after external file changes, or opening and waking IDE projects (multi-project, sleep/wake, Power Save). Do NOT skip this for Bash grep or rg while the project is open. One exception: broad multi-hop exploration of code you are NOT editing ('how does this flow work', 'which of our classes ...') in a project with .pi/mcp.json belongs to pi-crawler, which reads far more and answers condensed. A reachable port is not an open project: check ide_project_status first."
+description: "Operating manual for the JetBrains index and built-in MCP servers (ide_* tools, execute_tool). Preloaded into the oro-index-lookup subagent, which is the only session that talks to the index; the main session does not have the index server and routes every codebase lookup through /index-lookup. Kept model-hidden so it is never loaded inline; the refactoring and project-lifecycle sections wait for a refactoring agent."
+disable-model-invocation: true
 ---
 
 # IDE Index MCP - Agent Guide
 
 The IDE Index MCP server exposes JetBrains IDE (IntelliJ, PyCharm, PhpStorm, WebStorm, etc.) indexing and refactoring capabilities. These tools provide **semantic** code understanding — types, inheritance, references, call chains — that text-based tools cannot.
+
+## Who reads this
+
+The index server is connected only inside the `oro-index-lookup` subagent, which preloads this file.
+A main session has no `ide_*` tools; its codebase questions go through `/index-lookup`, and the
+`ide-first.sh` hook redirects grep and rg on source files there. The write, refactoring and
+project-lifecycle sections below describe capabilities no agent currently exposes; they stay for the
+refactoring agent that is still to be built.
 
 ## Core Rule
 
@@ -113,7 +122,10 @@ When both this plugin (`mcp__phpstorm-index__*` / `mcp__intellij-index__*`) and 
 | Need | Use |
 |------|-----|
 | Code navigation, search, diagnostics, rename, move, run tests | index plugin (`*-index`) |
-| Terminal, running non-test processes, Symfony service lookup (`locate_symfony_service`) | built-in server only |
+| Framework facts: service id → class/args/tags (`locate_symfony_service --identifier`), Doctrine entity fields and relations (`list_doctrine_entity_fields --className`), Twig template usages (`list_twig_template_usages --template` or `--fileGlob`), composer packages (`get_composer_dependencies`), Symfony forms and commands | built-in server only |
+| Terminal, running non-test processes | built-in server only |
+
+The built-in server is one MCP tool, `execute_tool`, whose `command` string is `<sub-tool> --param value ...`. Parameter names are not in the schema; they only appear in the error when omitted, so the confirmed ones above are worth keeping. `list_symfony_routes_url_controllers` takes no filter and dumps every route as CSV (thousands of lines on Oro): search the route name with `ide_search_text` instead. `analyze_calls` runs the same usage search as `ide_find_references` and carries the same library-scope cost. Because everything sits behind one tool, a permission rule cannot allow reads and deny writes: a read-only subagent needs a `PreToolUse` gate on the command name (`hooks/phpstorm-readonly-gate.sh`, tests in `hooks/tests/`).
 
 The built-in server is **not a fallback** for the index plugin: it cannot do semantic code search, and during dumb mode it fails the same way. Dumb mode / stale index are transient — wait and retry the index plugin, or use the `rg` fallbacks below; don't reroute to the built-in server.
 
@@ -126,7 +138,9 @@ takes a path you already know, so it is never the answer to "where is X".
 - **Finding files by extension/path glob pattern** → `ide_find_file`, or `rg --files -g '**/*.yaml'` when the project is not open
 - **Files outside the project root** → `rg <pattern> <path>` (the IDE indexes project + libraries; for paths beyond both, Bash is the only instrument; add `-N` only when the output feeds a pipeline, because the ripgreprc forces line numbers even when piped)
 - **Project closed, or the ide_* tools unavailable** → `rg -uu <path>`; a reachable index port is not an open project, so confirm with `ide_project_status` before trusting an empty result
-- **Reading project file content** → `Read` (`ide_read_file` is for library/jar sources)
+- **Reading project file content** → `Read` when you have it; `ide_read_file` also serves files under the project root including `vendor/` (it reports `isLibraryFile: false` for them), which matters in a subagent that has no `Read`
+- **Before trusting a small or empty text-search result** → probe Find-in-Files reach once with a string you know exists in `vendor/` (a service id, an interface declaration); if that returns nothing, vendor is excluded from text search in this project and the result says nothing about vendor code. Whether vendor is excluded varies per project (composer sync excludes packages by default; un-excluded projects search fine), so the probe, not the expectation, is the rule
+- **`paths` globs on `ide_search_text`** work for composer packages under the project root (`vendor/<org>/<pkg>/**` returned hits); the documented "drops library hits" caveat concerns external library roots and jars without a project-relative path, not `vendor/`
 - **Code in IDE-excluded folders** → `rg -uu <path>` (peels off `.gitignore` and hidden-file filters; `-uuu` also searches binaries). The IDE MCP returns nothing for explicitly-excluded paths regardless of `scope`. Typical case: a heavyweight `vendor/<thing>/*` excluded for IDE perf — `rg -uu vendor/oro` etc.
 
 ## Pre-Flight
@@ -151,8 +165,11 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 ## Tool Selection by Task
 
 ### Understanding how X is used
-1. `ide_find_references` — all call sites, field accesses, imports
-2. `ide_call_hierarchy` with `direction: "callers"` — full call chain upward
+1. `ide_search_text` on the call expression (`->create(`, `::CONST`, the short name) with a `filePattern` — instant, and on an Oro-size tree the first and usually the only usable instrument
+2. When the call goes through an interface, `ide_find_implementations` on that interface tells you which concrete class the call can reach; one implementer settles it
+3. `ide_find_references` / `ide_call_hierarchy` only with a `paths` glob narrowed to the package you care about, or on a small project
+
+On an Oro-size vendor tree, `ide_find_references` runs for minutes, pins the IDE at full CPU, times out on the client and keeps running in the IDE afterwards. Verified on a class, on a single method with one caller, and at **both** scopes: `project_and_libraries`, and `project_files` in a project where the vendor packages are un-excluded (then project scope is the whole tree). The plugin has no server-side timeout and does not cancel on disconnect. A timeout means change approach, not retry; if the IDE stays at full CPU, cancel the Find Usages job in the status bar or restart it.
 
 ### Understanding what X is
 1. `ide_symbol_info` — resolved signature and doc comment without reading the file. In PHP it
@@ -186,7 +203,10 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 3. `ide_build_project` — full project build to surface compilation/type errors
 
 ### Finding implementations
-1. `ide_find_implementations` — cursor on interface/abstract class/method
+1. `ide_find_implementations` with `language: "PHP"`, the fully qualified `symbol` and `scope: "project_and_libraries"` — one call returns every implementer in project and vendor code, including subclasses of vendor implementers that never name the interface (a text search for the interface misses those). Cheap even over libraries: it reads the stub index, no per-candidate resolution. Start hierarchy questions here, not with text search.
+2. Cursor form (`file`+`line`+`column`) on the interface/abstract class/method when the symbol is not fully qualified
+3. The result includes sub-interfaces (`kind: INTERFACE`) next to classes, and `totalCount` counts them too; filter on `kind` before counting "classes that implement X", or the count is off by the number of sub-interfaces. The list is already the transitive closure: implementers of a sub-interface appear in it.
+4. This tool and `ide_type_hierarchy` return fully qualified names; `ide_find_class` returns `qualifiedName: null` for PHP, so when the FQCN is the deliverable, get it from one of these two or from the file's `namespace` line.
 
 ### Tracing call chains
 1. `ide_call_hierarchy` with `direction: "callers"` — who calls this?
@@ -205,8 +225,9 @@ To get exact positions, use `ide_find_class` or `ide_file_structure` first, then
 | `ide_call_hierarchy` returns element but zero callers | Known limitation for some language constructs. Fall back to Grep. |
 | `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
 | `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
-| `ide_find_references` times out | Huge reference fan-out (e.g. a core vendor class used platform-wide). Narrow to `scope: project_files` for the first-party answer, or switch to `ide_search_text` with a `filePattern` mask. |
+| `ide_find_references` times out | Usage search over a big composer tree; happens on a single method with one caller too, at library scope and at project scope alike when vendor is un-excluded, and the IDE keeps running the job after the client gives up (the plugin's tool window shows the call still PENDING). Do not retry at another scope. Switch to `ide_search_text` on the call expression with a `filePattern`, plus `ide_find_implementations` on the interface the call is typed against. If PhpStorm stays at full CPU, cancel the Find Usages job from the status-bar background tasks or restart the IDE. |
 | Freshly opened project returns empty for EVERYTHING despite `ide_index_status` ready | The project has no configured content/source roots (never set up in this IDE — common for ad-hoc opened repos). The index has nothing to serve; fall back to `rg` on disk, or configure source roots in the IDE. |
+| `ide_search_text` finds nothing under `vendor/` for a string you know is there, while `ide_find_class`/`ide_find_file`/`ide_find_implementations`/`ide_read_file` still see the package | PhpStorm's composer integration marks every installed package as an excluded folder and re-attaches it as a library; Find in Files runs in project scope and skips excluded folders, the symbol and file-name indexes do not. Check `.idea/*.iml` for `excludeFolder` entries under `vendor/`. Un-exclude the first-party packages (Mark Directory as → Not Excluded) and re-index; composer sync re-excludes packages it installs later, so re-check after `composer install`. Until then, `rg -uu <path>` for that subtree, and never read "not registered"/"no callers" out of an empty text search under `vendor/`. |
 | Tool returns empty for a class/file you can see on disk in `vendor/`/library | Folder is in the IDE's Excluded list (Settings → Directories → right column). The `scope: project_and_libraries` parameter doesn't override this — exclusion wins at the index level. Either remove the exclusion (re-indexes the folder), or fall back to `rg -uu <path>` for that subtree. Verify by running `ide_find_class` on a class you know exists in the folder. |
 | `ide_find_definition`/`ide_find_references` don't follow Symfony service-YAML ↔ class links | Known index-plugin gap (resolves only the primary `getReference()`, not the IDE's provider-based Go-to-Declaration). Use the **JetBrains MCP Server's `locate_symfony_service`** instead, or `ide_search_text`. See [Framework DI / YAML navigation](#framework-di--yaml-navigation-symfony-etc). |
 

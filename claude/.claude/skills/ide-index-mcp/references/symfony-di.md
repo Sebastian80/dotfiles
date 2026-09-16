@@ -20,6 +20,13 @@ Symfony's service-YAML ↔ PHP navigation is contributed exactly that way. With 
 | Doctrine | `list_doctrine_entities`, `list_doctrine_entity_fields` |
 | PHP project | `get_php_project_config`, `get_composer_dependencies` |
 
+Confirmed parameter names (each learned from the tool's own error): `locate_symfony_service --identifier <service.id>`,
+`list_doctrine_entity_fields --className <FQCN>` (44 fields for `Oro\Bundle\OrderBundle\Entity\Order`, CSV with column, type,
+relation), `list_twig_template_usages --template <@Bundle/path.html.twig>` or `--fileGlob <glob>`, `search_text --q`,
+`search_regex --q`, `search_symbol --q` (file ranges only, no names), `get_symbol_info --filePath --line --column`,
+`analyze_calls --symbolFqn --analysisKind` (untested: it is a usage search with the same library-scope cost as
+`ide_find_references`). `list_symfony_routes_url_controllers` takes no filter at all (2,677 CSV lines on one Oro project).
+
 **The `list_*` tools are firehoses on an Oro-sized project — never call one just to see what it returns.** Measured on one Oro storefront: `list_doctrine_entities` returned 227,194 characters across 1,513 lines, and `list_twig_extensions` 67 KB of CSV. Both blew the MCP token cap and were spilled to a file, costing a turn to read back. Reach for `locate_symfony_service` (targeted, small) whenever you know the identifier; treat the unfiltered `list_*` calls as a last resort, and expect to grep the persisted file rather than read the response.
 
 **Plugin-independent fallback (no extra server):** `ide_search_text` with `regex` on the dotted service id or class FQN/short name, `filePattern: *.yml`. The `contextType` field separates the **definition** (`service.id:`/FQN key → `CODE`) from **`@`-references** (`STRING_LITERAL`).

@@ -1,0 +1,17 @@
+{"label":"[TP] terminal command","tool_input":{"command":"execute_terminal_command --command \"rm -rf var/cache\"","projectPath":"/home/sebastian/workspace/shop"}}
+{"label":"[TP] apply_patch","tool_input":{"command":"apply_patch --patch \"--- a\"","projectPath":"/home/sebastian/workspace/shop"}}
+{"label":"[TP] rename refactoring","tool_input":{"command":"rename_refactoring --filePath src/Foo.php --line 1 --column 7 --newName Bar"}}
+{"label":"[TP] execute_sql_query","tool_input":{"command":"execute_sql_query --query \"select 1\""}}
+{"label":"[TP] xdebug session","tool_input":{"command":"xdebug_start_debugger_session"}}
+{"label":"[TP] analyze_calls (usage-search risk)","tool_input":{"command":"analyze_calls --symbolFqn \\Foo\\Bar::baz --analysisKind callers"}}
+{"label":"[TP] leading whitespace does not bypass","tool_input":{"command":"   execute_terminal_command --command ls"}}
+{"label":"[TP] unknown tool name","tool_input":{"command":"something_new --q x"}}
+{"label":"[TP] create_new_file","tool_input":{"command":"create_new_file --filePath x.php --text hi"}}
+{"label":"[NEG] locate_symfony_service","tool_input":{"command":"locate_symfony_service --identifier netresearch_invoice_payment.factory.method.invoice_payment","projectPath":"/home/sebastian/workspace/shop"}}
+{"label":"[NEG] list_doctrine_entity_fields","tool_input":{"command":"list_doctrine_entity_fields --className Oro\\Bundle\\OrderBundle\\Entity\\Order"}}
+{"label":"[NEG] search_text","tool_input":{"command":"search_text --q InvoicePaymentMethodProvider"}}
+{"label":"[NEG] search_regex","tool_input":{"command":"search_regex --q \"class \\w+Factory\""}}
+{"label":"[NEG] list_twig_template_usages","tool_input":{"command":"list_twig_template_usages --template @OroOrder/Order/view.html.twig"}}
+{"label":"[NEG] get_composer_dependencies","tool_input":{"command":"get_composer_dependencies"}}
+{"label":"[NEG] read_file","tool_input":{"command":"read_file --filePath src/AppKernel.php"}}
+{"label":"[NEG] empty command passes through to the tool's own error","tool_input":{"command":""}}

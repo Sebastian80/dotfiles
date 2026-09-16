@@ -1,0 +1,24 @@
+{"query": "find all usages of PriceListToCustomerRepository \u2014 I think half of them are dead", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 9.0}
+{"query": "rename getPimField to getPimAttribute in the DataProviderDecorator and update ev", "should_trigger": true, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Read"], "seconds": 11.4}
+{"query": "which classes implement Oro\\Bundle\\PricingBundle\\Provider\\PriceProviderInterface", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 9.9}
+{"query": "who calls CombinedPriceListsBuilder::build and what does it call itself? I need ", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 14.6}
+{"query": "where is WebsiteSearchIndexer defined? take me there", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 11.4}
+{"query": "what methods does the CheckoutController have?", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 10.1}
+{"query": "check src/Acme/PricingBundle/Provider/PriceProvider.php for errors and warnings ", "should_trigger": true, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Bash"], "seconds": 13.8}
+{"query": "i edited a bunch of files with a script outside phpstorm and now find usages ret", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 4.8}
+{"query": "is phpstorm still indexing? my searches come back empty", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["ToolSearch", "Skill"], "seconds": 7.8}
+{"query": "open /home/sebastian/workspace/shop-62.docker.local in the ide too, I need to co", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 9.9}
+{"query": "why did phpstorm close my second project window overnight? was that the mcp life", "should_trigger": true, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Bash"], "seconds": 25.0}
+{"query": "search the whole project for the service id oro_pricing.builder.combined_price_l", "should_trigger": true, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Bash"], "seconds": 16.7}
+{"query": "put the ide in power save mode while the big migration runs, the fans are going ", "should_trigger": true, "invoked": true, "skills": ["ide-index-mcp"], "first_tools": ["Skill"], "seconds": 7.2}
+{"query": "set a breakpoint in PriceProvider::getPrice and tell me what $criteria contains ", "should_trigger": false, "invoked": false, "skills": ["jetbrains-debugger"], "first_tools": ["Skill", "Agent", "Bash"], "seconds": 21.4}
+{"query": "step through the checkout submit with xdebug, it's the docker setup from shop-61", "should_trigger": false, "invoked": false, "skills": ["jetbrains-debugger"], "first_tools": ["Skill", "Bash", "Read"], "seconds": 13.3}
+{"query": "grep through vendor/oro with rg -uu please, that folder is excluded from the ide", "should_trigger": false, "invoked": false, "skills": [], "first_tools": [], "seconds": 14.7}
+{"query": "read the contents of composer.json", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Read"], "seconds": 18.7}
+{"query": "run the phpunit tests for the pricing bundle and show me the failures", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Bash"], "seconds": 18.1}
+{"query": "how does the combined price list rebuild work conceptually in oro commerce?", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Read", "Bash", "Bash"], "seconds": 12.6}
+{"query": "commit my changes, ticket is PROJ-731", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Bash"], "seconds": 19.3}
+{"query": "which .feature files changed in the last two commits?", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash"], "seconds": 8.3}
+{"query": "add a nullable createdAt column to the PriceListSchedule entity with a doctrine ", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Agent", "Bash", "Bash"], "seconds": 18.0}
+{"query": "search my downloads folder for that export csv from yesterday, something like pr", "should_trigger": false, "invoked": false, "skills": [], "first_tools": ["Bash", "Bash", "Bash"], "seconds": 20.0}
+{"query": "reformat this JSON blob I pasted so I can actually read it", "should_trigger": false, "invoked": false, "skills": [], "first_tools": [], "seconds": 11.1}
