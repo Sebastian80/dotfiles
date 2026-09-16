@@ -1,0 +1,11 @@
+{"label":"[BLOCK] skill tool, index-lookup, port closed","port":"closed","want":"block","input":{"hook_event_name":"PreToolUse","tool_name":"Skill","tool_input":{"skill":"index-lookup","args":"where is X"}}}
+{"label":"[PASS] skill tool, index-lookup, port open","port":"open","want":"pass","input":{"hook_event_name":"PreToolUse","tool_name":"Skill","tool_input":{"skill":"index-lookup","args":"where is X"}}}
+{"label":"[PASS] skill tool, other skill, port closed","port":"closed","want":"pass","input":{"hook_event_name":"PreToolUse","tool_name":"Skill","tool_input":{"skill":"herdr"}}}
+{"label":"[PASS] skill tool, similar name, port closed","port":"closed","want":"pass","input":{"hook_event_name":"PreToolUse","tool_name":"Skill","tool_input":{"skill":"index-lookup-extra"}}}
+{"label":"[PASS] other tool, port closed","port":"closed","want":"pass","input":{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"ls"}}}
+{"label":"[CONTEXT] typed /index-lookup, port closed","port":"closed","want":"context","input":{"hook_event_name":"UserPromptSubmit","prompt":"/index-lookup where is X defined?"}}
+{"label":"[CONTEXT] typed /index-lookup with leading space, port closed","port":"closed","want":"context","input":{"hook_event_name":"UserPromptSubmit","prompt":"  /index-lookup where is X defined?"}}
+{"label":"[PASS] typed /index-lookup, port open","port":"open","want":"pass","input":{"hook_event_name":"UserPromptSubmit","prompt":"/index-lookup where is X defined?"}}
+{"label":"[PASS] prompt mentioning index-lookup mid-sentence, port closed","port":"closed","want":"pass","input":{"hook_event_name":"UserPromptSubmit","prompt":"why did /index-lookup fail earlier?"}}
+{"label":"[PASS] typed /index-lookupfoo, port closed","port":"closed","want":"pass","input":{"hook_event_name":"UserPromptSubmit","prompt":"/index-lookupfoo bar"}}
+{"label":"[PASS] other event, port closed","port":"closed","want":"pass","input":{"hook_event_name":"SessionStart"}}
