@@ -1,6 +1,6 @@
 ---
 name: ide-index-mcp
-description: "Operating manual for the JetBrains index and built-in MCP servers (ide_* tools, execute_tool). Preloaded into the oro-index-lookup subagent, which is the only session that talks to the index; the main session does not have the index server and routes every codebase lookup through /index-lookup. Kept model-hidden so it is never loaded inline; the refactoring and project-lifecycle sections wait for a refactoring agent."
+description: "Use when operating the JetBrains index and built-in MCP servers (ide_* tools, execute_tool) from inside the oro-index-lookup subagent, which preloads this manual. Model-hidden: a main session has no index server and routes codebase lookups through /index-lookup."
 disable-model-invocation: true
 ---
 
@@ -10,11 +10,13 @@ The IDE Index MCP server exposes JetBrains IDE (IntelliJ, PyCharm, PhpStorm, Web
 
 ## Who reads this
 
-The index server is connected only inside the `oro-index-lookup` subagent, which preloads this file.
-A main session has no `ide_*` tools; its codebase questions go through `/index-lookup`, and the
-`ide-first.sh` hook redirects grep and rg on source files there. The write, refactoring and
-project-lifecycle sections below describe capabilities no agent currently exposes; they stay for the
-refactoring agent that is still to be built.
+Nothing loads this file automatically. The index server is connected only inside the
+`oro-index-lookup` subagent, and the read-side rules from here live in that agent's own file: a skill
+with `disable-model-invocation: true` cannot be preloaded into a subagent, and Claude Code skips such a
+preload without an error (verified 2026-09-16). A main session has no `ide_*` tools; its codebase
+questions go through `/index-lookup`, and the `ide-first.sh` hook redirects grep and rg on source files
+there. The write, refactoring and project-lifecycle sections below describe capabilities no agent
+currently exposes; they stay for the refactoring agent that is still to be built.
 
 ## Core Rule
 

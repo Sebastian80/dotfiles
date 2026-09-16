@@ -30,3 +30,12 @@ relation), `list_twig_template_usages --template <@Bundle/path.html.twig>` or `-
 **The `list_*` tools are firehoses on an Oro-sized project — never call one just to see what it returns.** Measured on one Oro storefront: `list_doctrine_entities` returned 227,194 characters across 1,513 lines, and `list_twig_extensions` 67 KB of CSV. Both blew the MCP token cap and were spilled to a file, costing a turn to read back. Reach for `locate_symfony_service` (targeted, small) whenever you know the identifier; treat the unfiltered `list_*` calls as a last resort, and expect to grep the persisted file rather than read the response.
 
 **Plugin-independent fallback (no extra server):** `ide_search_text` with `regex` on the dotted service id or class FQN/short name, `filePattern: *.yml`. The `contextType` field separates the **definition** (`service.id:`/FQN key → `CODE`) from **`@`-references** (`STRING_LITERAL`).
+
+**Verified behaviour worth knowing before reaching for YAML (PhpStorm 2026.2, Oro enterprise project):**
+`locate_symfony_service --identifier <class FQCN>` returns every service of that class, including its
+FQCN alias and any decorator that uses the same class, or `No service found for: <FQCN>` when the class
+is no service. With a service id it returns only that one definition, so a decorator with a different
+class never shows up there; find it with `ide_search_text` regex `[A-Za-z0-9_.\\]+:\s*\n\s+decorates:\s*['"]?<id>`,
+whose match text is the decorating service's key. `list_twig_template_usages` sees Twig includes and PHP
+renders only, never a datagrid or layout YAML that names the template. `search_regex` on the built-in
+server returns positions without text.
