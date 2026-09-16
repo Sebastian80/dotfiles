@@ -173,13 +173,14 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
+    "UserPromptExpansion": [
       {
+        "matcher": "index-lookup",
         "hooks": [
           {
             "type": "command",
             "command": "bash /home/sebastian/.claude/hooks/index-lookup-ide-gate.sh",
-            "timeout": 10
+            "timeout": 150
           }
         ]
       }
