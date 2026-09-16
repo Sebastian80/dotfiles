@@ -1,6 +1,6 @@
 ---
 name: ide-index-mcp
-description: "Use when operating the JetBrains index and built-in MCP servers (ide_* tools, execute_tool) from inside the oro-index-lookup subagent, which preloads this manual. Model-hidden: a main session has no index server and routes codebase lookups through /index-lookup."
+description: "Use when operating the JetBrains index and built-in MCP servers (ide_* tools, execute_tool) directly, for example from a future refactoring agent. Model-hidden and never preloaded; the oro-index-lookup worker carries its own read-side rules, and a main session routes codebase lookups through /index-lookup."
 disable-model-invocation: true
 ---
 
@@ -14,8 +14,7 @@ Nothing loads this file automatically. The index server is connected only inside
 `oro-index-lookup` subagent, and the read-side rules from here live in that agent's own file: a skill
 with `disable-model-invocation: true` cannot be preloaded into a subagent, and Claude Code skips such a
 preload without an error (verified 2026-09-16). A main session has no `ide_*` tools; its codebase
-questions go through `/index-lookup`, and the `ide-first.sh` hook redirects grep and rg on source files
-there. The write, refactoring and project-lifecycle sections below describe capabilities no agent
+questions go through `/index-lookup`. The write, refactoring and project-lifecycle sections below describe capabilities no agent
 currently exposes; they stay for the refactoring agent that is still to be built.
 
 ## Core Rule

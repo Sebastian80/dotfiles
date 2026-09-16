@@ -139,11 +139,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Skill",
         "hooks": [
           {
             "type": "command",
-            "command": "bash /home/sebastian/.claude/hooks/ide-first.sh",
+            "command": "bash /home/sebastian/.claude/hooks/index-lookup-ide-gate.sh",
             "timeout": 10
           }
         ]
@@ -168,6 +168,17 @@
           {
             "type": "command",
             "command": "bash '/home/sebastian/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/sebastian/.claude/hooks/index-lookup-ide-gate.sh",
             "timeout": 10
           }
         ]

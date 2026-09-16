@@ -38,7 +38,7 @@ PORT="${IDE_INDEX_PORT:-29175}"
 # Any HTTP answer, 404 included, means the server is up; curl fails only without one.
 curl -s -m 1 -o /dev/null "http://127.0.0.1:${PORT}/" && exit 0
 
-MSG="PhpStorm is not running (the index MCP port ${PORT} does not answer), so the index-lookup worker cannot answer. Ask the user with AskUserQuestion: start PhpStorm with this project, or answer without the index. If they choose to start it, run ${HOME}/.local/share/JetBrains/Toolbox/scripts/phpstorm with the project root in the background, wait until port ${PORT} answers, then run index-lookup again; the worker itself checks that the project is open and indexed. If they decline, or no question can be asked, answer with the built-in tools (Grep, Glob, Read, rg); ide-first.sh lets grep and rg through while this port is closed."
+MSG="PhpStorm is not running (the index MCP port ${PORT} does not answer), so the index-lookup worker cannot answer. Ask the user with AskUserQuestion: start PhpStorm with this project, or answer without the index. If they choose to start it, run ${HOME}/.local/share/JetBrains/Toolbox/scripts/phpstorm with the project root in the background, wait until port ${PORT} answers, then run index-lookup again; the worker itself checks that the project is open and indexed. If they decline, or no question can be asked, answer with the built-in tools (Grep, Glob, Read, rg); in PHP projects use rg -uu, since plain rg follows .gitignore and skips vendor/."
 
 if [ "$EVENT" = "PreToolUse" ]; then
   echo "BLOCK: $MSG" >&2
