@@ -30,7 +30,7 @@ dotfiles/
 │   └── .claude/
 │       ├── AGENTS.md       # Global instructions (CLAUDE.md imports it)
 │       ├── rules/          # Modular topic-specific rules (git, gitlab, jira, python, ...)
-│       ├── skills/         # Custom skills (codex-in-herdr, herdr, ide-index-mcp, index-lookup,
+│       ├── skills/         # Custom skills (codex-in-herdr, herdr, ide-index-mcp,
 │       │                   #   jetbrains-debugger, mermaid, qa;
 │       │                   #   qa-review and terminal-browser are symlinks into agents/ and brew)
 │       ├── hooks/          # Event hooks with their test suites

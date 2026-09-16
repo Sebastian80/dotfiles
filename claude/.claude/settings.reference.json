@@ -137,18 +137,6 @@
     ]
   },
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash /home/sebastian/.claude/hooks/index-lookup-ide-gate.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|Bash",
@@ -169,18 +157,6 @@
             "type": "command",
             "command": "bash '/home/sebastian/.claude/hooks/herdr-agent-state.sh' session",
             "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptExpansion": [
-      {
-        "matcher": "index-lookup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash /home/sebastian/.claude/hooks/index-lookup-ide-gate.sh",
-            "timeout": 150
           }
         ]
       }

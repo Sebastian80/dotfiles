@@ -1,6 +1,6 @@
 ---
 name: ide-index-mcp
-description: "Use when operating the JetBrains index and built-in MCP servers (ide_* tools, execute_tool) directly, for example from a future refactoring agent. Model-hidden and never preloaded; the oro-index-lookup worker carries its own read-side rules, and a main session routes codebase lookups through /index-lookup."
+description: "Use when operating the JetBrains index and built-in MCP servers (ide_* tools, execute_tool) directly, for example from a future refactoring agent. Model-hidden and never preloaded; the oro-index-lookup worker carries its own read-side rules, and a main session routes codebase lookups through /phpstorm-index:index-lookup."
 disable-model-invocation: true
 ---
 
@@ -14,14 +14,14 @@ Nothing loads this file automatically. The index server is connected only inside
 `oro-index-lookup` subagent, and the read-side rules from here live in that agent's own file: a skill
 with `disable-model-invocation: true` cannot be preloaded into a subagent, and Claude Code skips such a
 preload without an error (verified 2026-09-16). A main session has no `ide_*` tools; its codebase
-questions go through `/index-lookup`. The write, refactoring and project-lifecycle sections below describe capabilities no agent
+questions go through `/phpstorm-index:index-lookup` (the phpstorm-index plugin). The write, refactoring and project-lifecycle sections below describe capabilities no agent
 currently exposes; they stay for the refactoring agent that is still to be built.
 
 ## Core Rule
 
 **Use IDE MCP tools as your primary search, navigation, and refactoring tools.** JetBrains indexes ALL project files — code, config, YAML, Markdown, etc. — so prefer `ide_search_text` and `ide_find_file` even for non-code searches. Fall back to Grep/Glob only for files outside the project, or when IDE Index is unavailable — `ide_search_text` now handles regex itself (see below).
 
-**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony. A subagent cannot ask the user anything; in a main session the `index-lookup-ide-gate.sh` hook is what offers to start PhpStorm. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case entirely — see [Before you trust a result](#before-you-trust-a-result).
+**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony. A subagent cannot ask the user anything; in a main session the phpstorm-index plugin's gate hook is what offers to start PhpStorm. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case entirely — see [Before you trust a result](#before-you-trust-a-result).
 
 The IDE understands your code structurally. Grep sees text. When you need to find usages, trace calls, navigate definitions, rename symbols, check inheritance, or find implementations — always reach for an IDE tool first.
 
@@ -126,7 +126,7 @@ When both this plugin (`mcp__phpstorm-index__*` / `mcp__intellij-index__*`) and 
 | Framework facts: service id → class/args/tags (`locate_symfony_service --identifier`), Doctrine entity fields and relations (`list_doctrine_entity_fields --className`), Twig template usages (`list_twig_template_usages --template` or `--fileGlob`), composer packages (`get_composer_dependencies`), Symfony forms and commands | built-in server only |
 | Terminal, running non-test processes | built-in server only |
 
-The built-in server is one MCP tool, `execute_tool`, whose `command` string is `<sub-tool> --param value ...`. Parameter names are not in the schema; they only appear in the error when omitted, so the confirmed ones above are worth keeping. `list_symfony_routes_url_controllers` takes no filter and dumps every route as CSV (thousands of lines on Oro): search the route name with `ide_search_text` instead. `analyze_calls` runs the same usage search as `ide_find_references` and carries the same library-scope cost. Because everything sits behind one tool, a permission rule cannot allow reads and deny writes: a read-only subagent needs a `PreToolUse` gate on the command name (`hooks/phpstorm-readonly-gate.sh`, tests in `hooks/tests/`).
+The built-in server is one MCP tool, `execute_tool`, whose `command` string is `<sub-tool> --param value ...`. Parameter names are not in the schema; they only appear in the error when omitted, so the confirmed ones above are worth keeping. `list_symfony_routes_url_controllers` takes no filter and dumps every route as CSV (thousands of lines on Oro): search the route name with `ide_search_text` instead. `analyze_calls` runs the same usage search as `ide_find_references` and carries the same library-scope cost. Because everything sits behind one tool, a permission rule cannot allow reads and deny writes: a read-only subagent needs a `PreToolUse` gate on the command name (`hooks/phpstorm-readonly-gate.sh` in the phpstorm-index plugin, tests in its `tests/`).
 
 The built-in server is **not a fallback** for the index plugin: it cannot do semantic code search, and during dumb mode it fails the same way. Dumb mode / stale index are transient — wait and retry the index plugin, or use the `rg` fallbacks below; don't reroute to the built-in server.
 
