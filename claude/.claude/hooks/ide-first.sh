@@ -30,7 +30,7 @@ TARGET='\.(php|phtml|twig|js|mjs|ts|vue|scss|ya?ml)\b|(^|[[:space:]"'"'"'])(src|
 
 # Appended to search-rule blocks: the hook fires reliably, the skill often is not
 # invoked, so the routing is stated here.
-HINT="Ask with the index-lookup skill (Skill tool, skill index-lookup, args = your question); it forks the oro-index-lookup subagent, which checks that the project is open and answers from the index. Only for IDE-excluded folders or a project PhpStorm does not have open: rg -uu <path>. Questions that need Oro Mate runtime data go to the oro-index-crawler agent."
+HINT="Ask with the index-lookup skill (Skill tool, skill index-lookup, args = your question); it forks the oro-index-lookup subagent, which checks that the project is open and answers from the index. Only for IDE-excluded folders or a project PhpStorm does not have open: rg -uu <path>."
 
 matches_target() { printf '%s' "$1" | grep -qE "$TARGET"; }
 

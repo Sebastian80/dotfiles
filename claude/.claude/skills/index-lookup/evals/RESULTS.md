@@ -95,3 +95,29 @@ first. False trigger: "rename getPimField to getPimAttribute ... update every ca
 presumably to enumerate callers before editing; the fork answers such a task with `OUT OF SCOPE`, so the
 cost is one wasted subagent call, not a wrong edit. One run per query, so both are single-flip noise
 level; the description stays as is.
+
+## 2026-09-16, "Use when" description under the method policy
+
+First run that follows the policy above: Sonnet, 3 runs per query, majority threshold, provenance in the
+summary. The routing surface changed first: the Pi-backed crawler agent was removed, and the project's
+routing rule now names this skill.
+
+| arm | description | positives | false triggers |
+| --- | --- | --- | --- |
+| `use-when-sonnet-2026-09-16` | "Use when" wording as committed in d2bed47 | 11/11 | 2/18 |
+| `ide-exclusion-recheck-sonnet-2026-09-16` | plus "not for problems with PhpStorm itself" | 12/12 | 0/5 |
+
+The two false triggers of the first arm, each in 2 of 3 runs:
+
+- "i edited a bunch of files with a script outside phpstorm and now find usages returns stale results"
+  is an IDE sync problem the worker cannot touch. The description now excludes problems with PhpStorm
+  itself (indexing, stale results after external edits, project windows, power save); the recheck
+  scored it 0 of 3.
+- "rename getPimField to getPimAttribute ... update every caller" was **relabelled positive**, not
+  fixed. No agent offers IDE refactoring, so the first step of a rename is finding every caller, which
+  is this skill's job; `ide-first.sh` already tells the main session to sweep the old name through it.
+
+The recheck covered all positives (to catch a loss from the new exclusion) and the five IDE-state
+negatives it targets, not the other 13 negatives. Those scored 0 by majority in the first arm, and a
+clause that only excludes cannot plausibly make them trigger; that is an inference, not a measurement.
+"is phpstorm still indexing?" still invokes the skill in 1 of 3 runs, below the threshold.

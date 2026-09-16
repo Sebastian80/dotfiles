@@ -57,6 +57,7 @@ def one_run(query):
     answered = False
     tools = []
     skills = []
+    agents = []
     try:
         for line in p.stdout:
             try:
@@ -68,6 +69,8 @@ def one_run(query):
                 for c in ev.get("message", {}).get("content", []):
                     if c.get("type") == "tool_use":
                         tools.append(c.get("name"))
+                        if c.get("name") == "Agent":
+                            agents.append(str(c.get("input", {}).get("subagent_type", "")))
                         if c.get("name") == "Skill":
                             name = str(c.get("input", {}).get("skill", ""))
                             skills.append(name)
@@ -79,7 +82,7 @@ def one_run(query):
                 break
     finally:
         p.kill()
-    return {"invoked": invoked, "answered": answered, "skills": skills, "first_tools": tools[:3],
+    return {"invoked": invoked, "answered": answered, "skills": skills, "agents": agents, "first_tools": tools[:3],
             "seconds": round(time.time() - t0, 1)}
 
 
@@ -94,6 +97,7 @@ def run_case(case):
             "invoked": None if rate is None else rate >= threshold, "trigger_rate": rate,
             "runs": len(trials), "non_answers": len(trials) - len(answered),
             "skills": sorted({s for t in trials for s in t["skills"]}),
+            "agents": sorted({a for t in trials for a in t["agents"]}),
             "first_tools": trials[0]["first_tools"],
             "seconds": round(sum(t["seconds"] for t in trials), 1)}
 
@@ -112,11 +116,12 @@ pos = [r for r in scored if r["should_trigger"]]
 neg = [r for r in scored if not r["should_trigger"]]
 cli = subprocess.run(["claude", "--version"], capture_output=True, text=True, env=env).stdout.strip()
 # Provenance: a trigger rate quoted without the model, CLI version and exact eval set
-# cannot be compared with anything later.
+# cannot be compared with anything later. The working directory is left out on purpose:
+# it usually names a customer project, and these summaries are committed to a public repo.
 summary = {"arm": arm, "model": model, "effort": effort, "claude_cli": cli,
            "eval_set": os.path.basename(eval_path),
            "eval_set_sha256": hashlib.sha256(open(eval_path, "rb").read()).hexdigest()[:16],
-           "skill": skill, "cwd": cwd, "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+           "skill": skill, "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            "runs_per_query": runs_per_query, "threshold": threshold,
            "unscored_cases": len(results) - len(scored),
            "positives": len(pos), "pos_invoked": sum(r["invoked"] for r in pos),

@@ -10,7 +10,7 @@
   {"query": "which layouts or templates include ProductPrice/price.html.twig?", "should_trigger": true},
   {"query": "which factory or provider creates ShippingMethodViewCollection instances?", "should_trigger": true},
   {"query": "is there a CustomerUserRoleRepository class anywhere, in our code or in vendor/oro?", "should_trigger": true},
-  {"query": "rename getPimField to getPimAttribute in the DataProviderDecorator and update every caller", "should_trigger": false},
+  {"query": "rename getPimField to getPimAttribute in the DataProviderDecorator and update every caller", "should_trigger": true},
   {"query": "check src/Acme/PricingBundle/Provider/PriceProvider.php for errors and warnings before I push", "should_trigger": false},
   {"query": "i edited a bunch of files with a script outside phpstorm and now find usages returns stale results", "should_trigger": false},
   {"query": "is phpstorm still indexing? my searches come back empty", "should_trigger": false},
