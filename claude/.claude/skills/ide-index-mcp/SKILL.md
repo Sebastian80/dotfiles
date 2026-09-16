@@ -21,7 +21,7 @@ currently exposes; they stay for the refactoring agent that is still to be built
 
 **Use IDE MCP tools as your primary search, navigation, and refactoring tools.** JetBrains indexes ALL project files — code, config, YAML, Markdown, etc. — so prefer `ide_search_text` and `ide_find_file` even for non-code searches. Fall back to Grep/Glob only for files outside the project, or when IDE Index is unavailable — `ide_search_text` now handles regex itself (see below).
 
-**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony and NEVER ask the user to launch the IDE for it. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case entirely — see [Before you trust a result](#before-you-trust-a-result).
+**Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony. A subagent cannot ask the user anything; in a main session the `index-lookup-ide-gate.sh` hook is what offers to start PhpStorm. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case entirely — see [Before you trust a result](#before-you-trust-a-result).
 
 The IDE understands your code structurally. Grep sees text. When you need to find usages, trace calls, navigate definitions, rename symbols, check inheritance, or find implementations — always reach for an IDE tool first.
 

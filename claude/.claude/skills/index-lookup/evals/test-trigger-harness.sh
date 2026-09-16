@@ -14,7 +14,7 @@ cat > "$T/bin/claude" <<'EOF'
 case "$2" in
   *HIT*)    echo '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"index-lookup"}}]}}' ;;
   *SILENT*) echo '{"type":"system","subtype":"init"}' ;;
-  *AGENT*)  for i in 1 2 3; do echo '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Agent","input":{"subagent_type":"oro-index-crawler"}}]}}'; done ;;
+  *AGENT*)  for i in 1 2 3; do echo '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Agent","input":{"subagent_type":"some-other-agent"}}]}}'; done ;;
   *)        for i in 1 2 3; do echo '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{}}]}}'; done ;;
 esac
 EOF
@@ -25,7 +25,7 @@ cat > "$T/cases.json" <<'EOF'
  {"query":"SILENT positive rate-limited","should_trigger":true},
  {"query":"HIT negative false trigger","should_trigger":false},
  {"query":"quiet negative","should_trigger":false},
- {"query":"AGENT positive routed to crawler","should_trigger":true}]
+ {"query":"AGENT positive routed to another agent","should_trigger":true}]
 EOF
 H="$HERE/trigger-harness.py"
 fail=0
@@ -43,8 +43,8 @@ check "silent case unscored"              "$(q "rows['SILENT positive rate-limit
 check "silent case 3 non-answers"         "$(q "rows['SILENT positive rate-limited']['non_answers']")" 3
 check "false trigger caught"              "$(q "rows['HIT negative false trigger']['invoked']")" True
 check "positives exclude silent (3/1)"    "$(q "(s['positives'], s['pos_invoked'])")" "(3, 1)"
-check "agent route recorded"              "$(q "rows['AGENT positive routed to crawler']['agents']")" "['oro-index-crawler']"
-check "agent route is not a trigger"      "$(q "rows['AGENT positive routed to crawler']['invoked']")" False
+check "agent route recorded"              "$(q "rows['AGENT positive routed to another agent']['agents']")" "['some-other-agent']"
+check "agent route is not a trigger"      "$(q "rows['AGENT positive routed to another agent']['invoked']")" False
 check "negatives (2/1)"                   "$(q "(s['negatives'], s['neg_invoked'])")" "(2, 1)"
 check "unscored_cases"                    "$(q "s['unscored_cases']")" 1
 check "provenance model"                  "$(q "s['model']")" sonnet

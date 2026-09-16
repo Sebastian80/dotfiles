@@ -115,7 +115,7 @@ The two false triggers of the first arm, each in 2 of 3 runs:
   scored it 0 of 3.
 - "rename getPimField to getPimAttribute ... update every caller" was **relabelled positive**, not
   fixed. No agent offers IDE refactoring, so the first step of a rename is finding every caller, which
-  is this skill's job; `ide-first.sh` already tells the main session to sweep the old name through it.
+  is this skill's job. (At the time, the `ide-first.sh` grep hook also routed that sweep here; the hook was removed later.)
 
 The recheck covered all positives (to catch a loss from the new exclusion) and the five IDE-state
 negatives it targets, not the other 13 negatives. Those scored 0 by majority in the first arm, and a

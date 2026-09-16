@@ -30,8 +30,8 @@ dotfiles/
 │   └── .claude/
 │       ├── AGENTS.md       # Global instructions (CLAUDE.md imports it)
 │       ├── rules/          # Modular topic-specific rules (git, gitlab, jira, python, ...)
-│       ├── skills/         # Custom skills (codex-in-herdr, herdr, herdr-orchestration,
-│       │                   #   ide-index-mcp, jetbrains-debugger, mermaid, pi-crawler, qa;
+│       ├── skills/         # Custom skills (codex-in-herdr, herdr, ide-index-mcp, index-lookup,
+│       │                   #   jetbrains-debugger, mermaid, qa;
 │       │                   #   qa-review and terminal-browser are symlinks into agents/ and brew)
 │       ├── hooks/          # Event hooks with their test suites
 │       └── statusline-omp.sh  # oh-my-posh statusline
