@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# phpstorm-index-call - call one tool on PhpStorm's IDE Index MCP server and print its text result
+# Usage: phpstorm-index-call <tool> [json arguments]
+#
+# Exit 0 with the tool's text on stdout; 1 when the tool reports an error (its text on stderr); 2 when
+# the server does not answer or the arguments are not JSON. The server accepts a single tools/call
+# request without an initialize handshake.
+#
+# Env: IDE_INDEX_PORT (29175), IDE_INDEX_TIMEOUT (seconds, 30)
+
+set -u
+[ $# -ge 1 ] || { echo "usage: phpstorm-index-call <tool> [json arguments]" >&2; exit 2; }
+PORT="${IDE_INDEX_PORT:-29175}"
+TIMEOUT="${IDE_INDEX_TIMEOUT:-30}"
+
+ARGS="${2:-{\}}"
+
+call() {
+  local body resp
+  body=$(jq -nc --arg tool "$1" --argjson args "$2" \
+    '{jsonrpc: "2.0", id: 1, method: "tools/call", params: {name: $tool, arguments: $args}}') || return 2
+  resp=$(curl -s -m "$TIMEOUT" -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+    -X POST "http://127.0.0.1:${PORT}/index-mcp/streamable-http" -d "$body") || return 2
+  # A streamable-HTTP server may answer as an event stream; the JSON is then on the last data line.
+  if printf '%s\n' "$resp" | grep -q '^data: '; then
+    resp=$(printf '%s\n' "$resp" | sed -n 's/^data: //p' | tail -n 1)
+  fi
+  printf '%s' "$resp"
+}
+
+resp=$(call "$1" "$ARGS") || exit 2
+text() { printf '%s' "$resp" | jq -r '[.result.content[]? | select(.type == "text") | .text] | join("\n")'; }
+failed() { [ "$(printf '%s' "$resp" | jq -r '.result.isError // false')" = true ]; }
+
+# With several projects open, the server refuses any call without project_path and lists the open
+# projects. Any of them is accepted as the context for project-independent tools such as
+# ide_project_status and ide_open_project, so retry once with the first.
+if failed && [ "$(printf '%s' "$ARGS" | jq 'has("project_path")')" = false ]; then
+  context=$(text | jq -r 'select(.error == "multiple_projects_open") | .available_projects[0].path // empty' 2>/dev/null)
+  if [ -n "$context" ]; then
+    resp=$(call "$1" "$(printf '%s' "$ARGS" | jq -c --arg p "$context" '. + {project_path: $p}')") || exit 2
+  fi
+fi
+
+printf '%s' "$resp" | jq -e '.result' >/dev/null 2>&1 || { printf '%s\n' "$resp" >&2; exit 1; }
+if failed; then
+  text >&2
+  exit 1
+fi
+text

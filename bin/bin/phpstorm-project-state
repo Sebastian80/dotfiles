@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# phpstorm-project-state - say whether PhpStorm has the project containing a directory open
+# Usage: phpstorm-project-state <directory>
+#
+# Prints "open" or "closed" and exits 0; exits 2 when the index server does not answer. A directory
+# counts as open when it is an open project's root or lies below one.
+#
+# Env: IDE_INDEX_PORT (29175)
+
+set -u
+[ $# -eq 1 ] || { echo "usage: phpstorm-project-state <directory>" >&2; exit 2; }
+DIR=$(cd "$1" 2>/dev/null && pwd -P || printf '%s' "$1")
+HERE=$(dirname "$(readlink -f "$0")")
+
+status=$("$HERE/phpstorm-index-call" ide_project_status) || exit 2
+printf '%s' "$status" | jq -r --arg dir "$DIR" '
+  [.projects[]? | select(.open) | .path as $p | select($dir == $p or ($dir | startswith($p + "/")))]
+  | if length > 0 then "open" else "closed" end' 2>/dev/null || exit 2

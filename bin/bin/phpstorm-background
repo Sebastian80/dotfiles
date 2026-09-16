@@ -2,13 +2,16 @@
 # phpstorm-background - open a project in PhpStorm without taking keyboard focus
 # Usage: phpstorm-background <project root>
 #
-# PhpStorm has no launch option to stay in the background, and the JetBrains launcher raises the
-# project window whether it starts the IDE or reuses a running one. So this starts the launcher and,
-# while PhpStorm comes up, minimizes every PhpStorm window that grabs focus and gives focus back to
-# the window that had it. X11 only (xdotool, wmctrl, xprop).
+# PhpStorm already running: the project is opened through the index MCP server's ide_open_project,
+# which needs no window. The JetBrains launcher would ask "This Window / New Window" there, a dialog
+# that waits for a click.
 #
-# Exits once the index MCP port answers and no PhpStorm window has taken focus for QUIET seconds,
-# or after TIMEOUT seconds. Exit 0 when the port answers, 1 when it never did.
+# PhpStorm not running: PhpStorm has no launch option to stay in the background, and the launcher
+# raises the project window. So this starts the launcher and, while PhpStorm comes up, minimizes every
+# PhpStorm window that grabs focus and gives focus back to the window that had it. X11 only (xdotool,
+# xprop). It exits once the project is open and no PhpStorm window has taken focus for QUIET seconds.
+#
+# Exit 0 when the project is open, 1 when it could not be opened within TIMEOUT seconds.
 #
 # Env: PHPSTORM_LAUNCHER (default: the Toolbox script), IDE_INDEX_PORT (29175),
 #      TIMEOUT (120), QUIET (8)
@@ -16,11 +19,23 @@
 set -u
 
 [ $# -eq 1 ] && [ -d "$1" ] || { echo "usage: phpstorm-background <project root>" >&2; exit 2; }
-PROJECT=$(cd "$1" && pwd)
+PROJECT=$(cd "$1" && pwd -P)
 LAUNCHER="${PHPSTORM_LAUNCHER:-$HOME/.local/share/JetBrains/Toolbox/scripts/phpstorm}"
 PORT="${IDE_INDEX_PORT:-29175}"
 TIMEOUT="${TIMEOUT:-120}"
 QUIET="${QUIET:-8}"
+HERE=$(dirname "$(readlink -f "$0")")
+export IDE_INDEX_PORT="$PORT"
+
+project_open() { [ "$("$HERE/phpstorm-project-state" "$PROJECT" 2>/dev/null)" = open ]; }
+
+if curl -s -m 1 -o /dev/null "http://127.0.0.1:${PORT}/"; then
+  project_open && exit 0
+  IDE_INDEX_TIMEOUT="$TIMEOUT" "$HERE/phpstorm-index-call" ide_open_project "$(jq -nc --arg p "$PROJECT" '{path: $p}')" \
+    >/dev/null || exit 1
+  project_open
+  exit
+fi
 
 prev=$(xdotool getactivewindow 2>/dev/null || true)
 setsid nohup "$LAUNCHER" "$PROJECT" >/dev/null 2>&1 < /dev/null &
@@ -31,7 +46,7 @@ is_phpstorm() {
 
 start=$SECONDS
 last_grab=$SECONDS
-port_up=no
+last_check=0
 while [ $((SECONDS - start)) -lt "$TIMEOUT" ]; do
   win=$(xdotool getactivewindow 2>/dev/null || true)
   if [ -n "$win" ] && [ "$win" != "$prev" ] && is_phpstorm "$win"; then
@@ -39,13 +54,11 @@ while [ $((SECONDS - start)) -lt "$TIMEOUT" ]; do
     [ -n "$prev" ] && xdotool windowactivate "$prev" 2>/dev/null
     last_grab=$SECONDS
   fi
-  if [ "$port_up" = no ] && curl -s -m 1 -o /dev/null "http://127.0.0.1:${PORT}/"; then
-    port_up=yes
-  fi
-  if [ "$port_up" = yes ] && [ $((SECONDS - last_grab)) -ge "$QUIET" ]; then
-    exit 0
+  if [ $((SECONDS - last_grab)) -ge "$QUIET" ] && [ "$SECONDS" -gt "$last_check" ]; then
+    last_check=$SECONDS
+    project_open && exit 0
   fi
   sleep 0.2
 done
 
-[ "$port_up" = yes ]
+exit 1
