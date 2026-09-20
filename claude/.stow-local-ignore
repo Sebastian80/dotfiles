@@ -1,0 +1,17 @@
+# Stow ignore file for claude package
+# Files and directories listed here will not be symlinked by Stow
+# Pattern format: Perl regular expressions
+
+# Claude Code reads ~/.claude/CLAUDE.md, which pulls this file in via @AGENTS.md.
+# A symlink at ~/.claude/AGENTS.md makes it a second entry point, and the same
+# instructions are loaded twice into every session.
+^/\.claude/AGENTS\.md$
+
+# Version control
+^\.git$
+^\.gitignore$
+^\.gitmodules$
+
+# Backup files
+\.backup$
+~$
