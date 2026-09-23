@@ -254,5 +254,12 @@
       "gcloud destructive/write subcommands (delete, deployments update, iam) — no established prod-safe carve-out; treat as soft block pending review",
       "Force-pushing or deleting a branch other people build on, and rewriting already-published history — destructive but clearable when the user has asked for it in this conversation"
     ]
+  },
+  "pluginConfigs": {
+    "agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
   }
 }
