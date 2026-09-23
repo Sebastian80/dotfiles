@@ -13,7 +13,6 @@ what it does not cover.
   gitlab-token entry being present is not evidence the auth is complete.
 - To delete a remote branch: `git push <remote-url> --delete <branch>` — useful for cleaning up accidental pushes to wrong repos.
 - A CI job failing with `couldn't find remote ref refs/heads/<branch>` right after an MR merge is the duplicate BRANCH pipeline racing the source-branch deletion — not a real failure. Dedupe with standard `workflow:` rules (prefer `merge_request_event`; suppress `$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS`; keep branch/tag pipelines otherwise).
-- `glab mr create` derives the MR SOURCE project from the current directory's git remote, not from `--repo`, so always `cd` into the repo the MR belongs to first. The 422 it throws and the checkout-less `glab api` recipe are in the skill's troubleshooting reference.
 
 ## Internal skill marketplace (coding-ai group)
 
