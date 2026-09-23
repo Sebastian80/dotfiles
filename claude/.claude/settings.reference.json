@@ -147,6 +147,16 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": "Bash|Read|Grep|WebFetch|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/sebastian/.claude/hooks/mask-output.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionStart": [

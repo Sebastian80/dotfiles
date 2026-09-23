@@ -12,7 +12,7 @@
 - Never `git add -A` unless you've just run `git status` — don't add random test files to the repo.
 - Never commit `.env` files, API keys, tokens, or credentials. If a file looks like it contains secrets, warn Sebastian before staging.
 - Data leaked into history (secrets, customer paths) gets a history rewrite with `git-filter-repo` as the default proposal, stated with its blast radius (force-push, every clone re-fetches). A forward-only commit removes nothing. Ask before rewriting; it changes shared history.
-- `**/CLAUDE.md` is globally gitignored (`~/.config/git/ignore`, deliberate). In repos, write `AGENTS.md` and add a local `CLAUDE.md` symlink — a created CLAUDE.md silently never stages, so never expect it to commit.
+- `**/CLAUDE.md` is globally gitignored (`~/.config/git/ignore`, deliberate). In repos, write `AGENTS.md` — Claude Code reads it directly when no CLAUDE.md exists (v2.1.277+), so no symlink is needed. A created CLAUDE.md silently never stages, so never expect it to commit.
 
 ## Remotes and submodules
 

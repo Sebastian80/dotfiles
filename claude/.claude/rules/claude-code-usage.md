@@ -7,8 +7,9 @@
 
 ## Parallel agents in one checkout
 
-Contract for several write-agents in one working copy (proven on a five-agent round: zero merge
-conflicts, three incidents behind these rules):
+Give each write-agent its own worktree (`isolation: "worktree"`) when the project runs from any
+checkout. When it can't — one Docker stack or database bound to this working copy — use this
+contract (proven on a five-agent round: zero merge conflicts, three incidents behind these rules):
 
 - **Partition file ownership up front.** Agents never touch shared files (service registration,
   instructions, docs, skills); those ship as snippets in a per-agent handoff file. The integrator
@@ -41,8 +42,13 @@ conflicts, three incidents behind these rules):
 
 - A variable set in settings.json `env` beats a shell export: `VAR=x claude -p …` does not
   override it. Probe with `claude -p --settings '{"env":{"VAR":"x"}}'` and a cheap model.
-- `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`: `0` lifts the limit (nesting allowed), `1` lets the
-  main session spawn but blocks subagents from spawning. Verified live, not in the docs.
+- `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` counts layers below the main session (default 3); `1`
+  turns nesting off. Anything but a positive integer is ignored, so `0` silently means 3 — there is
+  no unlimited setting.
+- `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` caps Agent-tool spawns only. Workflow runs have their own
+  cap (`CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS`, default 16).
+- `CLAUDE_CODE_SUBAGENT_MODEL` is only a default since v2.1.251: a model passed at spawn or set in
+  an agent definition wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` makes it binding.
 
 ## Task tracking
 
