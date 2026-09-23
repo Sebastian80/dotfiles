@@ -1,6 +1,6 @@
 ---
 name: mermaid
-description: Use when asked for any diagram, chart, flowchart, sequence, ER, class or architecture picture, or when a ```mermaid block is written into markdown, GitLab, Jira or an artifact. Covers 23 Mermaid diagram types, syntax validation, and generating diagrams from PHP code and Postgres schemas instead of by hand.
+description: Use when asked for any diagram, chart, flowchart, sequence, ER, class or architecture picture, or when a ```mermaid block is written into markdown, GitLab, Jira or an artifact. Covers every Mermaid diagram type with a syntax reference, validation, and generating diagrams from PHP code and Postgres schemas instead of by hand.
 allowed-tools: Read Write Edit Bash
 metadata:
   argument-hint: "[diagram description or requirements]"
@@ -8,7 +8,6 @@ metadata:
 
 # Mermaid Diagram Generator
 
-Generate high-quality Mermaid diagram code based on user requirements.
 
 ## Workflow
 
@@ -16,8 +15,8 @@ Generate high-quality Mermaid diagram code based on user requirements.
 2. **Prefer generation over authoring**: if the diagram describes existing code or a database, produce it with a generator (see below) so it is true by construction
 3. **Read Documentation**: Read the corresponding syntax reference for the diagram type
 4. **Generate Code**: Generate Mermaid code following the specification
-5. **Validate**: run `scripts/validate.sh <file.mmd|file.md>` and fix until it prints `ok`. Output that was not validated is a draft, say so
-6. **Apply Styling**: Apply appropriate themes and style configurations
+5. **Apply Styling** where it helps readability
+6. **Validate**: run `scripts/validate.sh <file.mmd|file.md>` and fix until it prints `ok`. Output that was not validated is a draft, say so
 
 ## Where Mermaid renders
 
@@ -65,6 +64,8 @@ Select the appropriate diagram type and read the corresponding documentation:
 | User Journey | [userJourney.md](references/userJourney.md) | User experience flows |
 | ZenUML | [zenuml.md](references/zenuml.md) | Sequence diagrams (code style) |
 
+Further types with a reference in `references/`: cynefin, eventmodeling, ishikawa, railroad, swimlanes, treeView, venn, wardley. Read the file before using one.
+
 ## Configuration & Themes
 
 - [Theming](references/config-theming.md) - Custom colors and styles
@@ -73,25 +74,9 @@ Select the appropriate diagram type and read the corresponding documentation:
 - [Configuration](references/config-configuration.md) - Global settings
 - [Math](references/config-math.md) - LaTeX math support
 
-## Output Specification
+## Output
 
-Generated Mermaid code should:
-
-1. Be wrapped in ```mermaid code blocks
-2. Have correct syntax that renders directly
-3. Have clear structure with proper line breaks and indentation
-4. Use semantic node naming
-5. Include styling when needed to improve visual appearance
-
-## Example Output
-
-```mermaid
-flowchart TD
-    A[Start] --> B{Condition}
-    B -->|Yes| C[Execute]
-    B -->|No| D[End]
-    C --> D
-```
+Wrap the result in a ```mermaid block.
 
 ---
 

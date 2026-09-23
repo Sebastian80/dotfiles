@@ -19,11 +19,11 @@ currently exposes; they stay for the refactoring agent that is still to be built
 
 ## Core Rule
 
-**Use IDE MCP tools as your primary search, navigation, and refactoring tools.** JetBrains indexes ALL project files — code, config, YAML, Markdown, etc. — so prefer `ide_search_text` and `ide_find_file` even for non-code searches. Fall back to Grep/Glob only for files outside the project, or when IDE Index is unavailable — `ide_search_text` now handles regex itself (see below).
+**Use IDE MCP tools as your primary search, navigation, and refactoring tools.** JetBrains indexes ALL project files — code, config, YAML, Markdown, etc. — so prefer `ide_search_text` and `ide_find_file` even for non-code searches. Fall back to `rg` via Bash only for files outside the project, or when IDE Index is unavailable — `ide_search_text` now handles regex itself (see below).
 
 **Availability:** the server only exists while the IDE is running. If no `ide_*`/`mcp__phpstorm-index__*` tools are present in the session, the IDE is closed — use the standard tools without ceremony. A subagent cannot ask the user anything; in a main session the ecom-phpstorm-index plugin's gate hook is what offers to start PhpStorm. If tools were present but a call fails mid-session, check `ide_index_status` once, then fall back. A call that *succeeds* but comes back empty is a different case entirely — see [Before you trust a result](#before-you-trust-a-result).
 
-The IDE understands your code structurally. Grep sees text. When you need to find usages, trace calls, navigate definitions, rename symbols, check inheritance, or find implementations — always reach for an IDE tool first.
+The IDE understands your code structurally. Grep sees text. When you need to find usages, trace calls, navigate definitions, rename symbols, check inheritance, or find implementations — reach for an IDE tool first (for usages on a large vendor tree, start with `ide_search_text`; see "Understanding how X is used").
 
 **The tool list is not documented here.** Each `mcp__phpstorm-index__*` tool carries its own
 description, parameters and examples, and that is the authoritative surface — it changes when
@@ -191,7 +191,7 @@ On an Oro-size vendor tree, `ide_find_references` runs for minutes, pins the IDE
 ### Refactoring
 1. Before renaming, run `ide_search_text` on the old name — semantic references miss call sites in dynamic dispatch (`__call` decorators) and string expressions in config/templates (e.g. Oro `layout.yml` `'=data[...].method(...)'` — functional call sites a rename silently breaks). The text sweep tells you up front which stragglers need manual Edit.
 2. `ide_refactor_rename` — rename a symbol + all references atomically (`file`+`line`+`column`+`newName`). Omit `line`/`column` to rename the **file** itself (updates references; works for any file type).
-3. After rename, **verify with `ide_search_text`/Grep** for the old name — expect 0 matches. Fix stragglers with Edit, then `ide_sync_files`.
+3. After rename, **verify with `ide_search_text` or `rg`** for the old name — expect 0 matches. Fix stragglers with Edit, then `ide_sync_files`.
 4. `ide_move_file` — relocate a file; IDE updates namespace/imports where a semantic backend exists (PHP PSR-4 aware)
 5. `ide_optimize_imports` — strip unused imports + organize the rest (no reformatting)
 6. `ide_reformat_code` — apply project code style
@@ -213,7 +213,7 @@ On an Oro-size vendor tree, `ide_find_references` runs for minutes, pins the IDE
 1. `ide_call_hierarchy` with `direction: "callers"` — who calls this?
 2. `ide_call_hierarchy` with `direction: "callees"` — what does this call?
 3. Cursor must be on the method/function name on its declaration line. Use `ide_file_structure` to find the exact line first.
-4. If the IDE returns empty callers but you know callers exist, fall back to Grep.
+4. If the IDE returns empty callers but you know callers exist, fall back to `rg`.
 
 ## Troubleshooting
 
@@ -223,9 +223,9 @@ On an Oro-size vendor tree, `ide_find_references` runs for minutes, pins the IDE
 | `ide_find_definition` returns wrong symbol | Column is off. Read the line, count to the exact first character of the symbol. |
 | Tool returns empty/stale results after file changes | Call `ide_sync_files`, then retry. |
 | Tool errors unexpectedly | Check `ide_index_status` — IDE may be in dumb mode (indexing). Wait and retry. |
-| `ide_call_hierarchy` returns element but zero callers | Known limitation for some language constructs. Fall back to Grep. |
-| `ide_refactor_rename` misses some references | Language-specific limitation. Grep for the old name, fix remaining with Edit. |
-| `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use Grep with class name pattern. |
+| `ide_call_hierarchy` returns element but zero callers | Known limitation for some language constructs. Fall back to `rg`. |
+| `ide_refactor_rename` misses some references | Language-specific limitation. `rg` for the old name, fix remaining with Edit. |
+| `ide_find_implementations` returns empty for structural types | Some languages use structural typing (e.g. Python Protocols) which IDE can't resolve. Use `rg` with a class-name pattern. |
 | `ide_find_references` times out | Usage search over a big composer tree; happens on a single method with one caller too, at library scope and at project scope alike when vendor is un-excluded, and the IDE keeps running the job after the client gives up (the plugin's tool window shows the call still PENDING). Do not retry at another scope. Switch to `ide_search_text` on the call expression with a `filePattern`, plus `ide_find_implementations` on the interface the call is typed against. If PhpStorm stays at full CPU, cancel the Find Usages job from the status-bar background tasks or restart the IDE. |
 | Freshly opened project returns empty for EVERYTHING despite `ide_index_status` ready | The project has no configured content/source roots (never set up in this IDE — common for ad-hoc opened repos). The index has nothing to serve; fall back to `rg` on disk, or configure source roots in the IDE. |
 | `ide_search_text` finds nothing under `vendor/` for a string you know is there, while `ide_find_class`/`ide_find_file`/`ide_find_implementations`/`ide_read_file` still see the package | PhpStorm's composer integration marks every installed package as an excluded folder and re-attaches it as a library; Find in Files runs in project scope and skips excluded folders, the symbol and file-name indexes do not. Check `.idea/*.iml` for `excludeFolder` entries under `vendor/`. Un-exclude the first-party packages (Mark Directory as → Not Excluded) and re-index; composer sync re-excludes packages it installs later, so re-check after `composer install`. Until then, `rg -uu <path>` for that subtree, and never read "not registered"/"no callers" out of an empty text search under `vendor/`. |
