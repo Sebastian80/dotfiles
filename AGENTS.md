@@ -68,6 +68,14 @@ dconf shortcuts in `system/dconf/media-keys.ini` are also GNOME-specific
 (`org.gnome.settings-daemon`) and have no meaning under KDE; re-create them in
 Plasma's shortcut editor.
 
+Third migration item — **`phpstorm-background` is X11-only.** It opens a project in PhpStorm without taking
+focus by minimizing PhpStorm windows and handing focus back with `xdotool`/`xprop`, which cannot see or move
+native Wayland windows. Copies live in `~/bin/phpstorm-background` (Pi's `start_ide`) and in the
+`ecom-phpstorm-index` plugin's `bin/`, whose index-lookup gate calls it when PhpStorm is down. The branch
+where PhpStorm already runs opens the project over the index MCP server and needs no window tool, so only a
+cold start is affected. Re-test that path under Plasma before relying on it; KWin scripting is the likely
+replacement for the focus handling.
+
 `make dock` (`scripts/setup/plank-use-overrides.sh`) only matters while the Plank dock
 exists; Plasma's task manager launches through desktop IDs, which the `chrome` package's
 two override files already cover.
