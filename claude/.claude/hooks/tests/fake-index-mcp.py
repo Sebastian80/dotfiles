@@ -10,7 +10,8 @@ ide_project_status lists those projects as open. ide_open_project adds its `path
 answers isError when "open_fails" is true. With more than one project open, a call without
 `project_path` gets the live server's multiple_projects_open error instead. Every tool call is appended to calls.log as `<tool> <args>`.
 """
-import json, sys
+import json
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT, STATE, CALLS = int(sys.argv[1]), sys.argv[2], sys.argv[3]
@@ -38,7 +39,8 @@ class Handler(BaseHTTPRequestHandler):
         args = req["params"].get("arguments", {})
         with open(CALLS, "a") as log:
             log.write(f"{name} {json.dumps(args, sort_keys=True)}\n")
-        state = json.load(open(STATE))
+        with open(STATE) as f:
+            state = json.load(f)
         error, text = False, ""
         if len(state["open"]) > 1 and "project_path" not in args:
             # Copied from the live server: with several projects open, every tool wants project_path.
@@ -53,7 +55,8 @@ class Handler(BaseHTTPRequestHandler):
                 error, text = True, "Project could not be opened"
             else:
                 state["open"].append(args["path"])
-                json.dump(state, open(STATE, "w"))
+                with open(STATE, "w") as f:
+                    json.dump(state, f)
                 text = f"Project '{args['path']}' is open and ready."
         reply(self, 200, {"jsonrpc": "2.0", "id": req.get("id"),
                           "result": {"content": [{"type": "text", "text": text}], "isError": error}})
