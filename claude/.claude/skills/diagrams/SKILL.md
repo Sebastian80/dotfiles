@@ -1,12 +1,12 @@
 ---
-name: mermaid
+name: diagrams
 description: Use when asked for any diagram, chart, flowchart, sequence, ER, class or architecture picture, or when a ```mermaid or .d2 diagram is written into markdown, GitLab, Jira or an artifact. Picks the renderer (D2 sketch style for exported images, Mermaid only where it must render inline), covers every Mermaid diagram type with a syntax reference, validation and rendering, and generating diagrams from PHP code and Postgres schemas instead of by hand.
 allowed-tools: Read Write Edit Bash
 metadata:
   argument-hint: "[diagram description or requirements]"
 ---
 
-# Mermaid Diagram Generator
+# Diagrams
 
 ## Pick the renderer first
 

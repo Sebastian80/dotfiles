@@ -19,7 +19,7 @@ set -uo pipefail
 # Sources that cannot be followed statically: ~/.bashrc loads its fragments through a variable.
 SHELLCHECK_EXCLUDE="SC1090,SC1091"
 # offen      - German Jira status in bash/.bash/exports/jira.bash, not a misspelling of "often"
-# classe,thi - Mermaid identifiers in the mermaid skill's reference diagrams
+# classe,thi - Mermaid identifiers in the diagrams skill's reference diagrams
 # wirth      - Niklaus Wirth, named in the railroad diagram reference
 # lightening - used correctly (making lighter) in the mermaid theming reference
 SPELL_IGNORE="offen,classe,wirth,thi,lightening"

@@ -339,7 +339,7 @@ make lint                             # every tracked script and doc
 
 Excluded by design: `bash/.bash/completions/composer.bash` (vendored Symfony), `SC1090`/`SC1091`
 (sources that cannot be followed statically), and a short spelling ignore list (the German Jira
-status "Offen" plus Mermaid identifiers from the mermaid skill's references). markdownlint covers
+status "Offen" plus Mermaid identifiers from the diagrams skill's references). markdownlint covers
 this repo's prose only: `claude/`, `agents/` and `pi/` hold instruction prose for models and
 `yazi/` holds vendored flavors, so they are spellchecked but not format-linted. Rules live in
 `.markdownlint.jsonc` (120 columns, code blocks and tables exempt).
