@@ -25,3 +25,15 @@ Measured with a throwaway repo under the scratchpad, after an evening lost to as
   (`--allowedTools` is variadic and eats a positional prompt), `--permission-mode default` to keep the
   classifier out, a control case that must pass, and a `want=` per case. (The guide claimed `--add-dir`
   leaves the cd block in place; two runs showed the opposite.)
+
+## Probing Claude Code settings
+
+- A variable set in settings.json `env` beats a shell export: `VAR=x claude -p …` does not
+  override it. Probe with `claude -p --settings '{"env":{"VAR":"x"}}'` and a cheap model.
+- `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` counts layers below the main session (default 3); `1`
+  turns nesting off. Anything but a positive integer is ignored, so `0` silently means 3 — there is
+  no unlimited setting.
+- `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` caps Agent-tool spawns only. Workflow runs have their own
+  cap (`CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS`, default 16).
+- `CLAUDE_CODE_SUBAGENT_MODEL` is only a default since v2.1.251: a model passed at spawn or set in
+  an agent definition wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` makes it binding.

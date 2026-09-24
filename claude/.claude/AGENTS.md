@@ -47,6 +47,7 @@ Each of these is here because a session got it wrong without it:
 
 - Delegate only large, genuinely independent work: a wide multi-file investigation, several unrelated failures. If one agent can do it, use one. Never delegate what you can finish in a handful of tool calls, or to re-check a change you can verify by running it.
 - An adversarial reviewer for research or a large diff is welcome. Brief it to report only gaps against correctness or the stated requirements; everything else is optional, never a fix loop.
+- Running several write-agents at once or writing a Workflow script? Load the `parallel-agents` skill first.
 - A subagent starts blank unless forked. Brief it with the objective, what's already known or ruled out, the files it may touch, and the exact shape of the answer. Keep doing the work that doesn't depend on it while it runs.
 
 ## Hyperlink references
