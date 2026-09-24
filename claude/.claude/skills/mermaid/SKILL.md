@@ -1,6 +1,6 @@
 ---
 name: mermaid
-description: Use when asked for any diagram, chart, flowchart, sequence, ER, class or architecture picture, or when a ```mermaid block is written into markdown, GitLab, Jira or an artifact. Covers every Mermaid diagram type with a syntax reference, validation, and generating diagrams from PHP code and Postgres schemas instead of by hand.
+description: Use when asked for any diagram, chart, flowchart, sequence, ER, class or architecture picture, or when a ```mermaid or .d2 diagram is written into markdown, GitLab, Jira or an artifact. Picks the renderer (D2 sketch style for exported images, Mermaid only where it must render inline), covers every Mermaid diagram type with a syntax reference, validation and rendering, and generating diagrams from PHP code and Postgres schemas instead of by hand.
 allowed-tools: Read Write Edit Bash
 metadata:
   argument-hint: "[diagram description or requirements]"
@@ -8,6 +8,49 @@ metadata:
 
 # Mermaid Diagram Generator
 
+## Pick the renderer first
+
+- **Diagram ends up as an image** (Jira, Confluence, docs, artifacts, chat): D2 in sketch style with the ELK
+  layout. Sebastian's preferred look. Render with `scripts/d2-render.sh in.d2 [out.svg|out.png]`, which
+  validates first and defaults to `--sketch --layout elk`; the SVG embeds its fonts and works standalone.
+- **Diagram must render inline from text** (GitLab or GitHub markdown, MR descriptions): Mermaid, since
+  git.netresearch.de renders no other fence. Start from the theme block below; the default theme looks dated.
+
+Either way, a diagram of a real system is built from that system (workflow definitions, DB, source), never
+from framework defaults. A hand-written diagram looks convincing even when every edge is wrong.
+
+## D2
+
+- Syntax: containers `name: "Label" { ... }`, edges `a -> b: label`, shapes `{shape: cylinder}` (also `queue`,
+  `page`, `step`, `oval`), dashed `{style.stroke-dash: 4}`. `d2 fmt` formats, `d2 validate` checks.
+- **Back-edges** (retry, error, "back to payment"): write them forward and flip the arrowhead,
+  `checkout.pay <- mollie: payment_error`, not `mollie -> checkout.pay`. ELK ranks by edge direction and routes
+  a backward edge in a loop around the whole diagram.
+- ELK ignores `direction:` inside containers, so a long chain comes out tall. `D2_LAYOUT=tala` (bundled and
+  free since D2 0.9.0) honours it, but has randomness: a small edit can reshuffle the layout.
+
+## Mermaid theme block
+
+````markdown
+```mermaid
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#eef2ff"
+    primaryBorderColor: "#6366f1"
+    lineColor: "#64748b"
+    clusterBkg: "#f8fafc"
+    clusterBorder: "#cbd5e1"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  ...
+```
+````
+
+Keep the default dagre layout: `layout: elk` loops back-edges around the whole diagram, and Mermaid has no
+one-sided reverse arrow to fix that (`a <-- b` puts the head on `b`).
 
 ## Workflow
 
