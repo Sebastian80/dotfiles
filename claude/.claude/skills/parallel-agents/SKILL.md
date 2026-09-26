@@ -8,7 +8,9 @@ description: Use BEFORE spawning two or more write-agents at once, or before wri
 ## Parallel agents in one checkout
 
 Give each write-agent its own worktree (`isolation: "worktree"`) when the project runs from any
-checkout. When it can't — one Docker stack or database bound to this working copy — use this
+checkout. An agent that changed nothing loses its worktree when it stops; one with commits or
+changes keeps it, and cleaning it up is yours: merge its branch, then `wt rm <agent-name>`.
+When it can't — one Docker stack or database bound to this working copy — use this
 contract (proven on a five-agent round: zero merge conflicts, three incidents behind these rules):
 
 - **Partition file ownership up front.** Agents never touch shared files (service registration,
