@@ -118,3 +118,5 @@ logs/
 .cache/
 tmp/
 temp/
+
+**/.claude/.cc-writes/
