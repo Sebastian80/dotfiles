@@ -4,6 +4,15 @@
     "npm:pi-web-access",
     "npm:pi-mcp-adapter@2.33.0"
   ],
-  "lastChangelogVersion": "0.85.1",
-  "theme": "dark"
+  "lastChangelogVersion": "0.87.1",
+  "theme": "dark",
+  "transport": "auto",
+  "tuiMode": "regular",
+  "subagents": {
+    "agentOverrides": {
+      "researcher": {
+        "tools": "inherit"
+      }
+    }
+  }
 }
