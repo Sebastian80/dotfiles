@@ -5,7 +5,7 @@ Type=Application
 Comment=A terminal emulator
 TryExec=/usr/bin/ghostty
 Exec=/usr/bin/ghostty --gtk-single-instance=true
-Icon=/home/sebastian/.local/share/icons/ghostty-custom.png
+Icon=ghostty-custom
 Categories=System;TerminalEmulator;
 Keywords=terminal;tty;pty;
 StartupNotify=true
