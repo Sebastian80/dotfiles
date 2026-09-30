@@ -13,6 +13,7 @@
 #   home/    $HOME minus workspace (except traefik-central), Downloads (except
 #            the ESET installer and the reinstall plan), caches, Trash, Ollama
 #            models, Chrome's on-device AI model, the agent-browser profile,
+#            Claude session transcripts (per-project memory kept),
 #            package-manager stores, IDE and Claude Code binaries, JetBrains
 #            plugins and snap runtime dirs (Thunderbird profile kept).
 #   system/  root-owned config: NetworkManager connections (VPN, WiFi PSKs),
@@ -66,6 +67,7 @@ INCLUDES=(
     'Downloads/'
     'Downloads/PROTECTAgentInstaller_Linux.tar.gz'
     'Downloads/kubuntu-reinstall-plan.md'
+    '.claude/projects/*/memory/***'
 )
 
 # Paths relative to $HOME that a fresh install regenerates.
@@ -88,6 +90,7 @@ EXCLUDES=(
     '.npm/'
     '.yarn/'
     '.var/app/*/cache/'
+    '.claude/projects/*/*'
     '.claude/debug/'
     '.claude/shell-snapshots/'
     '.claude/paste-cache/'
