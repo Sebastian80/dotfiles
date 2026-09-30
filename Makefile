@@ -1,7 +1,7 @@
 # Dotfiles Makefile - GNU Stow Management
 # Usage: make help
 
-.PHONY: help install uninstall update link unlink list lint test clean shortcuts dump-shortcuts dock
+.PHONY: help install uninstall update link unlink list lint test clean
 
 # Colors
 GREEN  := \033[0;32m
@@ -11,7 +11,7 @@ RED    := \033[0;31m
 NC     := \033[0m # No Color
 
 # Package list - all stow packages to manage (DRY: defined once, used everywhere)
-PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+PACKAGES := bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 
 # Default target
 .DEFAULT_GOAL := help
@@ -106,8 +106,6 @@ btop: ## Install btop configuration only
 claude: ## Install Claude Code configuration only
 	@stow -v claude
 
-gtk: ## Install GTK theme configuration only
-	@stow -v gtk
 
 # Git shortcuts
 status: ## Show git status
@@ -150,22 +148,6 @@ install-ai: ## Install AI agent tooling: Claude Code, Codex/Gemini CLIs, pi + sa
 			herdr integration install $$agent || echo "  herdr integration for $$agent skipped"; \
 		done; \
 	fi
-
-# Desktop shortcuts live in dconf, not in files, so stow cannot reach them.
-shortcuts: ## Restore the desktop keyboard shortcuts (dconf)
-	@echo "$(GREEN)Loading keyboard shortcuts into dconf...$(NC)"
-	@dconf load /org/gnome/settings-daemon/plugins/media-keys/ < system/dconf/media-keys.ini
-	@echo "$(GREEN)✓ Shortcuts restored$(NC)"
-	@dconf dump /org/gnome/settings-daemon/plugins/media-keys/ | grep -E '^binding' || true
-
-# Plank stores launchers by absolute path, so a ~/.local desktop override never reaches the dock.
-dock: ## Point Plank dock launchers at their ~/.local desktop overrides
-	@scripts/setup/plank-use-overrides.sh
-
-dump-shortcuts: ## Capture the current desktop keyboard shortcuts into the repo
-	@dconf dump /org/gnome/settings-daemon/plugins/media-keys/ > system/dconf/media-keys.ini
-	@echo "$(GREEN)✓ Wrote system/dconf/media-keys.ini$(NC)"
-	@git diff --stat -- system/dconf/media-keys.ini
 
 .PHONY: verify-auth
 verify-auth:  ## Verify authentication setup

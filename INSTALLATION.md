@@ -31,7 +31,7 @@ Or manually:
 
 ```bash
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+stow -n -v bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 ```
 
 **What to look for**:
@@ -93,7 +93,7 @@ Install all packages:
 
 ```bash
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+stow bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 ```
 
 Or install selectively:
@@ -422,9 +422,6 @@ make install-system # System config, requires sudo (sudoers)
 make install-ai     # Claude Code, Codex/Gemini CLIs, pi + sandbox, herdr integrations
 make install-pi     # Just pi and its sandbox extension
 make verify-auth    # Verify the authentication setup
-make shortcuts      # Restore the desktop keyboard shortcuts from dconf
-make dump-shortcuts # Capture the current desktop shortcuts into the repo
-make dock           # Point Plank dock launchers at their ~/.local overrides
 make status         # Git status
 make commit         # Quick commit
 make push           # Push to GitHub

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Copy stdin to the clipboard under the macOS name, so shell habits, fzf bindings and tmux
+# copy-mode share one entry point. Wayland uses wl-copy, X11 falls back to xclip.
+# --sensitive marks the entry as a secret: Klipper and other clipboard managers keep it out
+# of their history (wl-copy only; ignored under X11).
+#   pbcopy [--sensitive] < input
+set -euo pipefail
+case "${1:-}" in
+  -h|--help) echo "usage: pbcopy [--sensitive] < input   copy stdin to the clipboard"; exit 0 ;;
+esac
+sensitive=()
+if [ "${1:-}" = "--sensitive" ]; then sensitive=(--sensitive); shift; fi
+
+if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null; then
+  exec wl-copy "${sensitive[@]}"
+elif [ -n "${DISPLAY:-}" ] && command -v xclip >/dev/null; then
+  exec xclip -selection clipboard
+fi
+echo "pbcopy: no clipboard tool for this session (brew install wl-clipboard)" >&2
+exit 1

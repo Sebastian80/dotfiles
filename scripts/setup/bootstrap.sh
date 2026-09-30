@@ -219,7 +219,7 @@ echo ""
 step "Checking for conflicts..."
 
 # List of packages to install (all stow packages)
-PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome)
+PACKAGES=(bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome)
 
 # Claude Code, pi and herdr write sessions, credentials, logs and sockets into ~/.claude, ~/.pi/agent
 # and ~/.config/herdr, and pi's extensions directory receives the sandbox copy plus herdr's generated
@@ -262,7 +262,11 @@ if [[ $CONFLICTS -gt 0 ]]; then
             for package in "${PACKAGES[@]}"; do
                 if [[ -d "$package" ]]; then
                     # Get list of conflicting files
-                    conflicts=$(stow -n -v "$package" 2>&1 | grep "existing target is neither" | sed 's/.*existing target is neither a link nor a directory: //' || true)
+                    # stow <2.4: "existing target is neither a link nor a directory: FILE"
+                    # stow 2.4+:  "cannot stow SRC over existing target FILE since neither a link nor a directory ..."
+                    conflicts=$(stow -n -v "$package" 2>&1 | sed -nE \
+                        -e 's/.*existing target is neither a link nor a directory: //p' \
+                        -e 's/.*over existing target (.*) since neither a link nor a directory.*/\1/p' || true)
 
                     if [[ -n "$conflicts" ]]; then
                         while IFS= read -r file; do
@@ -357,7 +361,8 @@ echo ""
 step "Post-installation tasks..."
 
 # Check for machine-specific local config
-if [[ ! -f "$HOME/.bash/local.bash" ]]; then
+# Only once the bash package is stowed: a real ~/.bash here would block the symlink on the next run.
+if [[ -L "$HOME/.bash" && ! -f "$HOME/.bash/local.bash" ]]; then
     info "Creating empty .bash/local.bash for machine-specific config..."
     touch "$HOME/.bash/local.bash"
     echo "# Machine-specific bash configuration" > "$HOME/.bash/local.bash"

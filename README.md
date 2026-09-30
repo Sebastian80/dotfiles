@@ -32,11 +32,10 @@ dotfiles/
 │       ├── rules/          # Modular topic-specific rules (git, gitlab, jira, python, ...)
 │       ├── skills/         # Custom skills (codex-in-herdr, herdr, ide-index-mcp,
 │       │                   #   jetbrains-debugger, mermaid, qa;
-│       │                   #   qa-review and terminal-browser are symlinks into agents/ and brew)
+│       │                   #   terminal-browser's skill comes from `terminal-browser setup`)
 │       ├── hooks/          # Event hooks with their test suites
 │       └── statusline-omp.sh  # oh-my-posh statusline
 ├── git/            # Git configuration
-├── gtk/            # GTK theme configuration
 ├── ghostty/        # Ghostty terminal
 ├── oh-my-posh/     # Prompt engine
 ├── eza/            # Modern ls with Catppuccin Frappé theme
@@ -49,7 +48,6 @@ dotfiles/
 ├── btop/           # Modern system monitor
 ├── tmux/           # Terminal multiplexer
 ├── herdr/          # Agent multiplexer (persistent panes for Claude Code & co.)
-├── agents/         # Harness-neutral agent skills shared by Claude Code and pi (qa-review)
 ├── pi/             # pi coding agent: agent definitions, extensions, settings
 ├── chrome/         # Chrome desktop-entry overrides (so the dock uses them)
 ├── system/         # System-level configurations (requires sudo)
@@ -125,7 +123,7 @@ cp -r ~/.config/ghostty ~/dotfiles-backup-$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Deploy all packages (includes bin/ for user utilities)
 cd ~/dotfiles
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+stow bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 
 # Install Homebrew packages
 brew bundle install --file=~/dotfiles/Brewfile
@@ -159,8 +157,6 @@ stow yazi micro
 # Install system monitors
 stow htop btop
 
-# Install GTK theming
-stow gtk
 ```
 
 ## Management
@@ -419,7 +415,7 @@ utilities (`~/bin`) and installation/maintenance scripts (`scripts/`).
 - **moor** - Nice pager for humans (better less)
 - **lazydocker** - Terminal UI for Docker management
 - **bbrew** - Terminal UI for managing Homebrew packages
-- **xclip** - X11 clipboard utility
+- **wl-clipboard** - Wayland clipboard (`wl-copy`/`wl-paste`)
 - **yt-dlp** - Video downloader; pi-web-access calls it from PATH for video frames
 
 ### AI & MCP
@@ -463,10 +459,10 @@ cd ~/dotfiles
 
 # 3. Review what will be linked (dry run)
 cd ~/dotfiles
-stow -n -v bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+stow -n -v bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 
 # 4. Deploy packages
-stow bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+stow bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 
 # 5. Install Homebrew and tools
 brew bundle install --file=~/dotfiles/Brewfile

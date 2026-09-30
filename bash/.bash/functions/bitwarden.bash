@@ -265,7 +265,11 @@ bw() {
             shift
             local password=$(command bw get item "$@" 2>/dev/null | grep -o '"password":"[^"]*"' | cut -d'"' -f4)
             if [[ -n "$password" ]]; then
-                echo -n "$password" | xclip -selection clipboard 2>/dev/null || echo -n "$password" | pbcopy 2>/dev/null
+                # --sensitive keeps the password out of Klipper's history
+                if ! printf '%s' "$password" | pbcopy --sensitive; then
+                    echo "⚠ Could not copy to clipboard"
+                    return 1
+                fi
                 echo "✓ Password copied to clipboard"
             else
                 echo "⚠ Item not found: $*"

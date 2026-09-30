@@ -112,11 +112,8 @@ alias sudo='sudo '
 # Get week number
 alias week='date +%V'
 
-# Clipboard aliases (if xclip is available)
-if command -v xclip &>/dev/null; then
-    alias pbcopy='xclip -selection clipboard'
-    alias pbpaste='xclip -selection clipboard -o'
-fi
+# Clipboard: pbcopy/pbpaste are scripts in ~/bin (wl-clipboard on Wayland, xclip on X11),
+# not aliases, so fzf bindings and tmux can call them too.
 
 # ============================================
 # Image Viewers

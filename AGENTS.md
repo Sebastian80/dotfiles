@@ -47,28 +47,21 @@ Verified compatible, no changes needed:
   26.04 universe repo (`apt install ghostty`, may lag the PPA). Runs natively on Wayland; the
   CSI-u/`.inputrc` notes in `SETUP-NOTES.md` are unaffected.
 
-Open migration item — **xclip is X11-only** and flaky under Wayland/XWayland clipboard bridging
-(pipe-and-exit loses selection ownership). Affected spots:
+Resolved migration items (2026-09-30, on the fresh install):
 
-- `tmux/.tmux.conf:91` — copy-mode `y` pipes to `xclip -sel clip` (prefer
-  `set -g set-clipboard on` / OSC 52, which Ghostty supports)
-- `bash/.bash/aliases.bash` — `pbcopy`/`pbpaste` aliases
-- `bash/.bash/functions/fzf.bash` — Ctrl+Y copy binding
-- `bash/.bash/functions/bitwarden.bash` — password copy
+- **Clipboard**: `bin/pbcopy` and `bin/pbpaste` use wl-clipboard under `$WAYLAND_DISPLAY` and fall
+  back to xclip; the bash aliases, fzf Ctrl+Y, `bw copy` (with `--sensitive`, so Klipper skips it)
+  and tmux copy-mode all go through them. tmux also sets `set-clipboard on` for OSC 52. Brewfile
+  carries `wl-clipboard` instead of `xclip`.
+- **Display and window scripts dropped**: `display-scale` (xrandr transform) became a per-monitor
+  scale in Plasma, `window-to-screen` became KWin's built-in Window to Next Screen, and the GNOME
+  dconf shortcuts, `make shortcuts`/`dump-shortcuts` and the Plank `make dock` are gone
+  (see `system/README.md` for the Plasma equivalents).
+- **`herdr-launch`** finds and raises the open Herdr window through KWin's window runner over
+  D-Bus (`org.kde.KWin /WindowsRunner`) instead of xdotool/wmctrl, and leaves maximizing to
+  Ghostty's `maximize = true`.
 
-Fix direction: install `wl-clipboard` and branch on `$WAYLAND_DISPLAY` (wl-copy/wl-paste, xclip fallback).
-
-Second migration item — **the display and window scripts are X11-only and should
-be dropped, not ported.** `bin/display-scale` (xrandr transform on the external
-monitor) and `bin/window-to-screen` (wmctrl/xdotool) exist because X11 has one
-global scale and cannot render a monitor denser than native, and because the
-herdr Ghostty window has no title bar to drag. Plasma on Wayland has per-monitor
-fractional scaling natively, so the transform becomes a display setting. The
-dconf shortcuts in `system/dconf/media-keys.ini` are also GNOME-specific
-(`org.gnome.settings-daemon`) and have no meaning under KDE; re-create them in
-Plasma's shortcut editor.
-
-Third migration item — **`phpstorm-background` is X11-only.** It opens a project in PhpStorm without taking
+Open migration item — **`phpstorm-background` is X11-only.** It opens a project in PhpStorm without taking
 focus by minimizing PhpStorm windows and handing focus back with `xdotool`/`xprop`, which cannot see or move
 native Wayland windows. Copies live in `~/bin/phpstorm-background` (Pi's `start_ide`) and in the
 `ecom-phpstorm-index` plugin's `bin/`, whose index-lookup gate calls it when PhpStorm is down. The branch
@@ -76,9 +69,6 @@ where PhpStorm already runs opens the project over the index MCP server and need
 cold start is affected. Re-test that path under Plasma before relying on it; KWin scripting is the likely
 replacement for the focus handling.
 
-`make dock` (`scripts/setup/plank-use-overrides.sh`) only matters while the Plank dock
-exists; Plasma's task manager launches through desktop IDs, which the `chrome` package's
-two override files already cover.
-
-GTK stow package (`gtk.css` + bookmarks) is harmless on KDE, but don't add a `settings.ini` to it —
-Plasma's `kde-gtk-config` owns `~/.config/gtk-3.0/settings.ini`.
+No GTK stow package: Plasma's `kde-gtk-config` owns `~/.config/gtk-{3,4}.0/` (`gtk.css` imports its
+`colors.css`, plus `settings.ini`), so a stowed file there breaks the Breeze colours in GTK apps.
+Ghostty's tab styling rides on its own `gtk-custom-css = tab-style.css` instead.

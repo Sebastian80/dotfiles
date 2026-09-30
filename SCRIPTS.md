@@ -13,7 +13,6 @@ dotfiles/
 ├── bin/                            # User utilities (stowed to ~/bin)
 │   └── bin/
 │       ├── claude-agent-watch      # Render a Claude Code subagent transcript live
-│       ├── display-scale           # Scale the external monitor (mixed-DPI X11)
 │       ├── docker-clean            # Docker cleanup utility
 │       ├── dotfiles-backup         # Quick dotfiles backup
 │       ├── dotfiles-update         # Update and restow dotfiles
@@ -21,8 +20,8 @@ dotfiles/
 │       ├── herdr-launch            # Open/focus the chromeless Herdr Ghostty window
 │       ├── herdr-tool-tab          # Run a tool in a new focused herdr tab
 │       ├── jira-my-tickets         # List my unresolved Jira tickets, one per line
-│       ├── switch-theme            # Oh-my-posh theme switcher
-│       └── window-to-screen        # Move a window to another monitor
+│       ├── pbcopy / pbpaste        # Clipboard in/out (wl-clipboard, xclip on X11)
+│       └── switch-theme            # Oh-my-posh theme switcher
 │
 ├── scripts/                   # Installation & maintenance (NOT stowed)
 │   ├── setup/
@@ -33,7 +32,6 @@ dotfiles/
 │   │   ├── install-ghostty.sh # Ghostty terminal installation
 │   │   ├── install-node.sh    # Node.js + npm globals (--ai for the AI agent CLIs)
 │   │   ├── install-pi.sh      # pi coding agent + its sandbox extension
-│   │   ├── plank-use-overrides.sh  # Point Plank dock launchers at ~/.local overrides
 │   │   └── uninstall.sh       # Remove all dotfiles and installed components
 │   │
 │   ├── maintenance/
@@ -68,9 +66,9 @@ dotfiles/
 | `docker-clean` | Clean Docker cache and images | `docker-clean [--all]` |
 | `switch-theme` | Change oh-my-posh theme | `switch-theme` |
 | `claude-agent-watch` | Render a Claude Code subagent transcript live, for a herdr/tmux pane | `claude-agent-watch <agent-name\|file.jsonl>` |
-| `display-scale` | Scale the external monitor down to match the laptop panel (X11 transform) | `display-scale [factor]` |
-| `window-to-screen` | Move a window to another monitor without a title bar to drag | `window-to-screen [next\|prev\|MONITOR]` |
-| `herdr-launch` | Open, or focus, the maximized chromeless Herdr Ghostty window | `herdr-launch` |
+| `herdr-launch` | Open, or focus (via KWin), the maximized chromeless Herdr Ghostty window | `herdr-launch` |
+| `pbcopy` | Copy stdin to the clipboard; `--sensitive` keeps it out of Klipper's history | `cmd \| pbcopy [--sensitive]` |
+| `pbpaste` | Print the clipboard | `pbpaste` |
 | `herdr-tool-tab` | Run a command in a new focused herdr tab named after it | `herdr-tool-tab LABEL COMMAND...` |
 | `herdr-action-palette` | Fuzzy-pick and run any herdr plugin action (prefix+space) | `herdr-action-palette` |
 | `jira-my-tickets` | Print my unresolved Jira tickets as `KEY<TAB>summary [status]` | `jira-my-tickets [MAX]` |
@@ -354,7 +352,7 @@ this repo's prose only: `claude/`, `agents/` and `pi/` hold instruction prose fo
 
 - Prerequisites (git, stow, Homebrew)
 - Repository status
-- All 20 stow packages (agents, bash, bin, btop, chrome, claude, eza, fzf, ghostty, git, glow, gtk,
+- All 18 stow packages (bash, bin, btop, chrome, claude, eza, fzf, ghostty, git, glow,
   herdr, htop, micro, oh-my-posh, pi, ripgrep, tmux, yazi)
 - 19 critical symlinks (includes ~/bin utilities and tool configs)
 - Broken symlinks
@@ -568,7 +566,7 @@ make bin          # Install only bin/ package
 
 ```makefile
 # PACKAGES variable (defined once, used by install/uninstall/update):
-PACKAGES := bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome
+PACKAGES := bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome
 ```
 
 ---

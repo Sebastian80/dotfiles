@@ -42,7 +42,7 @@ brew "btop"         # Resource monitor with beautiful TUI
 brew "htop"         # Interactive process viewer
 brew "micro"        # Modern terminal text editor
 brew "lazydocker"   # Terminal UI for docker commands
-brew "xclip"        # X11 clipboard utility (required for clipboard ops in terminals)
+brew "wl-clipboard" # Wayland clipboard (wl-copy/wl-paste), backs ~/bin/pbcopy and pbpaste
 brew "moor"         # Nice pager for humans (better less)
 brew "yt-dlp"       # YouTube downloader; pi-web-access calls it from PATH for video frames, shadows the stale /usr/bin copy
 brew "Valkyrie00/homebrew-bbrew/bbrew"  # Terminal UI for managing Homebrew packages
@@ -66,6 +66,8 @@ brew "rust"               # Builds herdr plugins written in Rust (herdr-spreader
 # Browser in the terminal (Electron, kitty graphics). Ubuntu 24.04 needs the AppArmor userns
 # profile the cask ships; re-run after upgrades, the profile is keyed on the binary path:
 #   sudo bash "$(brew --prefix)/Caskroom/terminal-browser/<ver>/terminal-browser/scripts/apparmor.sh"
+# Its agent skills come from `terminal-browser setup`, not this repo: a symlink into the
+# versioned Caskroom went stale on every upgrade, and stow 2.4 refuses absolute symlinks.
 cask "terminal-browser"
 
 # Prompt & Shell

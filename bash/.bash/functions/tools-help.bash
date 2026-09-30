@@ -140,7 +140,7 @@ show-tools() {
     done
     echo ""
     echo "Package Managers & Utilities:"
-    for tool in fnm uv nala xclip; do
+    for tool in fnm uv nala wl-copy; do
         if command -v $tool &>/dev/null; then
             echo "  ✓ $tool: $(command -v $tool)"
         else

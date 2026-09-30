@@ -121,7 +121,7 @@ fgl() {
             --header='Enter: view commit | Ctrl-Y: copy hash' \
             --preview='git show --color=always {1}' \
             --preview-window=right:60% \
-            --bind='ctrl-y:execute-silent(echo -n {1} | xclip -selection clipboard)+abort' | \
+            --bind='ctrl-y:execute-silent(echo -n {1} | pbcopy)+abort' | \
         awk '{print $1}')
 
     if [ -n "$commit" ]; then

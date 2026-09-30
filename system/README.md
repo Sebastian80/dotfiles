@@ -28,36 +28,19 @@ This is safe because:
 3. Standard practice for systems using Homebrew
 4. Maintains sudo's security model
 
-## dconf/media-keys.ini
+## Desktop shortcuts
 
-Desktop keyboard shortcuts live in dconf, not in files, so stow cannot reach them
-and a reinstall loses them. This dump carries the custom shortcuts:
+The GNOME/Budgie dconf dump that used to live here is gone: Plasma stores shortcuts in
+`~/.config/kglobalshortcutsrc`, and its defaults already cover the old custom ones.
 
-| Shortcut | Action |
-|----------|--------|
-| `Super+L` | Lock the screen (`dm-tool lock`) |
-| `Super+Shift+S` | Flameshot region screenshot |
-| `Super+Shift+M` | Move the focused window to the next screen (`window-to-screen`) |
+| Old Budgie shortcut | Plasma default |
+|---------------------|----------------|
+| `Super+L` lock screen (`dm-tool lock`) | `Meta+L` Lock Session |
+| `Super+Shift+S` Flameshot region | `Meta+Shift+S` Spectacle rectangular region |
+| `Super+Shift+M` `window-to-screen` | `Meta+Shift+Left/Right` Window to Previous/Next Screen |
 
-**Restore them:**
-
-```bash
-make shortcuts
-```
-
-**Capture them again after adding one:**
-
-```bash
-make dump-shortcuts
-```
-
-`Super+Shift+M` exists because mutter evacuates windows off an external monitor
-when it sleeps and never moves them back (GNOME/mutter issues #1419 and #761),
-and the herdr Ghostty window has no title bar to drag it with.
-
-Not covered here: `~/.config/autostart/display-scale.desktop`, which applies the
-external monitor's xrandr transform at login. It is still untracked, like
-`fix-mouse-accel.desktop`.
+The display-scale xrandr transform is a per-monitor scale in System Settings > Display
+Configuration now.
 
 ## Installation via Stow
 

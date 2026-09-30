@@ -82,7 +82,7 @@ fi
 # 3. Check Stow Packages
 section "Stow Packages"
 
-PACKAGES=(bash bin claude git gtk ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi agents chrome)
+PACKAGES=(bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome)
 
 for package in "${PACKAGES[@]}"; do
     if [[ -d "$package" ]]; then
@@ -142,7 +142,6 @@ verify_symlink ~/.config/micro "$DOTFILES_DIR/micro/.config/micro"
 verify_symlink ~/.config/htop "$DOTFILES_DIR/htop/.config/htop"
 verify_symlink ~/.config/btop "$DOTFILES_DIR/btop/.config/btop"
 verify_symlink ~/.config/git "$DOTFILES_DIR/git/.config/git"
-verify_symlink ~/.config/gtk-4.0/gtk.css "$DOTFILES_DIR/gtk/.config/gtk-4.0/gtk.css"
 
 # Tool-specific config symlinks
 verify_symlink ~/.config/eza "$DOTFILES_DIR/eza/.config/eza"
