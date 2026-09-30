@@ -21,6 +21,7 @@ dotfiles/
 │       ├── herdr-tool-tab          # Run a tool in a new focused herdr tab
 │       ├── jira-my-tickets         # List my unresolved Jira tickets, one per line
 │       ├── pbcopy / pbpaste        # Clipboard in/out (wl-clipboard, xclip on X11)
+│       ├── snap-dock-icons         # Theme icons for snap launchers (docks like Krema)
 │       └── switch-theme            # Oh-my-posh theme switcher
 │
 ├── scripts/                   # Installation & maintenance (NOT stowed)
@@ -69,6 +70,7 @@ dotfiles/
 | `herdr-launch` | Open, or focus (via KWin), the maximized chromeless Herdr Ghostty window | `herdr-launch` |
 | `pbcopy` | Copy stdin to the clipboard; `--sensitive` keeps it out of Klipper's history | `cmd \| pbcopy [--sensitive]` |
 | `pbpaste` | Print the clipboard | `pbpaste` |
+| `snap-dock-icons` | Give snap launchers a theme icon name so Krema shows them; re-run after new snaps | `snap-dock-icons [-n]` |
 | `herdr-tool-tab` | Run a command in a new focused herdr tab named after it | `herdr-tool-tab LABEL COMMAND...` |
 | `herdr-action-palette` | Fuzzy-pick and run any herdr plugin action (prefix+space) | `herdr-action-palette` |
 | `jira-my-tickets` | Print my unresolved Jira tickets as `KEY<TAB>summary [status]` | `jira-my-tickets [MAX]` |

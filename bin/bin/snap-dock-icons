@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Give snap launchers a theme icon name, so docks that resolve icons only through the icon
+# theme (Krema uses QIcon::fromTheme) stop showing placeholders. Snap .desktop files point
+# Icon= at an absolute path under /snap/<name>/current. For each such launcher this writes a
+# user override in ~/.local/share/applications with Icon=<desktop-id> and links the snap's
+# image into ~/.local/share/icons/hicolor/256x256/apps under that name. The link goes through
+# /snap/<name>/current, so it survives snap refreshes. Re-run after installing a new snap;
+# already converted launchers are rewritten from the current snap file.
+#   snap-dock-icons [-n] [-h]    -n: only list what would change
+set -euo pipefail
+case "${1:-}" in
+  -h|--help) echo "usage: snap-dock-icons [-n]   give snap launchers theme icons (-n: dry run)"; exit 0 ;;
+esac
+dry=false
+[ "${1:-}" = "-n" ] && dry=true
+
+src_dir=/var/lib/snapd/desktop/applications
+apps_dir="$HOME/.local/share/applications"
+icon_dir="$HOME/.local/share/icons/hicolor/256x256/apps"
+changed=0
+
+for src in "$src_dir"/*.desktop; do
+  [ -e "$src" ] || continue
+  icon=$(sed -n 's/^Icon=//p' "$src" | head -1)
+  case "$icon" in /*) ;; *) continue ;; esac
+  [ -f "$icon" ] || { echo "skip $(basename "$src"): $icon missing" >&2; continue; }
+  id=$(basename "$src" .desktop)
+  ext=${icon##*.}
+  echo "$id: $icon -> Icon=$id"
+  changed=$((changed + 1))
+  $dry && continue
+  mkdir -p "$apps_dir" "$icon_dir"
+  ln -sfn "$icon" "$icon_dir/$id.$ext"
+  sed "s|^Icon=/.*|Icon=$id|" "$src" > "$apps_dir/$id.desktop"
+done
+
+if [ "$changed" -eq 0 ]; then
+  echo "no snap launchers with absolute icon paths"
+elif ! $dry; then
+  kbuildsycoca6 >/dev/null 2>&1 || true
+  echo "done; restart the dock (e.g. pkill -x krema && krema &) to pick up the icons"
+fi
