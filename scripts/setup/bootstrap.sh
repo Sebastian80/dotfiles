@@ -225,7 +225,10 @@ PACKAGES=(bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza f
 # and ~/.config/herdr, and pi's extensions directory receives the sandbox copy plus herdr's generated
 # state reporter. Created as real directories before any stow call: a missing one would be folded
 # into a symlink into this repo and that state would land here. herdr's directory is private.
+# The icon theme directories get the same treatment: apps such as JetBrains Toolbox install their
+# own icons into ~/.local/share/icons/hicolor/*/apps, which would otherwise be a link into this repo.
 mkdir -p "$HOME/.claude" "$HOME/.pi/agent/extensions" "$HOME/.config/herdr" && chmod 700 "$HOME/.config/herdr"
+mkdir -p "$HOME/.local/share/icons/hicolor/scalable/apps" "$HOME/.local/share/icons/hicolor/512x512/apps"
 
 # Check for conflicts
 CONFLICTS=0

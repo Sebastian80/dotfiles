@@ -31,6 +31,7 @@ help: ## Show this help message
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
 	@mkdir -p ~/.claude ~/.pi/agent ~/.config/herdr && chmod 700 ~/.config/herdr
+	@mkdir -p ~/.local/share/icons/hicolor/scalable/apps ~/.local/share/icons/hicolor/512x512/apps
 	@stow -v $(PACKAGES)
 	@echo "$(GREEN)✓ Installation complete$(NC)"
 	@echo ""
