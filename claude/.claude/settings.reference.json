@@ -40,8 +40,6 @@
       "Skill"
     ],
     "deny": [
-      "Agent(ecom-orocommerce-docker:oro-implementer)",
-      "Agent(ecom-orocommerce-docker:oro-qa-reviewer)",
       "Read(.env)",
       "Read(.env.local)",
       "Read(.env.*.local)",
@@ -162,7 +160,7 @@
     ],
     "SessionStart": [
       {
-        "matcher": "*",
+        "matcher": "^(startup|resume|clear|compact|fork)$",
         "hooks": [
           {
             "type": "command",
@@ -194,8 +192,12 @@
     "data-tools@netresearch-claude-code-marketplace": true,
     "markdown-to-pdf@netresearch-claude-code-marketplace": true,
     "netresearch-branding@netresearch-claude-code-marketplace": true,
-    "php-modernization@netresearch-claude-code-marketplace": true,
-    "retro@netresearch-claude-code-marketplace": true
+    "retro@netresearch-claude-code-marketplace": true,
+    "qa-review@sebastian80": true,
+    "qa@sebastian80": true,
+    "ecom-phpstorm-index@ecom-phpstorm-index-local": true,
+    "ecom-oro-mate@ecom-oro-mate-local": true,
+    "ticket-work@sebastian80": true
   },
   "extraKnownMarketplaces": {
     "netresearch-claude-code-marketplace": {
@@ -224,11 +226,37 @@
         "source": "github",
         "repo": "obra/superpowers"
       }
+    },
+    "sebastian80": {
+      "source": {
+        "source": "github",
+        "repo": "Sebastian80/claude-code-marketplace"
+      }
+    },
+    "ecom-phpstorm-index-local": {
+      "source": {
+        "source": "directory",
+        "path": "/home/sebastian/workspace/ecom-phpstorm-index-skill"
+      }
+    },
+    "ecom-oro-mate-local": {
+      "source": {
+        "source": "directory",
+        "path": "/home/sebastian/workspace/ecom-oro-mate-plugin"
+      }
     }
   },
   "language": "english",
   "feedbackDrafts": "off",
   "effortLevel": "high",
+  "advisorModel": "fable",
+  "pluginConfigs": {
+    "agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
+  },
   "autoUpdatesChannel": "latest",
   "plansDirectory": ".claude/plan",
   "tui": "fullscreen",
@@ -236,9 +264,12 @@
   "claudeMdExcludes": [
     "/home/sebastian/dotfiles/claude/.claude/CLAUDE.md"
   ],
+  "editorMode": "normal",
   "preferredNotifChannel": "ghostty",
+  "switchModelsOnFlag": false,
   "teammateMode": "in-process",
   "remoteControlAtStartup": false,
+  "crossSessionInbound": "accept",
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
   "autoMode": {
@@ -277,12 +308,5 @@
       "**Session scratchpad**: the directory given as the scratchpad in the system prompt (typically /tmp/claude-*/…/scratchpad) holds disposable working copies — throwaway clones, candidate files, logs. Nothing there is shared and it does not survive the session.",
       "**Version control review boundary**: local git operations (add, commit, reset, checkout, restore, rebase, amend, history rewriting) change nothing another person can observe; push, tag push, branch deletion, merge and package publication do. Gate the second set, not the first."
     ]
-  },
-  "pluginConfigs": {
-    "agents-md@builtin": {
-      "options": {
-        "instructionFiles": "claude-md-and-agents-md"
-      }
-    }
   }
 }
