@@ -36,6 +36,14 @@ fi
 # Config file can contain default flags for ripgrep (rg)
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
+# Brew's curl, OpenSSL and Python come first in PATH (pulled in as dependencies of composer,
+# git, php and others) and ship their own CA bundle, which lacks the mkcert CA, so
+# https://*.docker.local failed with "unable to get local issuer". Point brew's OpenSSL at the
+# system bundle, which update-ca-certificates keeps current (public roots + mkcert CA).
+if [ -r /etc/ssl/certs/ca-certificates.crt ]; then
+    export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+fi
+
 # Clickable links inside herdr panes. herdr sets TERM_PROGRAM=herdr in every pane (documented, not
 # configurable), which link detection such as Claude Code's does not recognise, so links came out as
 # "text (url)". herdr passes OSC 8 hyperlinks through to Ghostty (tested 2026-10-01).
