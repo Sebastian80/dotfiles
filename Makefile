@@ -30,7 +30,7 @@ help: ## Show this help message
 # a symlink into this repo and that state would land here. herdr's directory is private.
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
-	@mkdir -p ~/.claude ~/.pi/agent ~/.config/herdr && chmod 700 ~/.config/herdr
+	@mkdir -p ~/.claude ~/.pi/agent ~/.config/herdr/plugins ~/.config/herdr/herdr-sidebar-setup && chmod 700 ~/.config/herdr
 	@mkdir -p ~/.local/share/icons/hicolor/scalable/apps ~/.local/share/icons/hicolor/512x512/apps
 	@stow -v $(PACKAGES)
 	@echo "$(GREEN)✓ Installation complete$(NC)"
