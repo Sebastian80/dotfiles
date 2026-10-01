@@ -332,3 +332,15 @@ make install-system
 - **Installation Guide:** `~/dotfiles/INSTALLATION.md` - Step 5: Install System Configurations
 - **Makefile:** `~/dotfiles/Makefile` - See `install-system` target
 - **Sudoers Manual:** `man sudoers` - Full sudoers documentation
+
+## Window rules (`kwin` stow package)
+
+`~/.config/kwinrulesrc` comes from the `kwin` package. Two rules force focus stealing prevention to
+None, so these windows come to the front when another app hands them work:
+
+- `google-chrome`: links clicked in Thunderbird (snap), terminals and Electron apps. On Wayland the
+  activation token gets lost on the way (snapd's `OpenURL` passes only the URL, terminals cannot
+  request one), and KWin then only flashes the taskbar entry.
+- `bitwarden`: the SSH agent's approval dialog, which otherwise stays hidden behind the active window.
+
+System Settings → Window Rules edits the file in place: KConfig writes through the stow symlink.

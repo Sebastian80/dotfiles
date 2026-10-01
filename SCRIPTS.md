@@ -354,8 +354,8 @@ this repo's prose only: `claude/`, `agents/` and `pi/` hold instruction prose fo
 
 - Prerequisites (git, stow, Homebrew)
 - Repository status
-- All 18 stow packages (bash, bin, btop, chrome, claude, eza, fzf, ghostty, git, glow,
-  herdr, htop, micro, oh-my-posh, pi, ripgrep, tmux, yazi)
+- All 19 stow packages (bash, bin, btop, chrome, claude, eza, fzf, ghostty, git, glow,
+  herdr, htop, kwin, micro, oh-my-posh, pi, ripgrep, tmux, yazi)
 - 19 critical symlinks (includes ~/bin utilities and tool configs)
 - Broken symlinks
 - Homebrew packages

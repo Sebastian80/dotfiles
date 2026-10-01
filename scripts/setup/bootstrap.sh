@@ -219,7 +219,7 @@ echo ""
 step "Checking for conflicts..."
 
 # List of packages to install (all stow packages)
-PACKAGES=(bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome)
+PACKAGES=(bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza fzf glow ripgrep herdr pi chrome kwin)
 
 # Claude Code, pi and herdr write sessions, credentials, logs and sockets into ~/.claude, ~/.pi/agent
 # and ~/.config/herdr, and pi's extensions directory receives the sandbox copy plus herdr's generated

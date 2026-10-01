@@ -1,0 +1,17 @@
+[5dfc210b-d81a-480c-a5e3-393f4d3559b7]
+Description=Chrome: allow focus (links from other apps)
+fsplevel=0
+fsplevelrule=2
+wmclass=google-chrome
+wmclassmatch=1
+
+[General]
+count=2
+rules=5dfc210b-d81a-480c-a5e3-393f4d3559b7,f7a10e29-cd9f-43e0-96aa-503f738491d3
+
+[f7a10e29-cd9f-43e0-96aa-503f738491d3]
+Description=Bitwarden: allow focus (SSH agent approval dialog)
+fsplevel=0
+fsplevelrule=2
+wmclass=bitwarden
+wmclassmatch=1
