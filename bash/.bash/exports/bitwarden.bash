@@ -7,7 +7,8 @@
 #
 # How it works:
 #   - Bitwarden desktop app can act as an SSH agent
-#   - Creates socket at ~/.bitwarden-ssh-agent.sock
+#   - Creates socket at ~/.bitwarden-ssh-agent.sock (deb/AppImage) or, as a snap,
+#     ~/snap/bitwarden/current/.bitwarden-ssh-agent.sock
 #   - SSH client uses this socket via SSH_AUTH_SOCK
 #
 # Usage:
@@ -21,6 +22,9 @@
 # Configure SSH to use Bitwarden SSH agent
 if [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
     export SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
+# The snap keeps the socket in its per-revision data dir; `current` survives snap refreshes
+elif [ -S "$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock" ]; then
+    export SSH_AUTH_SOCK="$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock"
 fi
 
 # Suppress Node.js deprecation warnings for Bitwarden CLI
