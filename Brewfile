@@ -44,6 +44,7 @@ brew "micro"        # Modern terminal text editor
 brew "lazydocker"   # Terminal UI for docker commands
 brew "ddev/ddev/ddev"  # Local PHP stacks: dhl-magento2 and openmage run on ddev (router on 8080/8443, traefik-central holds 80/443)
 brew "hashicorp/tap/vault"  # Vault CLI: pipeline secrets; login prompts for a password (real TTY), token lands in ~/.vault-token
+brew "rclone"         # Cloud copy: ~/notes to Google Drive via ~/bin/notes-backup (remote "gdrive")
 brew "wl-clipboard" # Wayland clipboard (wl-copy/wl-paste), backs ~/bin/pbcopy and pbpaste
 brew "moor"         # Nice pager for humans (better less)
 brew "yt-dlp"       # YouTube downloader; pi-web-access calls it from PATH for video frames, shadows the stale /usr/bin copy
