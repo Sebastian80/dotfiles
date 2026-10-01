@@ -35,3 +35,10 @@ fi
 # ripgrep - Configuration file location
 # Config file can contain default flags for ripgrep (rg)
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
+
+# Clickable links inside herdr panes. herdr sets TERM_PROGRAM=herdr in every pane (documented, not
+# configurable), which link detection such as Claude Code's does not recognise, so links came out as
+# "text (url)". herdr passes OSC 8 hyperlinks through to Ghostty (tested 2026-10-01).
+if [ "${TERM_PROGRAM:-}" = herdr ]; then
+    export FORCE_HYPERLINK=1
+fi
