@@ -344,3 +344,12 @@ None, so these windows come to the front when another app hands them work:
 - `bitwarden`: the SSH agent's approval dialog, which otherwise stays hidden behind the active window.
 
 System Settings → Window Rules edits the file in place: KConfig writes through the stow symlink.
+
+## Ghostty icon in Alt+Tab
+
+Ghostty sends its window icon to KWin as pixel buffers (`xdg-toplevel-icon`), loaded by the fixed
+name `com.mitchellh.ghostty` from the hicolor theme, and KWin prefers those over the `.desktop`
+icon. The `ghostty` package therefore ships the custom icon under that name in every size the
+system package has; `~/.local/share` wins over `/usr/share`. Herdr's window is a Ghostty window and
+loads the same name, so it shows the Ghostty icon in the switcher, not `herdr.svg`. Open windows keep
+the old icon until reopened.

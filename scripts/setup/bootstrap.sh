@@ -229,7 +229,9 @@ PACKAGES=(bash bin claude git ghostty oh-my-posh tmux yazi micro htop btop eza f
 # own icons into ~/.local/share/icons/hicolor/*/apps, which would otherwise be a link into this repo.
 # herdr installs plugins into ~/.config/herdr/plugins; only its config/ subdirectory belongs here.
 mkdir -p "$HOME/.claude" "$HOME/.pi/agent/extensions" "$HOME/.config/herdr/plugins" "$HOME/.config/herdr/herdr-sidebar-setup" && chmod 700 "$HOME/.config/herdr"
-mkdir -p "$HOME/.local/share/icons/hicolor/scalable/apps" "$HOME/.local/share/icons/hicolor/512x512/apps"
+for d in scalable 16x16 16x16@2 32x32 32x32@2 128x128 128x128@2 256x256 256x256@2 512x512 1024x1024; do
+    mkdir -p "$HOME/.local/share/icons/hicolor/$d/apps"
+done
 
 # Check for conflicts
 CONFLICTS=0

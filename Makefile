@@ -31,7 +31,7 @@ help: ## Show this help message
 install: ## Install all dotfiles (create symlinks)
 	@echo "$(GREEN)Installing all dotfiles...$(NC)"
 	@mkdir -p ~/.claude ~/.pi/agent ~/.config/herdr/plugins ~/.config/herdr/herdr-sidebar-setup && chmod 700 ~/.config/herdr
-	@mkdir -p ~/.local/share/icons/hicolor/scalable/apps ~/.local/share/icons/hicolor/512x512/apps
+	@for d in scalable 16x16 16x16@2 32x32 32x32@2 128x128 128x128@2 256x256 256x256@2 512x512 1024x1024; do mkdir -p ~/.local/share/icons/hicolor/$$d/apps; done
 	@stow -v $(PACKAGES)
 	@echo "$(GREEN)✓ Installation complete$(NC)"
 	@echo ""
