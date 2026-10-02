@@ -9,8 +9,13 @@ what it does not cover.
   it moved behind GitLab Pages access control. Unauthenticated it answers with the GitLab sign-in page, so
   composer reports `"…/users/sign_in" does not contain valid JSON` and then silently falls back to a stale
   cache, or fails outright on a repository it has no cache for. A colleague hit the identical error on an
-  unrelated project the same morning, so treat that message as "missing bearer", not "bad token" — the
-  gitlab-token entry being present is not evidence the auth is complete.
+  unrelated project the same morning, so treat that message as "no credential the Pages auth accepts
+  reaches this composer process", not "bad token" — the gitlab-token entry being present is not evidence
+  the auth is complete. Before adding entries, check which auth source the process actually sees (env
+  `COMPOSER_AUTH` vs `auth.json`; list key names only, never values). In Docker, the host's
+  `COMPOSER_AUTH` does not reach `docker compose run` unless passed with `-e COMPOSER_AUTH`. (A bearer
+  was added to a container's `auth.json` and the error stayed; the host env held the working credential,
+  and `-e COMPOSER_AUTH` fixed it.)
 - To delete a remote branch: `git push <remote-url> --delete <branch>` — useful for cleaning up accidental pushes to wrong repos.
 - A CI job failing with `couldn't find remote ref refs/heads/<branch>` right after an MR merge is the duplicate BRANCH pipeline racing the source-branch deletion — not a real failure. Dedupe with standard `workflow:` rules (prefer `merge_request_event`; suppress `$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS`; keep branch/tag pipelines otherwise).
 
