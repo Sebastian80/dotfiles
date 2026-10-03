@@ -11,10 +11,10 @@
     "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS": "5",
     "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "1",
     "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION": "50",
-    "CLAUDE_CODE_SCROLL_SPEED": "0.5",
     "CLAUDE_CODE_SUBAGENT_MODEL": "opus",
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1",
-    "CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS": "5"
+    "CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS": "5",
+    "CLAUDE_CODE_SCROLL_SPEED": "0.5"
   },
   "attribution": {
     "commit": "",
@@ -194,9 +194,9 @@
     "retro@netresearch-claude-code-marketplace": true,
     "qa-review@sebastian80": true,
     "qa@sebastian80": true,
-    "ecom-phpstorm-index@ecom-phpstorm-index-local": true,
-    "ecom-oro-mate@ecom-oro-mate-local": true,
-    "ticket-work@sebastian80": true
+    "ticket-work@sebastian80": true,
+    "ecom-phpstorm-index@sebastian80": true,
+    "ecom-oro-mate@sebastian80": true
   },
   "extraKnownMarketplaces": {
     "netresearch-claude-code-marketplace": {
@@ -230,18 +230,6 @@
       "source": {
         "source": "github",
         "repo": "Sebastian80/claude-code-marketplace"
-      }
-    },
-    "ecom-phpstorm-index-local": {
-      "source": {
-        "source": "directory",
-        "path": "/home/sebastian/workspace/ecom-phpstorm-index-skill"
-      }
-    },
-    "ecom-oro-mate-local": {
-      "source": {
-        "source": "directory",
-        "path": "/home/sebastian/workspace/ecom-oro-mate-plugin"
       }
     }
   },
