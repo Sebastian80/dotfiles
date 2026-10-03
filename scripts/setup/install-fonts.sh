@@ -37,7 +37,7 @@ FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
 
 # Nerd Fonts version
-NERD_FONTS_VERSION="v3.2.1"
+NERD_FONTS_VERSION="v3.5.1"
 
 # List of fonts to install (add/remove as needed)
 FONTS=(
