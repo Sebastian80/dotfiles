@@ -1,0 +1,12 @@
+[General]
+AttentionAnimation=1
+BackgroundOpacity=0.05
+BackgroundStyle=1
+CornerRadius=24
+HideDelay=300
+IconSpacing=10
+MaxZoomFactor=1.5
+PinnedLaunchers=applications:herdr.desktop,applications:com.mitchellh.ghostty.desktop,applications:com.anthropic.Claude.desktop,applications:google-chrome.desktop,applications:thunderbird_thunderbird.desktop,applications:jetbrains-phpstorm-e7363f23-132a-46a9-aea7-b0dcf0cc3234.desktop,applications:org.kde.dolphin.desktop,applications:bitwarden_bitwarden.desktop,applications:systemsettings.desktop
+ShadowLightY=-70
+VirtualDesktopMode=2
+VisibilityMode=1
