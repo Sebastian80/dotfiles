@@ -1,8 +1,8 @@
 # Ghostty profile for the Herdr launcher (herdr.desktop).
 #
-# Loads the shared config, then strips every piece of Ghostty chrome: Herdr draws
-# its own tabs, splits and sidebar, so the GTK header bar, the window-manager
-# decorations and Ghostty's tab bar only cost rows. Runs as its own GTK instance
+# Loads the shared config, then strips Ghostty's own chrome: Herdr draws its own
+# tabs, splits and sidebar, so the GTK header bar and Ghostty's tab bar only cost
+# rows. KWin's title bar stays for minimize/maximize/close. Runs as its own GTK instance
 # (separate class) so the panel groups it under herdr.desktop, not under Ghostty.
 #
 # Launch by hand:  ghostty --config-file=~/.config/ghostty/herdr
@@ -20,11 +20,12 @@ gtk-single-instance = true
 # Fixed caption: herdr-launch finds the open window by this exact title.
 title = Herdr
 
-window-decoration = none
+# KWin draws the title bar (Nordic Aurorae) instead of Ghostty's GTK header bar.
+window-decoration = server
 window-show-tab-bar = never
 gtk-titlebar = false
 # The shared config merges the tab bar into the header bar (tabs style); that header
-# survives window-decoration = none. Native style lets the decoration setting drop it.
+# survives gtk-titlebar = false. Native style lets the decoration setting drop it.
 gtk-titlebar-style = native
 maximize = true
 window-save-state = never
@@ -41,7 +42,7 @@ confirm-close-surface = always
 # full profile (PATH, fnm, aliases) and hands its environment to herdr via exec.
 command = /bin/bash -lic "exec herdr"
 
-# Escape hatch for moving or resizing the window by its title bar.
+# Hide or show the title bar for this window.
 keybind = ctrl+shift+d=toggle_window_decorations
 # Toggle maximize by hand, e.g. after un-maximizing to share the screen.
 keybind = ctrl+shift+m=toggle_maximize
