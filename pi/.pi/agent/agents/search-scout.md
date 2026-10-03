@@ -4,7 +4,6 @@ description: Web research on a cheap model. Searches, fetches and verifies, then
 advertise: true
 excludeTools: write, edit
 model: openai-codex/gpt-5.6-luna
-fallbackModels: openai-codex/gpt-5.5
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: false
